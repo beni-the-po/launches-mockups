@@ -1,0 +1,3613 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Launches — Mockup</title>
+	<link rel="stylesheet" href="atlas.css">
+	<style>
+		body {
+			background-color: #f7f8f9;
+			margin: 0;
+		}
+
+		.mockup-toolbar {
+			position: sticky;
+			top: 0;
+			z-index: 1040;
+			display: flex;
+			align-items: center;
+			gap: .5rem;
+			padding: .5rem 1rem;
+			background: #272833;
+			color: #fff;
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+			font-size: .8125rem;
+		}
+
+		.mockup-toolbar strong {
+			margin-right: .5rem;
+			opacity: .7;
+			font-weight: 600;
+			letter-spacing: .02em;
+			text-transform: uppercase;
+			font-size: .6875rem;
+		}
+
+		.mockup-toolbar button {
+			appearance: none;
+			border: 1px solid rgba(255, 255, 255, .3);
+			background: transparent;
+			color: #fff;
+			border-radius: 3px;
+			padding: .25rem .625rem;
+			font-size: .8125rem;
+			cursor: pointer;
+		}
+
+		.mockup-toolbar button.active {
+			background: #fff;
+			color: #272833;
+			border-color: #fff;
+			font-weight: 600;
+		}
+
+		.mockup-toolbar button.placeholder {
+			border-style: dashed;
+			opacity: .5;
+			cursor: not-allowed;
+		}
+
+		.mockup-frame {
+			max-width: 1200px;
+			margin: 1.5rem auto;
+			background: #fff;
+			border: 1px solid #e7e7ed;
+			border-radius: 4px;
+			box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
+			overflow: hidden;
+			min-height: 640px;
+		}
+
+		[data-view] {
+			display: none;
+		}
+
+		[data-view].mockup-active {
+			display: block;
+		}
+
+		.dropdown-menu.mockup-open {
+			display: block;
+		}
+
+		.text-truncate-inline {
+			display: inline-block;
+			max-width: 320px;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			vertical-align: middle;
+		}
+
+		.mockup-empty-state {
+			text-align: center;
+			padding: 4rem 1rem;
+		}
+
+		.mockup-empty-state img {
+			width: 200px;
+			margin-bottom: 1.5rem;
+		}
+
+		.mockup-empty-state h3 {
+			font-size: 1.0625rem;
+			font-weight: 600;
+			margin-bottom: .5rem;
+		}
+
+		.mockup-empty-state p {
+			color: #6b6c7e;
+			max-width: 360px;
+			margin: 0 auto 1.25rem;
+		}
+
+		.modal.mockup-open {
+			display: block;
+		}
+
+		.modal-backdrop.show {
+			display: block;
+		}
+
+		.page-editor-block {
+			border: 1px dashed #cdced9;
+			border-radius: 4px;
+			padding: 2.5rem 1rem;
+			margin-bottom: 1rem;
+			text-align: center;
+			color: #6b6c7e;
+			background: #fafafb;
+			font-size: .875rem;
+		}
+
+		.mockup-toolbar .mockup-sim {
+			display: flex;
+			align-items: center;
+			gap: .5rem;
+			margin-left: auto;
+			padding-left: 1rem;
+			border-left: 1px solid rgba(255, 255, 255, .25);
+		}
+
+		.mockup-toolbar .mockup-sim label {
+			margin: 0;
+			color: #fff;
+			font-weight: 400;
+			opacity: .8;
+			font-size: .75rem;
+		}
+
+		.mockup-toolbar .mockup-sim select {
+			background: #393a4a;
+			color: #fff;
+			border: 1px solid rgba(255, 255, 255, .3);
+			border-radius: 3px;
+			padding: .2rem .4rem;
+			font-size: .8125rem;
+		}
+
+		.mockup-toolbar .mockup-sim select.mockup-sim-running {
+			background: #b95000;
+			border-color: #ffb46e;
+		}
+
+		.promo-alert-container {
+			position: fixed;
+			top: 3.25rem;
+			right: 1rem;
+			z-index: 1100;
+			display: flex;
+			flex-direction: column;
+			gap: .5rem;
+			width: 440px;
+			max-width: calc(100vw - 2rem);
+		}
+
+		.promo-alert {
+			display: flex;
+			gap: .625rem;
+			align-items: flex-start;
+			padding: .75rem 1rem;
+			border: 1px solid #f3b6b6;
+			border-radius: 4px;
+			background: #feefef;
+			color: #a10000;
+			font-size: .875rem;
+			line-height: 1.4;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, .12);
+		}
+
+		.promo-alert.promo-alert-info {
+			border-color: #a7ccf7;
+			background: #eef2fa;
+			color: #2e5aac;
+		}
+
+		.promo-alert-body {
+			flex: 1;
+		}
+
+		.promo-alert-close {
+			appearance: none;
+			border: 0;
+			background: transparent;
+			color: inherit;
+			font-size: 1.125rem;
+			line-height: 1;
+			cursor: pointer;
+			opacity: .7;
+		}
+	</style>
+</head>
+<body>
+
+	<div class="mockup-toolbar">
+		<strong>Mockup nav</strong>
+		<button type="button" data-goto="landing" class="active">Launches (list)</button>
+		<button type="button" data-goto="pages">Pages</button>
+		<button type="button" data-goto="cms-content">CMS Content</button>
+		<div class="mockup-sim">
+			<label for="simRunningProcess">Simulate running promotion process:</label>
+			<select id="simRunningProcess">
+				<option value="">None</option>
+				<option value="0">Publication "Summer Campaign"</option>
+				<option value="1">Launch "Spring Sale"</option>
+				<option value="2">Site Template Sync "Corporate Template"</option>
+				<option value="3">Staging Publish to Live "Marketing Site"</option>
+				<option value="4">LAR Import "products.lar"</option>
+			</select>
+			<button type="button" id="simReachScheduledTime" title="Simulate that every Scheduled Launch reaches its publish time now">Reach scheduled time</button>
+		</div>
+	</div>
+	<div class="promo-alert-container" id="promoAlertContainer" aria-live="assertive"></div>
+
+	<div class="mockup-frame">
+
+		<!-- ================= LANDING (with data) ================= -->
+		<div data-view="landing" class="mockup-active launch-landing">
+			<div class="container-fluid p-4">
+				<h1 class="mb-4">Launches</h1>
+
+				<nav class="management-bar navbar navbar-expand-md management-bar-light">
+					<div class="container-fluid px-0">
+						<ul class="navbar-nav">
+							<li class="nav-item">
+								<div class="custom-control custom-checkbox">
+									<label>
+										<input aria-label="Select All Items on the Page" class="custom-control-input" id="launchSelectAll" type="checkbox">
+										<span class="custom-control-label"></span>
+									</label>
+								</div>
+							</li>
+							<li class="nav-item">
+								<button class="btn btn-unstyled dropdown-toggle ml-2 mr-2 nav-link" type="button">
+									<span class="inline-item inline-item-before"><svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#filter"></use></svg></span>
+									<span class="navbar-text-truncate">Filter</span>
+									<svg class="lexicon-icon inline-item inline-item-after" style="width:12px;height:12px" viewBox="0 0 512 512"><use xlink:href="#caret-bottom"></use></svg>
+								</button>
+							</li>
+						</ul>
+						<ul class="navbar-nav">
+							<li class="nav-item">
+								<button type="button" class="nav-btn pl-4 pr-4 btn btn-primary" data-goto="form" data-form-mode="new">New Launch</button>
+							</li>
+						</ul>
+					</div>
+				</nav>
+
+				<div class="input-group search-row mb-4" style="max-width: 320px">
+					<div class="input-group-item input-group-item-shrink input-group-prepend">
+						<span class="input-group-text"><svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#search"></use></svg></span>
+					</div>
+					<div class="input-group-item">
+						<input type="text" class="form-control" id="launchSearchInput" placeholder="Search launches" autocomplete="off">
+					</div>
+				</div>
+
+				<div class="table-responsive">
+					<table class="show-quick-actions-on-hover table table-autofit table-head-bordered table-heading-nowrap table-hover table-list table-striped">
+						<thead>
+							<tr>
+								<th class="lfr-checkbox-column"><span class="sr-only">Item Selection</span></th>
+								<th class="table-cell-expand-small table-cell-minw-200 table-title">Name</th>
+								<th class="table-cell-expand table-cell-minw-300">Description</th>
+								<th class="table-cell-expand-smallest table-cell-ws-nowrap">Modified</th>
+								<th class="table-cell-expand-smallest table-cell-ws-nowrap">Status</th>
+								<th class="lfr-entry-action-column"><span class="sr-only">Item Actions</span></th>
+							</tr>
+						</thead>
+						<tbody id="launchRows"></tbody>
+					</table>
+				</div>
+
+				<div class="pagination-bar mt-3">
+					<span class="text-secondary" id="launchPaginationSummary">1 to 4 of 4 launches</span>
+
+					<ul class="pagination ml-auto">
+						<li class="page-item disabled">
+							<button class="page-link" type="button" aria-label="Previous page" disabled>
+								<svg class="lexicon-icon" style="width:14px;height:14px" viewBox="0 0 512 512"><use xlink:href="#caret-left"></use></svg>
+							</button>
+						</li>
+						<li class="page-item active">
+							<button class="page-link" type="button">1</button>
+						</li>
+						<li class="page-item disabled">
+							<button class="page-link" type="button" aria-label="Next page" disabled>
+								<svg class="lexicon-icon" style="width:14px;height:14px" viewBox="0 0 512 512"><use xlink:href="#caret-right"></use></svg>
+							</button>
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+
+		<!-- ================= LANDING (empty state) ================= -->
+		<div data-view="landing-empty" class="launch-landing">
+			<div class="container-fluid p-4">
+				<h1 class="mb-4">Launches</h1>
+
+				<div class="mockup-empty-state">
+					<img src="empty_state.svg" alt="No launches">
+					<h3>No launches</h3>
+					<p>Click New to create your first launch</p>
+					<button type="button" class="btn btn-primary" data-goto="form" data-form-mode="new">New Launch</button>
+				</div>
+			</div>
+		</div>
+
+		<!-- ================= LAUNCH FORM (Info / Assets) ================= -->
+		<div data-view="form" class="launch-form">
+			<div class="management-bar management-bar-light navbar">
+				<div class="align-items-center container-fluid d-flex">
+					<button type="button" class="btn btn-monospaced btn-unstyled btn-borderless mr-2" aria-label="Back" data-goto="landing">
+						<svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#angle-left"></use></svg>
+					</button>
+
+					<span class="font-weight-bold" id="launchFormTitle">New Launch</span>
+
+					<div class="ml-auto">
+						<button type="button" class="btn btn-secondary btn-borderless mr-2" id="launchFormPreviewBtn">
+							<span class="inline-item inline-item-before"><svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#globe"></use></svg></span>
+							Preview
+						</button>
+						<div class="dropdown mr-2" style="position: relative; display: inline-block" id="launchFormPublishGroup">
+							<button type="button" class="btn btn-secondary dropdown-toggle" id="launchFormPublishBtn">
+								Publish
+								<svg class="lexicon-icon inline-item inline-item-after" style="width:12px;height:12px" viewBox="0 0 512 512"><use xlink:href="#caret-bottom"></use></svg>
+							</button>
+							<div class="dropdown-menu dropdown-menu-right" id="launchFormPublishMenu" role="menu">
+								<button type="button" role="menuitem" class="dropdown-item" data-launch-form-action="publish">
+									<span class="inline-item inline-item-before"><svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#upload"></use></svg></span>
+									Publish
+								</button>
+								<button type="button" role="menuitem" class="dropdown-item" data-launch-form-action="schedule">
+									<span class="inline-item inline-item-before"><svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#calendar"></use></svg></span>
+									Schedule
+								</button>
+							</div>
+						</div>
+						<button type="button" class="btn btn-secondary btn-borderless mr-2" data-goto="landing" id="launchFormCancelBtn">Cancel</button>
+						<button type="button" class="btn btn-primary" data-goto="landing" id="launchFormSaveBtn">Create</button>
+					</div>
+				</div>
+			</div>
+
+			<div class="container-fluid p-4">
+				<ul class="nav nav-underline" role="tablist">
+					<li class="nav-item" role="presentation">
+						<a class="nav-link active" href="#" role="tab" data-form-tab="info" aria-selected="true">Info</a>
+					</li>
+					<li class="nav-item" role="presentation">
+						<a class="nav-link" href="#" role="tab" data-form-tab="elements" aria-selected="false">Assets</a>
+					</li>
+				</ul>
+
+				<div class="tab-content mt-4">
+					<div class="tab-pane fade show active" data-form-pane="info" role="tabpanel">
+						<div class="form-group" style="max-width: 640px">
+							<label for="launchFormName">Name</label>
+							<input
+								type="text"
+								class="form-control"
+								placeholder="Untitled Launch"
+								aria-label="Launch name"
+								id="launchFormName"
+							>
+						</div>
+
+						<div class="form-group mt-4" style="max-width: 640px">
+							<label for="launchFormDescription">Description</label>
+							<textarea class="form-control" id="launchFormDescription" placeholder="Enter description"></textarea>
+						</div>
+					</div>
+
+					<div class="tab-pane fade" data-form-pane="elements" role="tabpanel">
+						<div class="d-flex align-items-center justify-content-between mb-3">
+							<span class="text-secondary" id="elementsCapSummary">0 of 1,000 assets</span>
+
+							<button type="button" class="btn btn-primary" id="addElementBtn">
+								<span class="inline-item inline-item-before"><svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#plus"></use></svg></span>
+								Add Asset
+							</button>
+						</div>
+
+						<div class="table-responsive">
+							<table class="show-quick-actions-on-hover table table-autofit table-head-bordered table-heading-nowrap table-hover table-list table-striped">
+								<thead>
+									<tr>
+										<th class="table-cell-expand-small table-cell-minw-200 table-title">Name</th>
+										<th class="table-cell-expand-smallest table-cell-ws-nowrap">Version</th>
+										<th class="table-cell-expand-smallest table-cell-ws-nowrap">Author</th>
+										<th class="table-cell-expand-smallest table-cell-ws-nowrap">Type</th>
+										<th class="table-cell-expand-smallest table-cell-ws-nowrap">Scope</th>
+										<th class="table-cell-expand-smallest table-cell-ws-nowrap">Scope name</th>
+										<th class="table-cell-expand-smallest table-cell-ws-nowrap">Modified</th>
+										<th class="table-cell-expand-smallest table-cell-ws-nowrap">Status</th>
+										<th class="lfr-entry-action-column"><span class="sr-only">Item Actions</span></th>
+									</tr>
+								</thead>
+								<tbody id="elementRows"></tbody>
+							</table>
+						</div>
+
+						<div class="pagination-bar mt-3">
+							<span class="text-secondary" id="elementsPaginationSummary">1 to 3 of 3 assets</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- ================= ERROR DETAILS ================= -->
+		<div data-view="errors" class="launch-errors">
+			<div class="management-bar management-bar-light navbar">
+				<div class="align-items-center container-fluid d-flex">
+					<button type="button" class="btn btn-monospaced btn-unstyled btn-borderless mr-2" aria-label="Back" data-goto="landing">
+						<svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#angle-left"></use></svg>
+					</button>
+
+					<span class="font-weight-bold" id="errorsTitle">Error Details</span>
+				</div>
+			</div>
+
+			<div class="container-fluid p-4">
+				<div class="d-flex flex-wrap align-items-center mb-4" style="gap: .75rem">
+					<div class="input-group search-row" style="max-width: 320px">
+						<div class="input-group-item input-group-item-shrink input-group-prepend">
+							<span class="input-group-text"><svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#search"></use></svg></span>
+						</div>
+						<div class="input-group-item">
+							<input type="text" class="form-control" id="errorsSearchInput" placeholder="Search errors" autocomplete="off">
+						</div>
+					</div>
+
+					<div style="max-width: 220px">
+						<select class="form-control" id="errorsSeverityFilter">
+							<option value="">All Severities</option>
+							<option value="danger">Critical</option>
+							<option value="warning">Warning</option>
+							<option value="info">Info</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="table-responsive">
+					<table class="table table-autofit table-head-bordered table-heading-nowrap table-hover table-list table-striped">
+						<thead>
+							<tr>
+								<th class="table-cell-expand table-cell-minw-300">Message</th>
+								<th class="table-cell-expand-small table-cell-minw-200">Asset</th>
+								<th class="table-cell-expand-smallest table-cell-ws-nowrap">
+									<button type="button" class="btn btn-unstyled p-0 d-inline-flex align-items-center" data-sort-field="date">
+										Date
+										<span class="inline-item inline-item-after" data-sort-icon="date"><svg class="lexicon-icon" style="width:12px;height:12px" viewBox="0 0 512 512"><use xlink:href="#order-arrow"></use></svg></span>
+									</button>
+								</th>
+								<th class="table-cell-expand-smallest table-cell-ws-nowrap">
+									<button type="button" class="btn btn-unstyled p-0 d-inline-flex align-items-center" data-sort-field="severity">
+										Severity
+										<span class="inline-item inline-item-after" data-sort-icon="severity"><svg class="lexicon-icon" style="width:12px;height:12px" viewBox="0 0 512 512"><use xlink:href="#order-arrow"></use></svg></span>
+									</button>
+								</th>
+							</tr>
+						</thead>
+						<tbody id="errorRows"></tbody>
+					</table>
+				</div>
+
+				<div class="pagination-bar mt-3">
+					<span class="text-secondary" id="errorsPaginationSummary">1 to 5 of 5 errors</span>
+				</div>
+			</div>
+		</div>
+
+		<!-- ================= PAGES ================= -->
+		<div data-view="pages" class="pages-list">
+			<div class="management-bar management-bar-light navbar">
+				<div class="align-items-center container-fluid d-flex">
+					<button type="button" class="btn btn-monospaced btn-unstyled btn-borderless mr-2" aria-label="Back" data-goto="landing">
+						<svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#angle-left"></use></svg>
+					</button>
+
+					<span class="font-weight-bold">Pages</span>
+
+					<button type="button" class="btn btn-primary ml-auto" data-goto="new-page">New Page</button>
+				</div>
+			</div>
+
+			<div class="container-fluid p-4">
+				<div class="table-responsive">
+					<table class="show-quick-actions-on-hover table table-autofit table-head-bordered table-heading-nowrap table-hover table-list table-striped">
+						<thead>
+							<tr>
+								<th class="table-cell-expand-small table-cell-minw-200 table-title">Name</th>
+								<th class="table-cell-expand-smallest table-cell-ws-nowrap"><span class="sr-only">Launch</span></th>
+								<th class="table-cell-expand-smallest table-cell-ws-nowrap">Updated</th>
+								<th class="table-cell-expand-smallest table-cell-ws-nowrap">Status</th>
+								<th class="lfr-entry-action-column"><span class="sr-only">Item Actions</span></th>
+							</tr>
+						</thead>
+						<tbody id="pageRows"></tbody>
+					</table>
+				</div>
+
+				<div class="pagination-bar mt-3">
+					<span class="text-secondary" id="pagesPaginationSummary">1 to 5 of 5 pages</span>
+				</div>
+			</div>
+		</div>
+
+		<!-- ================= PAGE EDITOR (simulated) ================= -->
+		<div data-view="page-editor" class="page-editor">
+			<div class="management-bar management-bar-light navbar">
+				<div class="align-items-center container-fluid d-flex">
+					<button type="button" class="btn btn-monospaced btn-unstyled btn-borderless mr-2" aria-label="Back" data-goto="pages">
+						<svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#angle-left"></use></svg>
+					</button>
+
+					<input type="text" class="form-control font-weight-bold" id="pageEditorTitle" style="width: 240px" aria-label="Page name" required>
+					<span class="text-secondary ml-2" id="pageEditorDraftLabel" style="font-size: .8125rem"></span>
+
+					<div class="ml-auto dropdown" style="position: relative">
+						<button type="button" class="btn btn-primary dropdown-toggle" id="pageEditorActionsBtn">
+							Actions
+							<svg class="lexicon-icon inline-item inline-item-after" style="width:12px;height:12px" viewBox="0 0 512 512"><use xlink:href="#caret-bottom"></use></svg>
+						</button>
+						<div class="dropdown-menu dropdown-menu-right" id="pageEditorActionsMenu" role="menu">
+							<button type="button" role="menuitem" class="dropdown-item" data-editor-action="keepAsMainDraft">
+								<span class="inline-item inline-item-before"><svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#check-circle"></use></svg></span>
+								Keep as Main Draft
+							</button>
+							<button type="button" role="menuitem" class="dropdown-item" data-editor-action="readyToPublish">
+								<span class="inline-item inline-item-before"><svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#check"></use></svg></span>
+								Ready to Publish
+							</button>
+							<button type="button" role="menuitem" class="dropdown-item" data-editor-action="publish">
+								<span class="inline-item inline-item-before"><svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#upload"></use></svg></span>
+								Publish
+							</button>
+							<button type="button" role="menuitem" class="dropdown-item" data-editor-action="save">
+								<span class="inline-item inline-item-before"><svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#check-circle"></use></svg></span>
+								Save
+							</button>
+							<button type="button" role="menuitem" class="dropdown-item" data-editor-action="addToLaunch">
+								<span class="inline-item inline-item-before"><svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#plus"></use></svg></span>
+								Add to a Launch
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="container-fluid p-4">
+				<p class="text-secondary mb-4" style="font-size: .8125rem">Simulated page layout — not an editable canvas, just a stand-in for what the real page editor would show here.</p>
+
+				<div style="max-width: 720px; margin: 0 auto">
+					<div class="page-editor-block">Header / Banner</div>
+					<div class="page-editor-block">Rich Text Section</div>
+					<div class="page-editor-block">Image Gallery</div>
+					<div class="page-editor-block">Call to Action</div>
+					<div class="page-editor-block">Footer</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- ================= PAGE VERSION HISTORY ================= -->
+		<div data-view="history" class="page-history">
+			<div class="management-bar management-bar-light navbar">
+				<div class="align-items-center container-fluid d-flex">
+					<button type="button" class="btn btn-monospaced btn-unstyled btn-borderless mr-2" aria-label="Back" data-goto="pages">
+						<svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#angle-left"></use></svg>
+					</button>
+
+					<span class="font-weight-bold" id="historyTitle">Version History</span>
+				</div>
+			</div>
+
+			<div class="container-fluid p-4">
+				<div class="table-responsive">
+					<table class="show-quick-actions-on-hover table table-autofit table-head-bordered table-heading-nowrap table-hover table-list table-striped">
+						<thead>
+							<tr>
+								<th class="table-cell-expand-smallest table-cell-ws-nowrap">Version</th>
+								<th class="table-cell-expand-smallest table-cell-ws-nowrap">Updated</th>
+								<th class="table-cell-expand table-cell-minw-200">Launch</th>
+								<th class="lfr-entry-action-column"><span class="sr-only">Item Actions</span></th>
+							</tr>
+						</thead>
+						<tbody id="historyRows"></tbody>
+					</table>
+				</div>
+
+				<div class="pagination-bar mt-3">
+					<span class="text-secondary" id="historyPaginationSummary">1 to 3 of 3 versions</span>
+				</div>
+			</div>
+		</div>
+
+		<!-- ================= CMS CONTENT ================= -->
+		<div data-view="cms-content" class="pages-list">
+			<div class="management-bar management-bar-light navbar">
+				<div class="align-items-center container-fluid d-flex">
+					<button type="button" class="btn btn-monospaced btn-unstyled btn-borderless mr-2" aria-label="Back" data-goto="landing">
+						<svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#angle-left"></use></svg>
+					</button>
+
+					<span class="font-weight-bold">CMS Content</span>
+				</div>
+			</div>
+
+			<div class="container-fluid p-4">
+				<div class="table-responsive">
+					<table class="show-quick-actions-on-hover table table-autofit table-head-bordered table-heading-nowrap table-hover table-list table-striped">
+						<thead>
+							<tr>
+								<th class="table-cell-expand-small table-cell-minw-200 table-title">Name</th>
+								<th class="table-cell-expand-smallest table-cell-ws-nowrap">Version</th>
+								<th class="table-cell-expand-smallest table-cell-ws-nowrap">Updated</th>
+								<th class="table-cell-expand-smallest table-cell-ws-nowrap">Status</th>
+								<th class="lfr-entry-action-column"><span class="sr-only">Item Actions</span></th>
+							</tr>
+						</thead>
+						<tbody id="cmsContentRows"></tbody>
+					</table>
+				</div>
+
+				<div class="pagination-bar mt-3">
+					<span class="text-secondary" id="cmsContentPaginationSummary">1 to 5 of 5 items</span>
+				</div>
+			</div>
+		</div>
+
+		<!-- ================= CMS CONTENT EDITOR (simulated) ================= -->
+		<div data-view="cms-editor" class="page-editor">
+			<div class="management-bar management-bar-light navbar">
+				<div class="align-items-center container-fluid d-flex">
+					<button type="button" class="btn btn-monospaced btn-unstyled btn-borderless mr-2" aria-label="Back" data-goto="cms-content">
+						<svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#angle-left"></use></svg>
+					</button>
+
+					<span class="font-weight-bold" id="cmsEditorTitle">Content</span>
+
+					<div class="ml-auto dropdown" style="position: relative">
+						<button type="button" class="btn btn-primary dropdown-toggle" id="cmsEditorActionsBtn">
+							Actions
+							<svg class="lexicon-icon inline-item inline-item-after" style="width:12px;height:12px" viewBox="0 0 512 512"><use xlink:href="#caret-bottom"></use></svg>
+						</button>
+						<div class="dropdown-menu dropdown-menu-right" id="cmsEditorActionsMenu" role="menu">
+							<button type="button" role="menuitem" class="dropdown-item" data-editor-action="publish">
+								<span class="inline-item inline-item-before"><svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#upload"></use></svg></span>
+								Publish
+							</button>
+							<button type="button" role="menuitem" class="dropdown-item" data-editor-action="addToLaunch">
+								<span class="inline-item inline-item-before"><svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#plus"></use></svg></span>
+								Add to a Launch
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="container-fluid p-4">
+				<p class="text-secondary mb-4" style="font-size: .8125rem">Simulated content layout — not an editable form, just a stand-in for what the real content editor would show here.</p>
+
+				<div style="max-width: 720px; margin: 0 auto">
+					<div class="page-editor-block">Title</div>
+					<div class="page-editor-block">Body Text</div>
+					<div class="page-editor-block">Featured Image</div>
+					<div class="page-editor-block">Metadata / Tags</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- ================= CMS CONTENT VERSION HISTORY ================= -->
+		<div data-view="cms-history" class="page-history">
+			<div class="management-bar management-bar-light navbar">
+				<div class="align-items-center container-fluid d-flex">
+					<button type="button" class="btn btn-monospaced btn-unstyled btn-borderless mr-2" aria-label="Back" data-goto="cms-content">
+						<svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#angle-left"></use></svg>
+					</button>
+
+					<span class="font-weight-bold" id="cmsHistoryTitle">Version History</span>
+				</div>
+			</div>
+
+			<div class="container-fluid p-4">
+				<div class="table-responsive">
+					<table class="show-quick-actions-on-hover table table-autofit table-head-bordered table-heading-nowrap table-hover table-list table-striped">
+						<thead>
+							<tr>
+								<th class="table-cell-expand-smallest table-cell-ws-nowrap">Version</th>
+								<th class="table-cell-expand-smallest table-cell-ws-nowrap">Updated</th>
+								<th class="table-cell-expand table-cell-minw-200">Launch</th>
+								<th class="lfr-entry-action-column"><span class="sr-only">Item Actions</span></th>
+							</tr>
+						</thead>
+						<tbody id="cmsHistoryRows"></tbody>
+					</table>
+				</div>
+
+				<div class="pagination-bar mt-3">
+					<span class="text-secondary" id="cmsHistoryPaginationSummary">1 to 3 of 3 versions</span>
+				</div>
+			</div>
+		</div>
+
+	</div>
+
+	<div class="modal" id="confirmModal" tabindex="-1" role="dialog" aria-modal="true" hidden>
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h2 class="modal-title" id="confirmModalTitle">Confirm</h2>
+					<button aria-label="Close" class="close" type="button" id="confirmModalClose">
+						<svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#times"></use></svg>
+					</button>
+				</div>
+				<div class="modal-body">
+					<p id="confirmModalMessage"></p>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-secondary" type="button" id="confirmModalCancel">Cancel</button>
+					<button class="btn btn-primary" type="button" id="confirmModalConfirm">Publish</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="modal" id="scheduleModal" tabindex="-1" role="dialog" aria-modal="true" hidden>
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h2 class="modal-title">Schedule Launch</h2>
+					<button aria-label="Close" class="close" type="button" id="scheduleModalClose">
+						<svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#times"></use></svg>
+					</button>
+				</div>
+				<div class="modal-body">
+					<p class="mb-3">Choose when <strong id="scheduleModalLaunchName"></strong> should be published.</p>
+
+					<div class="form-group">
+						<label for="scheduleModalDate">Date</label>
+						<input type="date" class="form-control" id="scheduleModalDate">
+					</div>
+
+					<div class="form-group mt-3">
+						<label for="scheduleModalTime">Time</label>
+						<input type="time" class="form-control" id="scheduleModalTime">
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-secondary" type="button" id="scheduleModalCancel">Cancel</button>
+					<button class="btn btn-primary" type="button" id="scheduleModalConfirm" disabled>Schedule</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal" id="addElementModal" tabindex="-1" role="dialog" aria-modal="true" hidden>
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h2 class="modal-title">Add Asset</h2>
+					<button aria-label="Close" class="close" type="button" id="addElementModalClose">
+						<svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#times"></use></svg>
+					</button>
+				</div>
+				<div class="modal-body">
+					<div class="form-group">
+						<label for="addElementScopeType">Scope</label>
+						<select class="form-control" id="addElementScopeType">
+							<option value="">Select Scope</option>
+							<option value="site">Site</option>
+							<option value="space">Space</option>
+						</select>
+					</div>
+
+					<div class="form-group" id="addElementScopeValueGroup" hidden>
+						<label for="addElementScopeValue" id="addElementScopeValueLabel">Site</label>
+						<select class="form-control" id="addElementScopeValue">
+							<option value="">Select...</option>
+						</select>
+					</div>
+
+					<div id="addElementListGroup" hidden>
+						<label class="d-block mb-2">Assets</label>
+						<div id="addElementList" style="max-height: 260px; overflow-y: auto"></div>
+					</div>
+
+					<p class="text-secondary mb-0" id="addElementEmptyMessage" hidden>No assets found for this scope.</p>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-secondary" type="button" id="addElementModalCancel">Cancel</button>
+					<button class="btn btn-primary" type="button" id="addElementModalConfirm" disabled>Add</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal" id="chooseDraftModal" tabindex="-1" role="dialog" aria-modal="true" hidden>
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h2 class="modal-title">Choose a Draft</h2>
+					<button aria-label="Close" class="close" type="button" id="chooseDraftModalClose">
+						<svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#times"></use></svg>
+					</button>
+				</div>
+				<div class="modal-body">
+					<p class="mb-3">This page has more than one draft. Choose which one to continue editing.</p>
+					<div id="chooseDraftList"></div>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-secondary" type="button" id="chooseDraftModalCancel">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal" id="addToLaunchModal" tabindex="-1" role="dialog" aria-modal="true" hidden>
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h2 class="modal-title">Add to a Launch</h2>
+					<button aria-label="Close" class="close" type="button" id="addToLaunchModalClose">
+						<svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#times"></use></svg>
+					</button>
+				</div>
+				<div class="modal-body">
+					<p class="mb-3">Add <strong id="addToLaunchVersionLabel"></strong> to a Launch.</p>
+
+					<div class="form-group">
+						<label for="addToLaunchSelect">Launch</label>
+						<select class="form-control" id="addToLaunchSelect">
+							<option value="">Select a Launch</option>
+						</select>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-secondary" type="button" id="addToLaunchModalCancel">Cancel</button>
+					<button class="btn btn-primary" type="button" id="addToLaunchModalConfirm" disabled>Add</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal" id="previewModal" tabindex="-1" role="dialog" aria-modal="true" hidden>
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h2 class="modal-title">Preview Launch</h2>
+					<button aria-label="Close" class="close" type="button" id="previewModalClose">
+						<svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#times"></use></svg>
+					</button>
+				</div>
+				<div class="modal-body">
+					<div id="previewSiteStep">
+						<p class="mb-3">Choose a Site to preview <strong id="previewLaunchNameLabel"></strong> on.</p>
+						<div id="previewSiteList"></div>
+					</div>
+					<div id="previewPageStep" hidden>
+						<p class="mb-3">Choose a Page on <strong id="previewSiteNameLabel"></strong> to start the preview.</p>
+						<div id="previewPageList"></div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-secondary" type="button" id="previewModalBack" hidden>Back</button>
+					<button class="btn btn-secondary" type="button" id="previewModalCancel">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal" id="notReadyModal" tabindex="-1" role="dialog" aria-modal="true" hidden>
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h2 class="modal-title" id="notReadyModalTitle">Cannot Publish Launch</h2>
+					<button aria-label="Close" class="close" type="button" id="notReadyModalClose">
+						<svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#times"></use></svg>
+					</button>
+				</div>
+				<div class="modal-body">
+					<p class="mb-3" id="notReadyModalMessage"></p>
+					<ul class="mb-0" id="notReadyModalList"></ul>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-secondary" type="button" id="notReadyModalDismiss">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal-backdrop" id="modalBackdrop" hidden></div>
+
+	<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+		<symbol id="angle-left" viewBox="0 0 512 512">
+			<path class="lexicon-icon-outline" d="M114.106 254.607c0.22 6.936 2.972 13.811 8.272 19.11l227.222 227.221c11.026 11.058 28.94 11.058 39.999 0 11.058-11.026 11.058-28.94 0-39.999l-206.333-206.333c0 0 206.333-206.333 206.333-206.333 11.058-11.059 11.058-28.973 0-39.999-11.058-11.059-28.973-11.059-39.999 0l-227.221 227.221c-5.3 5.3-8.052 12.174-8.273 19.111z"/>
+		</symbol>
+		<symbol id="plus" viewBox="0 0 512 512">
+			<path class="lexicon-icon-outline" d="M479.82 224.002h-192.41v-191.91c0-17.6-14.4-32-32-32v0c-17.6 0-32 14.4-32 32v191.91h-191.41c-17.6 0-32 14.4-32 32v0c0 17.6 14.4 32 32 32h191.41v191.91c0 17.6 14.4 32 32 32v0c17.6 0 32-14.4 32-32v-191.909h192.41c17.6 0 32-14.4 32-32v0c0-17.6-14.4-32-32-32z"/>
+		</symbol>
+		<symbol id="minus-circle" viewBox="0 0 512 512">
+			<path class="lexicon-icon-outline" d="M256.4,0c-340.8,0-342.8,512,0,512C595.2,512,599.2,0,256.4,0z M384.7,304H128.1c-64.2,0-63.2-96,0-96h256.6C448.8,208,450.8,304,384.7,304z"/>
+		</symbol>
+		<symbol id="ellipsis-v" viewBox="0 0 512 512">
+			<path class="lexicon-icon-outline ellipsis-v-dot-2" d="M319 255.5c0 35.346-28.654 64-64 64s-64-28.654-64-64c0-35.346 28.654-64 64-64s64 28.654 64 64z"/>
+			<path class="lexicon-icon-outline ellipsis-v-dot-3" d="M319 448c0 35.346-28.654 64-64 64s-64-28.654-64-64c0-35.346 28.654-64 64-64s64 28.654 64 64z"/>
+			<path class="lexicon-icon-outline ellipsis-v-dot-1" d="M319 64c0 35.346-28.654 64-64 64s-64-28.654-64-64c0-35.346 28.654-64 64-64s64 28.654 64 64z"/>
+		</symbol>
+		<symbol id="filter" viewBox="0 0 512 512">
+			<path class="lexicon-icon-outline filter-border" d="M448.1,89.9V156L256,316.1l0,0L63.9,156V89.9H448.1 M480.2,25.9H31.8c-17.7,0-32,14.3-32,32V186L192,346.1v108.3c0,18.6,18.5,40.8,46.3,28.6l64-32c10.8-5.4,17.7-16.5,17.7-28.6v-76.3L512.2,186V57.9C512.2,40.2,497.9,25.9,480.2,25.9L480.2,25.9z"/>
+		</symbol>
+		<symbol id="caret-bottom" viewBox="0 0 512 512">
+			<path class="lexicon-icon-outline" d="M103.5,204.3l136.1,136.1c9,9,23.7,9,32.7,0l136.1-136.1c14.6-14.6,4.3-39.5-16.4-39.5H119.9C99.2,164.8,88.9,189.7,103.5,204.3L103.5,204.3z"/>
+		</symbol>
+		<symbol id="caret-left" viewBox="0 0 512 512">
+			<path class="lexicon-icon-outline" d="M307.6,103.5L171.5,239.6c-9,9-9,23.7,0,32.7l136.1,136.1c14.6,14.6,39.5,4.3,39.5-16.4V119.9C347.1,99.2,322.2,88.9,307.6,103.5L307.6,103.5z"/>
+		</symbol>
+		<symbol id="caret-right" viewBox="0 0 512 512">
+			<path class="lexicon-icon-outline" d="M204.3,408.4l136.1-136.1c9-9,9-23.7,0-32.7L204.3,103.5c-14.6-14.6-39.5-4.3-39.5,16.4V392C164.8,412.7,189.7,423,204.3,408.4L204.3,408.4z"/>
+		</symbol>
+		<symbol id="search" viewBox="0 0 512 512">
+			<path class="lexicon-icon-outline" d="M503.254 467.861l-133.645-133.645c27.671-35.13 44.344-79.327 44.344-127.415 0-113.784-92.578-206.362-206.362-206.362s-206.362 92.578-206.362 206.362 92.578 206.362 206.362 206.362c47.268 0 90.735-16.146 125.572-42.969l133.851 133.851c5.002 5.002 11.554 7.488 18.106 7.488s13.104-2.486 18.106-7.488c10.004-10.003 10.004-26.209 0.029-36.183zM52.446 206.801c0-85.558 69.616-155.173 155.173-155.173s155.174 69.616 155.174 155.173-69.616 155.173-155.173 155.173-155.173-69.616-155.173-155.173z"/>
+		</symbol>
+		<symbol id="pencil" viewBox="0 0 512 512">
+			<path class="lexicon-icon-body" fill="none" d="M483,31C466.9,14.9,445.5,6,422.8,6s-44.1,8.9-60.2,24.9L4.1,389.4l4.4,115.3l119.9,1.2L483,151.4C516.2,118.2,516.2,64.2,483,31L483,31z"/>
+			<path class="lexicon-icon-outline" d="M483,31C466.9,14.9,445.5,6,422.8,6s-44.1,8.9-60.2,24.9L4.1,389.4l4.4,115.3l119.9,1.2L483,151.4C516.2,118.2,516.2,64.2,483,31L483,31z M105.1,449l-42-0.4l-1.4-36.5l274.4-274.4l40.1,40.1L105.1,449L105.1,449z M442.9,111.2l-26.4,26.4l-40.1-40.1l26.4-26.4c10.7-10.7,29.4-10.7,40.1,0C453.9,82.2,453.9,100.2,442.9,111.2z"/>
+		</symbol>
+		<symbol id="upload" viewBox="0 0 512 512">
+			<path class="lexicon-icon-outline upload-arrow-up" d="M278.9,9.5C272.8,3.4,264.6,0,256,0c-8.6,0-16.8,3.4-22.9,9.5l-71.6,71.6c-12.7,12.7-12.7,33.2,0,45.8c6.3,6.3,14.6,9.5,22.9,9.5s16.6-3.2,22.9-9.5l16.7-16.7V352c0,17.7,14.3,32,32,32c17.7,0,32-14.3,32-32V110.2l16.7,16.7c12.7,12.7,33.2,12.7,45.8,0c12.7-12.7,12.7-33.2,0-45.8L278.9,9.5z"/>
+			<path class="lexicon-icon-outline upload-bracket" d="M416,352c-17.7,0-32,14.3-32,32v64H128v-64c0-17.7-14.3-32-32-32s-32,14.3-32,32v128h384V384C448,366.3,433.7,352,416,352z"/>
+		</symbol>
+		<symbol id="calendar" viewBox="0 0 512 512">
+			<path class="calendar-border lexicon-icon-outline" d="M512,160c0-35-28.7-64-63.7-64l-0.3,0v-64c0-44-64-41-64,0v64h-96v-64c0-40-64-44-64,0v64h-96v-64c0-45-64-40-64,0v64l-0.3,0c-35,0-63.7,29-63.7,64V448c0,35,29,64,64,64h352l96-96V160z M384,448.1v-64h64L384,448.1z M448,320H320v128H64V160h384V320z"/>
+			<rect class="calendar-date lexicon-icon-outline" x="96" y="192" width="32" height="32"/>
+			<rect class="calendar-date lexicon-icon-outline" x="160" y="192" width="32" height="32"/>
+			<rect class="calendar-date lexicon-icon-outline" x="224" y="192" width="32" height="32"/>
+			<rect class="calendar-date lexicon-icon-outline" x="288" y="192" width="32" height="32"/>
+			<rect class="calendar-date lexicon-icon-outline" x="352" y="192" width="32" height="32"/>
+			<rect class="calendar-date lexicon-icon-outline" x="96" y="256" width="32" height="32"/>
+			<rect class="calendar-date lexicon-icon-outline" x="160" y="256" width="32" height="32"/>
+			<rect class="calendar-date lexicon-icon-outline" x="224" y="256" width="32" height="32"/>
+			<rect class="calendar-date lexicon-icon-outline" x="288" y="256" width="32" height="32"/>
+			<rect class="calendar-date lexicon-icon-outline" x="352" y="256" width="32" height="32"/>
+			<rect class="calendar-date lexicon-icon-outline" x="96" y="320" width="32" height="32"/>
+			<rect class="calendar-date lexicon-icon-outline" x="96" y="384" width="32" height="32"/>
+			<rect class="calendar-date lexicon-icon-outline" x="160" y="384" width="32" height="32"/>
+			<rect class="calendar-date lexicon-icon-outline" x="160" y="320" width="32" height="32"/>
+			<rect class="calendar-date lexicon-icon-outline" x="224" y="320" width="32" height="32"/>
+		</symbol>
+		<symbol id="paste" viewBox="0 0 512 512">
+			<path class="lexicon-icon-body" fill="none" d="M412,128h-60V68c0-37.4-30.6-68-68-68H100C62.6,0,32,30.6,32,68v248c0,37.4,30.6,68,68,68h60v60c0,37.4,30.6,68,68,68h184c37.4,0,68-30.6,68-68V196C480,158.6,449.4,128,412,128z"/>
+			<path class="lexicon-icon-outline" d="M412,128h-60V68c0-37.4-30.6-68-68-68H100C62.6,0,32,30.6,32,68v248c0,37.4,30.6,68,68,68h60v60c0,37.4,30.6,68,68,68h184c37.4,0,68-30.6,68-68V196C480,158.6,449.4,128,412,128z M160,196v124H96V64h192v64h-60C190.6,128,160,158.6,160,196z M416,448H224V192h192V448z"/>
+		</symbol>
+		<symbol id="info-circle" viewBox="0 0 512 512">
+			<path class="lexicon-icon-outline" d="M437,75C388.7,26.6,324.4,0,256,0C187.6,0,123.3,26.6,75,75C26.6,123.3,0,187.6,0,256c0,68.4,26.6,132.7,75,181c48.4,48.4,112.6,75,181,75c68.4,0,132.7-26.6,181-75c48.4-48.4,75-112.6,75-181C512,187.6,485.4,123.3,437,75z M288,384c0,17.7-14.3,32-32,32c-17.7,0-32-14.3-32-32V224c0-17.7,14.3-32,32-32c17.7,0,32,14.3,32,32V384z M256,160c-17.7,0-32-14.3-32-32c0-17.7,14.3-32,32-32s32,14.3,32,32C288,145.7,273.7,160,256,160z"/>
+		</symbol>
+		<symbol id="times" viewBox="0 0 512 512">
+			<path class="lexicon-icon-outline" d="M301.1,256.1L502.3,54.9c30.1-30.1-16.8-73.6-45.2-45.2L255.9,210.8L54.6,9.7C24.6-20.4-19,26.5,9.4,54.9l201.2,201.2L9.3,457.3c-28.9,28.9,15.8,74.6,45.2,45.2l201.3-201.2l201.3,201.2c28.9,28.9,74.2-16.3,45.2-45.2L301.1,256.1z"/>
+		</symbol>
+		<symbol id="order-arrow" viewBox="0 0 512 512">
+			<path class="lexicon-icon-outline order-arrow-arrow-down" d="M307.6,431.5l71.6,71.6c11.9,10.8,32.9,11.2,45.8,0l71.6-71.6c29.8-33.6-15.8-74.9-45.8-45.8l-16.7,16.7V31.6c0-42.5-64-42.5-64,0v370.8l-16.7-16.7C321.6,355.8,277.9,400.6,307.6,431.5z"/>
+			<path class="lexicon-icon-outline order-arrow-arrow-up" d="M204.4,80.5L132.8,8.9C120.9-1.8,99.9-2.3,87,8.9L15.4,80.5c-29.8,33.6,15.7,74.9,45.8,45.8l16.7-16.7v370.8c0,42.5,64,42.5,64,0V109.6l16.7,16.7C190.4,156.2,234.1,111.4,204.4,80.5z"/>
+		</symbol>
+		<symbol id="order-arrow-down" viewBox="0 0 512 512">
+			<path class="lexicon-icon-outline" d="M161.5,367.9l71.6,71.6c11.9,10.8,32.9,11.2,45.8,0l71.6-71.6c29.8-33.6-15.8-74.9-45.8-45.8L288,338.8V96c0-42.5-64-42.5-64,0v242.8l-16.7-16.7C175.5,292.2,131.8,337,161.5,367.9z"/>
+		</symbol>
+		<symbol id="order-arrow-up" viewBox="0 0 512 512">
+			<path class="lexicon-icon-outline" d="M350.4,143.9l-71.6-71.6c-11.9-10.8-32.9-11.3-45.8,0l-71.6,71.6c-29.8,33.6,15.8,74.9,45.8,45.8l16.7-16.7v242.8c0,42.5,64,42.5,64,0V173l16.7,16.7C336.4,219.5,380.1,174.8,350.4,143.9z"/>
+		</symbol>
+		<symbol id="view" viewBox="0 0 512 512">
+			<path class="lexicon-icon-outline" d="M499.7,228.2C412.4,101.9,291,96,260.4,96c-3.1,0-10.7,0-14.8,0C210,96,81.3,106.5,3.2,244.5c-9.1,16.1,3.3,30.7,9.2,39.3C99.8,410.1,222.6,416,253.6,416c3.2,0,10.8,0,14.9,0c35.2,0,162.2-10.5,240.2-148.5C517.8,251.4,505.7,236.8,499.7,228.2z M253.1,313.5c-28.2,0-51-22.8-51-51c0-28.2,22.8-51,51-51c28.2,0,51,22.8,51,51C304.1,290.7,281.3,313.5,253.1,313.5z M56,256.6c26.8-42.1,62-72.7,104.9-91c6.6-2.8,13.1-5.2,19.4-7.3c-32.8,23-54.3,61.1-54.3,104.2c0,29.7,10.2,57,27.3,78.7C120.7,325.4,86,299.3,56,256.6z M346,349.3c21.2-22.7,34.3-53.2,34.3-86.8c0-44.2-22.6-83.2-56.9-106c40.9,12.1,91.1,39.2,133,98.9C423.3,307.6,382.1,335,346,349.3z"/>
+		</symbol>
+		<symbol id="check" viewBox="0 0 512 512">
+			<path class="lexicon-icon-outline" d="M502.091 60.993c-9.909-9.91-25.962-9.91-35.843 0l-336.988 336.988-83.508-83.451c-9.881-9.909-25.962-9.909-35.843 0-9.909 9.909-9.909 25.962 0 35.843l98.257 98.257c2.608 2.608 5.679 4.433 8.924 5.679 4.028 2.464 8.403 4.115 12.952 4.115 6.49 0 12.981-2.464 17.936-7.418l354.112-354.141c9.909-9.909 9.909-25.962 0-35.871l0-0.001z"/>
+		</symbol>
+		<symbol id="check-circle" viewBox="0 0 512 512">
+			<path class="lexicon-icon-outline" d="M254.2,304.9c49.9-58.2,134-156.4,169.5-197.8l0,0c5.9-6.8,14.6-11.2,24.3-11.2c17.7,0,32,14.3,32,32c0,8-2.9,15.2-7.7,20.8l0,0c-41.7,48.6-150.3,175.4-192,224l0,0c-5.9,6.8-14.6,11.2-24.3,11.2c-8.8,0-16.8-3.6-22.6-9.4c-45.3-45.3-50.7-50.7-96-96c-5.8-5.8-9.4-13.8-9.4-22.6c0-17.7,14.3-32,32-32c8.8,0,16.8,3.6,22.6,9.4C218.2,268.9,229.2,279.9,254.2,304.9z M507.3,207.1c-18.3,21.4-39.5,46.1-60.6,70.6C435.9,373.6,354.7,448,256,448c-106,0-192-86-192-192S150,64,256,64c35.5,0,68.7,9.6,97.2,26.4c15.1-17.6,29.5-34.4,42.1-49.2C355.3,15.2,307.4,0,256,0C114.6,0,0,114.6,0,256s114.6,256,256,256s256-114.6,256-256C512,239.3,510.4,223,507.3,207.1z"/>
+		</symbol>
+		<symbol id="time" viewBox="0 0 512 512">
+			<path class="lexicon-icon-body" fill="none" d="M437,75C388.7,26.6,324.4,0,256,0S123.3,26.6,75,75C26.6,123.3,0,187.6,0,256s26.6,132.7,75,181c48.4,48.4,112.6,75,181,75s132.7-26.6,181-75c48.4-48.4,75-112.6,75-181S485.4,123.3,437,75z"/>
+			<path class="lexicon-icon-outline lx-time-border" d="M437,75C388.7,26.6,324.4,0,256,0S123.3,26.6,75,75C26.6,123.3,0,187.6,0,256s26.6,132.7,75,181c48.4,48.4,112.6,75,181,75s132.7-26.6,181-75c48.4-48.4,75-112.6,75-181S485.4,123.3,437,75z M256,448c-105.9,0-192-86.1-192-192S150.1,64,256,64s192,86.1,192,192S361.9,448,256,448z"/>
+			<path class="lexicon-icon-outline lx-time-hands" d="M180.7,347.3c3.1,3.1,7.2,4.7,11.3,4.7s8.2-1.6,11.3-4.7l48-48c6.3,3,13.3,4.7,20.7,4.7c26.5,0,48-21.5,48-48c0-20.9-13.4-38.7-32-45.3V112c0-8.8-7.2-16-16-16s-16,7.2-16,16v98.7c-18.6,6.6-32,24.4-32,45.3c0,7.4,1.7,14.4,4.7,20.7l-48,48C174.4,330.9,174.4,341.1,180.7,347.3z"/>
+		</symbol>
+		<symbol id="trash" viewBox="0 0 512 512">
+			<path class="lexicon-icon-outline lx-trash-body-border" d="M64.4,440.7c0,39.3,31.9,71.3,71.3,71.3h240.6c39.3,0,71.3-31.9,71.3-71.3v-312H64.4V440.7z M128.2,192.6h255.5v231.7c0,13.1-10.7,23.8-23.8,23.8H152c-13.1,0-23.8-10.7-23.8-23.8V192.6z"/>
+			<polygon class="lexicon-icon-outline lx-trash-lid" points="351.8,32.9 351.8,0 160.2,0 160.2,32.9 64.4,32.9 64.4,96.1 447.6,96.1 447.6,32.9 "/>
+			<rect class="lexicon-icon-outline lx-trash-line-2" x="287.9" y="223.6" width="63.9" height="191.6"/>
+			<rect class="lexicon-icon-outline lx-trash-line-1" x="160.2" y="223.6" width="63.9" height="191.6"/>
+		</symbol>
+		<symbol id="shortcut" viewBox="0 0 512 512">
+			<path class="lexicon-icon-outline lx-shortcut-border" d="M480,320c-17.6729,0-32,14.3271-32,32v96H64V64h96c17.6729,0,32-14.3271,32-32S177.6729,0,160,0H64C28.7104,0,0,28.7104,0,64v384c0,35.29,28.7104,64,64,64h384c35.29,0,64-28.71,64-64v-96C512,334.3271,497.6729,320,480,320z"/>
+			<path class="lexicon-icon-outline lx-shortcut-arrow" d="M480,0H320c-17.6729,0-32,14.3267-32,32s14.3271,32,32,32h82.7456L265.373,201.3726c-12.4971,12.4971-12.4971,32.7578,0,45.2549C271.6211,252.876,279.8105,256,288,256s16.3789-3.124,22.627-9.3726L448,109.2544V192c0,17.6733,14.3271,32,32,32s32-14.3267,32-32V32C512,14.3267,497.6729,0,480,0z"/>
+		</symbol>
+		<symbol id="rocket" viewBox="0 0 16 16">
+			<path class="lexicon-icon-outline" d="M4.142 10.275c.218.218.225.583.09.86-.134.28-.218.592-.09.72.129.129.44.045.72-.09.278-.135.643-.127.861.09l.395.396-.462.23a3.019 3.019 0 0 1-2.304.165 3.019 3.019 0 0 1 .164-2.304l.231-.462.395.395Zm.775-4.364c-.6 1.095-.992 2.137-1.149 3.047a.226.226 0 0 1-.09.02H.222a.224.224 0 0 1-.158-.382L2.748 5.91h2.17Zm5.169 7.338-2.684 2.684a.224.224 0 0 1-.382-.158v-3.543c.914-.154 1.963-.548 3.066-1.152v2.169Z" />
+			<path class="lexicon-icon-outline" clip-rule="evenodd" d="M14.257 6.048a9.224 9.224 0 0 1-1.42 1.856c-2.013 2.012-4.236 3.313-5.892 3.593L4.5 9.053c.28-1.656 1.58-3.879 3.593-5.891A9.225 9.225 0 0 1 9.95 1.74a4.456 4.456 0 0 0 1.306 3.003 4.455 4.455 0 0 0 3.001 1.305Zm-4.582.275a1.118 1.118 0 1 0-1.58 1.581 1.118 1.118 0 0 0 1.58-1.58Z" fill-rule="evenodd" />
+			<path class="lexicon-icon-outline" d="M15.998 0s-.059 2.644-1.32 5.258a3.679 3.679 0 0 1-2.869-1.069 3.68 3.68 0 0 1-1.07-2.87C13.353.06 16 0 16 0Z" />
+		</symbol>
+		<symbol id="globe" viewBox="0 0 512 512">
+			<path class="lexicon-icon-outline" d="M256,0C115.2,0,0,115.2,0,256s115.2,256,256,256s256-115.2,256-256S396.8,0,256,0z M320,384c12.8,9.6,25.6,76.8,25.6,76.8c-28.8,12.8-73.6,25.2-121.6,16c0,0-32-16-32-60.8s16-67.2-32-96s-86.4-22.4-96-32s-16-38.4,0-64c12.8,0,19.2,0,32,0c0-22.4,0-48,0-64c25.6,0,35.2,0,64,0c19.2-12.8,64-124.8,64-124.8c19.2-6.4,52.8-6.9,64,0C183.3,161.3,348.7,46.7,320,96c-19.2,35.2-96,83.2-96,96s22.4,32,32,32s51.2-64,64-64s41.6,54.4,32,64s-115.2,16-128,32s-16,80,0,96S307.2,374.4,320,384z M425.6,403.2c0,0,25.6-86.4,22.4-115.2s-22.4-60.8-32-64s-25.6,6.4-32,0c0-6.4,0-19.2,0-32c6.4-6.4,67.2-6.4,86.4,0C476.8,195.2,506.5,308.9,425.6,403.2z"></path>
+		</symbol>
+	</svg>
+
+	<script>
+		(function () {
+			var views = document.querySelectorAll('[data-view]');
+			var navButtons = document.querySelectorAll('.mockup-toolbar button[data-goto]');
+
+			function show(name) {
+				views.forEach(function (el) {
+					el.classList.toggle('mockup-active', el.getAttribute('data-view') === name);
+				});
+
+				navButtons.forEach(function (btn) {
+					btn.classList.toggle('active', btn.getAttribute('data-goto') === name);
+				});
+
+				window.scrollTo({top: 0, behavior: 'instant'});
+			}
+
+			function navigate(target, formMode, id) {
+				if (target === 'form') {
+					openLaunchForm(formMode || 'edit', id);
+				}
+				else if (target === 'errors') {
+					openErrorsPage(id);
+				}
+				else if (target === 'history') {
+					openHistoryView(id);
+				}
+				else if (target === 'page-editor') {
+					openPageEditor(id);
+				}
+				else if (target === 'new-page') {
+					createNewPage();
+				}
+				else if (target === 'cms-history') {
+					openCmsHistoryView(id);
+				}
+				else if (target === 'cms-editor') {
+					openCmsEditor(id);
+				}
+				else {
+					show(target);
+				}
+			}
+
+			document.body.addEventListener('click', function (event) {
+				var trigger = event.target.closest('[data-goto]');
+
+				if (!trigger) {
+					return;
+				}
+
+				event.preventDefault();
+				navigate(trigger.getAttribute('data-goto'), trigger.getAttribute('data-form-mode'), trigger.getAttribute('data-launch-id'));
+			});
+
+			// ---- Launches list (frontend data set look) ----
+
+			var LAUNCHES = [
+				{id: 'myLaunche', name: 'MyLaunche', description: '', modified: '9/15/2026, 6:51:12 AM', status: 'secondary', statusLabel: 'Open', statusKey: 'open'},
+				{id: 'winterNewsletter', name: 'Winter Newsletter', description: 'Newsletter landing page and signup banner, ready to go live', modified: '9/16/2026, 10:05:44 AM', status: 'secondary', statusLabel: 'Open', statusKey: 'open'},
+				{id: 'blackFriday', name: 'Black Friday Deals', description: 'Deals landing page and countdown banner — passes validation, but one asset fails while publishing', modified: '9/16/2026, 11:20:03 AM', status: 'secondary', statusLabel: 'Open', statusKey: 'open'},
+				{id: 'fallCampaign', name: 'Fall Campaign Refresh', description: 'Homepage banner and landing page copy update', modified: '9/12/2026, 2:14:00 PM', status: 'secondary', statusLabel: 'Open', statusKey: 'open'},
+				{id: 'q3Announcement', name: 'Q3 Product Announcement', description: 'Blog post and pricing page updates', modified: '9/9/2026, 9:02:31 AM', status: 'danger', statusLabel: 'Failed', statusKey: 'failed'},
+				{id: 'holidayStorefront', name: 'Holiday Storefront', description: '', modified: '8/30/2026, 4:47:09 PM', status: 'success', statusLabel: 'Published', statusKey: 'published'}
+			];
+
+			var rowsEl = document.getElementById('launchRows');
+			var searchInput = document.getElementById('launchSearchInput');
+			var selectAllCheckbox = document.getElementById('launchSelectAll');
+			var paginationSummary = document.getElementById('launchPaginationSummary');
+			var openDropdown = null;
+
+			function icon(name, extraStyle) {
+				return '<svg class="lexicon-icon" style="width:16px;height:16px' + (extraStyle || '') + '" viewBox="0 0 512 512"><use xlink:href="#' + name + '"></use></svg>';
+			}
+
+			// While a publish is running the status column shows a progress bar instead of the status
+			// label. It's not a status of its own: the Launch stays Open until the publish resolves.
+			function renderStatusCell(launch) {
+				if (typeof launch.publishProgress === 'number') {
+					var pct = Math.round(launch.publishProgress);
+
+					return '' +
+						'<div class="progress-group" style="min-width: 140px">' +
+							'<div class="progress">' +
+								'<div class="progress-bar" role="progressbar" aria-label="Publishing ' + launch.name + '" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '" style="width: ' + pct + '%"></div>' +
+							'</div>' +
+							'<div class="progress-group-addon">' + pct + '%</div>' +
+						'</div>';
+				}
+
+				return '<span class="label label-' + launch.status + '"><span class="label-item label-item-expand">' + launch.statusLabel + '</span></span>';
+			}
+
+			function updateStatusCell(launch) {
+				var cell = document.querySelector('[data-status-cell="' + launch.id + '"]');
+
+				if (cell) {
+					cell.innerHTML = renderStatusCell(launch);
+				}
+			}
+
+			function renderLaunchRows(filter) {
+				var q = (filter || '').trim().toLowerCase();
+				var list = LAUNCHES.filter(function (launch) {
+					return !q || launch.name.toLowerCase().indexOf(q) !== -1 || launch.description.toLowerCase().indexOf(q) !== -1;
+				});
+
+				if (!list.length) {
+					rowsEl.innerHTML = '<tr><td colspan="6" class="text-center text-secondary" style="padding: 32px">No launches match your search.</td></tr>';
+					paginationSummary.textContent = '0 of ' + LAUNCHES.length + ' launches';
+					return;
+				}
+
+				rowsEl.innerHTML = list.map(function (launch) {
+					return '' +
+						'<tr data-id="' + launch.id + '">' +
+							'<td class="lfr-checkbox-column text-left text-middle">' +
+								'<div class="custom-checkbox custom-control"><label><input class="custom-control-input launch-row-checkbox" type="checkbox"><span class="custom-control-label"></span></label></div>' +
+							'</td>' +
+							'<td class="table-cell-expand-small table-cell-minw-200 table-title">' +
+								'<a class="d-inline-block" href="#" data-goto="form" data-form-mode="edit" data-launch-id="' + launch.id + '">' + launch.name + icon('shortcut', '; margin-left: 4px') + '</a>' +
+							'</td>' +
+							'<td class="table-cell-expand table-cell-minw-300">' + (launch.description || '—') + '</td>' +
+							'<td class="table-cell-expand-smallest table-cell-ws-nowrap">' + launch.modified + '</td>' +
+							'<td class="table-cell-expand-smallest table-cell-ws-nowrap" data-status-cell="' + launch.id + '">' + renderStatusCell(launch) + '</td>' +
+							'<td class="lfr-entry-action-column">' +
+								'<button type="button" class="component-action btn btn-monospaced btn-unstyled" aria-label="Actions for ' + launch.name + '" data-kebab="' + launch.id + '">' + icon('ellipsis-v') + '</button>' +
+							'</td>' +
+						'</tr>';
+				}).join('');
+
+				paginationSummary.textContent = '1 to ' + list.length + ' of ' + list.length + ' launches';
+			}
+
+			if (searchInput) {
+				searchInput.addEventListener('input', function () {
+					renderLaunchRows(searchInput.value);
+				});
+			}
+
+			if (selectAllCheckbox) {
+				selectAllCheckbox.addEventListener('change', function () {
+					document.querySelectorAll('.launch-row-checkbox').forEach(function (checkbox) {
+						checkbox.checked = selectAllCheckbox.checked;
+					});
+				});
+			}
+
+			function closeDropdown() {
+				if (openDropdown) {
+					openDropdown.remove();
+					openDropdown = null;
+				}
+			}
+
+			// "View" (read-only) is always available, on every status, regardless of what else is.
+			// Beyond that: open -> everything; failed -> View + View Error Details + Delete; published -> View/Delete (no Edit, no Publish/Schedule);
+			// scheduled -> View + Delete.
+			function getMenuItemsForStatus(statusKey) {
+				var VIEW_ITEM = {icon: 'view', label: 'View', action: 'form', formMode: 'view'};
+
+				// Read-only, non-destructive, same as View — available on every status, no
+				// exceptions, same "always available" precedent View itself follows.
+				var PREVIEW_ITEM = {icon: 'globe', label: 'Preview', perform: 'preview'};
+
+				switch (statusKey) {
+					case 'failed':
+						return [
+							VIEW_ITEM,
+							PREVIEW_ITEM,
+							{icon: 'info-circle', label: 'View Error Details', action: 'errors'},
+							{divider: true},
+							{icon: 'trash', label: 'Delete', danger: true, perform: 'delete'}
+						];
+					case 'published':
+						return [
+							VIEW_ITEM,
+							PREVIEW_ITEM,
+							{divider: true},
+							{icon: 'trash', label: 'Delete', danger: true, perform: 'delete'}
+						];
+					// Not a status: a publish is running (progress bar in the status column). Only the
+					// read-only actions until it resolves, so it can't be edited, re-published or deleted.
+					case 'publishInProgress':
+						return [VIEW_ITEM, PREVIEW_ITEM];
+					case 'scheduled':
+						return [
+							VIEW_ITEM,
+							PREVIEW_ITEM,
+							{divider: true},
+							{icon: 'trash', label: 'Delete', danger: true, perform: 'delete'}
+						];
+					case 'open':
+					default:
+						return [
+							VIEW_ITEM,
+							PREVIEW_ITEM,
+							{icon: 'pencil', label: 'Edit', action: 'form', formMode: 'edit'},
+							{icon: 'upload', label: 'Publish', perform: 'publish'},
+							{icon: 'calendar', label: 'Schedule', perform: 'schedule'},
+							{divider: true},
+							{icon: 'trash', label: 'Delete', danger: true, perform: 'delete'}
+						];
+				}
+			}
+
+			document.addEventListener('click', function (event) {
+				var kebabButton = event.target.closest('[data-kebab]');
+
+				if (!kebabButton) {
+					closeDropdown();
+					return;
+				}
+
+				event.preventDefault();
+				event.stopPropagation();
+
+				if (openDropdown && openDropdown.dataset.owner === kebabButton.dataset.kebab) {
+					closeDropdown();
+					return;
+				}
+
+				closeDropdown();
+
+				var launch = LAUNCHES.filter(function (l) { return l.id === kebabButton.dataset.kebab; })[0];
+				var items = getMenuItemsForStatus(launch ? (typeof launch.publishProgress === 'number' ? 'publishInProgress' : launch.statusKey) : 'open');
+
+				if (!items.length) {
+					return;
+				}
+
+				var menu = document.createElement('div');
+				menu.className = 'dropdown-menu mockup-open';
+				menu.dataset.owner = kebabButton.dataset.kebab;
+				menu.setAttribute('role', 'menu');
+				menu.innerHTML = items.map(function (item) {
+					if (item.divider) {
+						return '<div class="dropdown-divider"></div>';
+					}
+
+					var attrs = (item.action ? ' data-goto="' + item.action + '"' : '') + (item.formMode ? ' data-form-mode="' + item.formMode + '"' : '') + (item.perform ? ' data-perform="' + item.perform + '"' : '');
+
+					return '<button type="button" role="menuitem" class="dropdown-item' + (item.danger ? ' text-danger' : '') + '"' + attrs + '>' +
+						'<span class="inline-item inline-item-before">' + icon(item.icon) + '</span>' + item.label +
+					'</button>';
+				}).join('');
+
+				document.body.appendChild(menu);
+
+				var rect = kebabButton.getBoundingClientRect();
+				var menuRect = menu.getBoundingClientRect();
+				var top = rect.bottom + 4;
+				var left = rect.right - menuRect.width;
+
+				if (left < 10) {
+					left = 10;
+				}
+
+				menu.style.position = 'fixed';
+				menu.style.top = top + 'px';
+				menu.style.left = left + 'px';
+
+				menu.querySelectorAll('.dropdown-item').forEach(function (item) {
+					item.addEventListener('click', function (itemEvent) {
+						itemEvent.stopPropagation();
+						closeDropdown();
+
+						var perform = item.getAttribute('data-perform');
+						var goto = item.getAttribute('data-goto');
+
+						if (perform === 'publish' && launch) {
+							confirmPublishLaunch(launch);
+						}
+						else if (perform === 'schedule' && launch) {
+							confirmScheduleLaunch(launch);
+						}
+						else if (perform === 'preview' && launch) {
+							openPreviewModal(launch);
+						}
+						else if (perform === 'delete' && launch) {
+							confirmDeleteLaunch(launch);
+						}
+						else if (goto) {
+							navigate(goto, item.getAttribute('data-form-mode'), launch ? launch.id : null);
+						}
+					});
+				});
+
+				openDropdown = menu;
+			});
+
+			window.addEventListener('scroll', closeDropdown, true);
+			window.addEventListener('resize', closeDropdown);
+
+			renderLaunchRows();
+
+			// ---- Pages list ----
+
+			var PAGES = [
+				{id: 'home', name: 'Home', site: 'Guest', version: '4.0', updated: '9/15/2026, 10:12:00 AM', status: 'success', statusLabel: 'Published'},
+				{id: 'about-us', name: 'About Us', site: 'Guest', version: '2.1', updated: '9/14/2026, 4:30:00 PM', status: 'secondary', statusLabel: 'Draft'},
+				{id: 'contact', name: 'Contact', site: 'Guest', version: '1.3', updated: '9/13/2026, 9:05:00 AM', status: 'success', statusLabel: 'Published'},
+				{id: 'products', name: 'Products', site: 'Guest', version: '3.2', updated: '9/12/2026, 3:47:00 PM', status: 'info', statusLabel: 'Pending'},
+				{id: 'careers', name: 'Careers', site: 'Guest', version: '1.0', updated: '9/11/2026, 1:22:00 PM', status: 'secondary', statusLabel: 'Draft'}
+			];
+
+			var pageRowsEl = document.getElementById('pageRows');
+			var pagesPaginationSummary = document.getElementById('pagesPaginationSummary');
+			var openPageDropdown = null;
+
+			// PAGE_DRAFTS is declared further down (Page editor section) but assigned after this
+			// function's first call at page load — guard against it still being `undefined` then.
+			function pageHasLaunchDraft(pageId) {
+				var drafts = (PAGE_DRAFTS && PAGE_DRAFTS[pageId]) || [];
+				return drafts.some(function (d) { return d.launchId; });
+			}
+
+			function renderPageRows() {
+				pageRowsEl.innerHTML = PAGES.map(function (page) {
+					return '' +
+						'<tr data-id="' + page.id + '">' +
+							'<td class="table-cell-expand-small table-cell-minw-200 table-title"><span class="text-truncate-inline">' + page.name + '</span></td>' +
+							'<td class="table-cell-expand-smallest table-cell-ws-nowrap">' +
+								(pageHasLaunchDraft(page.id) ?
+									'<span title="Has a draft tied to a Launch" aria-label="Has a draft tied to a Launch">' + icon('rocket') + '</span>' :
+									'') +
+							'</td>' +
+							'<td class="table-cell-expand-smallest table-cell-ws-nowrap">' + page.updated + '</td>' +
+							'<td class="table-cell-expand-smallest table-cell-ws-nowrap">' +
+								'<span class="label label-' + page.status + '"><span class="label-item label-item-expand">' + page.statusLabel + '</span></span>' +
+							'</td>' +
+							'<td class="lfr-entry-action-column">' +
+								'<button type="button" class="component-action btn btn-monospaced btn-unstyled" aria-label="Actions for ' + page.name + '" data-page-kebab="' + page.id + '">' +
+									icon('ellipsis-v') +
+								'</button>' +
+							'</td>' +
+						'</tr>';
+				}).join('');
+
+				pagesPaginationSummary.textContent = '1 to ' + PAGES.length + ' of ' + PAGES.length + ' pages';
+			}
+
+			function closePageDropdown() {
+				if (openPageDropdown) {
+					openPageDropdown.remove();
+					openPageDropdown = null;
+				}
+			}
+
+			document.addEventListener('click', function (event) {
+				var kebabButton = event.target.closest('[data-page-kebab]');
+
+				if (!kebabButton) {
+					closePageDropdown();
+					return;
+				}
+
+				event.preventDefault();
+				event.stopPropagation();
+
+				if (openPageDropdown && openPageDropdown.dataset.owner === kebabButton.dataset.pageKebab) {
+					closePageDropdown();
+					return;
+				}
+
+				closePageDropdown();
+
+				var pageId = kebabButton.dataset.pageKebab;
+				var kebabPage = PAGES.filter(function (p) { return p.id === pageId; })[0];
+
+				// Per user rule: a page with status "Launch Draft" only offers Edit — its version
+				// history isn't meaningful to browse while the page only has an unresolved
+				// Launch-tied draft, so "History View" is hidden for that status only.
+				var items = [{icon: 'pencil', label: 'Edit', perform: 'editPage'}];
+
+				if (!kebabPage || kebabPage.statusLabel !== 'Launch Draft') {
+					items.push({icon: 'time', label: 'History View', perform: 'history'});
+				}
+
+				var menu = document.createElement('div');
+				menu.className = 'dropdown-menu mockup-open';
+				menu.dataset.owner = pageId;
+				menu.setAttribute('role', 'menu');
+				menu.innerHTML = items.map(function (item) {
+					return '<button type="button" role="menuitem" class="dropdown-item"' + (item.perform ? ' data-perform="' + item.perform + '"' : '') + '>' +
+						'<span class="inline-item inline-item-before">' + icon(item.icon) + '</span>' + item.label +
+					'</button>';
+				}).join('');
+
+				document.body.appendChild(menu);
+
+				var rect = kebabButton.getBoundingClientRect();
+				var menuRect = menu.getBoundingClientRect();
+				var top = rect.bottom + 4;
+				var left = rect.right - menuRect.width;
+
+				if (left < 10) {
+					left = 10;
+				}
+
+				menu.style.position = 'fixed';
+				menu.style.top = top + 'px';
+				menu.style.left = left + 'px';
+
+				menu.querySelectorAll('.dropdown-item').forEach(function (item) {
+					item.addEventListener('click', function (itemEvent) {
+						itemEvent.stopPropagation();
+						closePageDropdown();
+
+						var perform = item.getAttribute('data-perform');
+
+						if (perform === 'history') {
+							navigate('history', null, pageId);
+						}
+						else if (perform === 'editPage') {
+							handleEditPage(pageId);
+						}
+					});
+				});
+
+				openPageDropdown = menu;
+			});
+
+			window.addEventListener('scroll', closePageDropdown, true);
+			window.addEventListener('resize', closePageDropdown);
+
+			// ---- Page editor (simulated) ----
+
+			var currentEditorPageId = null;
+			var pageEditorTitle = document.getElementById('pageEditorTitle');
+			var pageEditorDraftLabel = document.getElementById('pageEditorDraftLabel');
+			var pageEditorActionsBtn = document.getElementById('pageEditorActionsBtn');
+			var pageEditorActionsMenu = document.getElementById('pageEditorActionsMenu');
+			var currentEditorDraftId = null;
+
+			// Every Page can have multiple simultaneous drafts: at most one "Main Draft" (id
+			// 'main', launchId null) plus at most one draft per Launch it's attached to
+			// (launchId set, id derived from that). Editing always operates on a specific draft.
+			// "Home" is seeded with two drafts so the multi-draft picker modal is demonstrable
+			// without first having to manually create a second draft.
+			var PAGE_DRAFTS = {
+				home: [
+					{id: 'main', launchId: null, updated: '9/15/2026, 5:40:00 PM'},
+					{id: 'draft-fallCampaign', launchId: 'fallCampaign', updated: '9/12/2026, 3:10:00 PM'}
+				],
+				'about-us': [],
+				contact: [],
+				products: [],
+				careers: []
+			};
+
+			// Renders the Pages list for the first time here, now that PAGE_DRAFTS exists — the
+			// "has a Launch-tied draft" column reads it, so rendering any earlier (e.g. right after
+			// the kebab-dropdown setup above) would show every row's indicator as empty regardless
+			// of seed data, since PAGE_DRAFTS would still be its hoisted `undefined`.
+			renderPageRows();
+
+			function draftLabel(draft) {
+				if (!draft.launchId) {
+					return 'Main Draft';
+				}
+
+				var launch = LAUNCHES.filter(function (l) { return l.id === draft.launchId; })[0];
+				return (launch ? launch.name : 'Unknown Launch') + ' Draft';
+			}
+
+			function bumpVersion(version) {
+				var major = parseInt(version, 10);
+				return (isNaN(major) ? 1 : major + 1) + '.0';
+			}
+
+			// ---- Choose Draft modal (shown when a page has more than one draft) ----
+
+			var chooseDraftModal = document.getElementById('chooseDraftModal');
+			var chooseDraftList = document.getElementById('chooseDraftList');
+			var chooseDraftModalCancelBtn = document.getElementById('chooseDraftModalCancel');
+			var chooseDraftModalCloseBtn = document.getElementById('chooseDraftModalClose');
+
+			function openChooseDraftModal(pageId, drafts) {
+				chooseDraftList.innerHTML = drafts.map(function (draft, index) {
+					return '' +
+						'<button type="button" class="btn btn-secondary d-flex justify-content-between align-items-center mb-2" style="width: 100%" data-draft-index="' + index + '">' +
+							'<span>' + draftLabel(draft) + '</span>' +
+							'<span class="text-secondary" style="font-size: .75rem">' + draft.updated + '</span>' +
+						'</button>';
+				}).join('');
+
+				chooseDraftList.querySelectorAll('[data-draft-index]').forEach(function (btn) {
+					btn.addEventListener('click', function () {
+						var draft = drafts[Number(btn.dataset.draftIndex)];
+						hideModal(chooseDraftModal);
+						openPageEditor(pageId, draft.id);
+					});
+				});
+
+				showModal(chooseDraftModal);
+			}
+
+			chooseDraftModalCancelBtn.addEventListener('click', function () { hideModal(chooseDraftModal); });
+			chooseDraftModalCloseBtn.addEventListener('click', function () { hideModal(chooseDraftModal); });
+
+			var nextPageId = 0;
+
+			// Entry point for the Pages list's "New Page" button: simulates starting a brand new
+			// page from scratch — adds the PAGES row, seeds its Main Draft, and opens the editor
+			// on it directly, the same "straight into editing" shortcut Launches' "New Launch"
+			// button gives for a fresh Launch.
+			function createNewPage() {
+				nextPageId += 1;
+
+				var newId = 'new-page-' + nextPageId;
+
+				PAGES.push({
+					id: newId,
+					name: 'Untitled Page',
+					version: '1.0',
+					updated: new Date().toLocaleString(),
+					status: 'info',
+					statusLabel: 'Pending'
+				});
+
+				PAGE_DRAFTS[newId] = [
+					{id: 'main', launchId: null, updated: new Date().toLocaleString()}
+				];
+
+				renderPageRows();
+
+				openPageEditor(newId, 'main');
+			}
+
+			// Entry point for the Pages list's "Edit" kebab item: 0 drafts -> create the initial
+			// Main Draft and go straight in; 1 draft -> go straight in; >1 -> ask which to resume.
+			function handleEditPage(pageId) {
+				var drafts = PAGE_DRAFTS[pageId] || (PAGE_DRAFTS[pageId] = []);
+
+				if (drafts.length > 1) {
+					openChooseDraftModal(pageId, drafts);
+					return;
+				}
+
+				if (drafts.length === 0) {
+					drafts.push({id: 'main', launchId: null, updated: new Date().toLocaleString()});
+				}
+
+				openPageEditor(pageId, drafts[0].id);
+			}
+
+			// Main Draft: Keep as Main Draft / Publish / Add to a Launch (no "Ready to Publish" —
+			// that signal is only meaningful once a draft is tied to a Launch someone is tracking
+			// toward). Any other (Launch-tied) draft: Ready to Publish / Save only — no "Keep as
+			// Main Draft" (it's already attached to a Launch), no "Add to a Launch" (already
+			// attached to one), and **no "Publish"** (a Launch-tied draft publishes as part of its
+			// Launch, not standalone from the editor). Shared between the initial open and
+			// "Add to a Launch" resolving mid-session (draft type changes without leaving the
+			// editor, so the menu has to refresh live, not just once on open).
+			function updatePageEditorActionsForDraft(draft) {
+				var isMainDraft = !draft.launchId;
+				pageEditorActionsMenu.querySelector('[data-editor-action="keepAsMainDraft"]').hidden = !isMainDraft;
+				pageEditorActionsMenu.querySelector('[data-editor-action="readyToPublish"]').hidden = isMainDraft;
+				pageEditorActionsMenu.querySelector('[data-editor-action="publish"]').hidden = !isMainDraft;
+				pageEditorActionsMenu.querySelector('[data-editor-action="addToLaunch"]').hidden = !isMainDraft;
+				pageEditorActionsMenu.querySelector('[data-editor-action="save"]').hidden = isMainDraft;
+			}
+
+			function openPageEditor(pageId, draftId) {
+				currentEditorPageId = pageId;
+
+				var drafts = PAGE_DRAFTS[pageId] || (PAGE_DRAFTS[pageId] = []);
+				var draft = drafts.filter(function (d) { return d.id === draftId; })[0] || drafts[0];
+
+				if (!draft) {
+					draft = {id: 'main', launchId: null, updated: new Date().toLocaleString()};
+					drafts.push(draft);
+				}
+
+				currentEditorDraftId = draft.id;
+
+				var editorPage = PAGES.filter(function (p) { return p.id === pageId; })[0];
+				pageEditorTitle.value = editorPage ? editorPage.name : '';
+				pageEditorDraftLabel.textContent = '(' + draftLabel(draft) + ')';
+				pageEditorActionsBtn.disabled = !pageEditorTitle.value.trim();
+
+				updatePageEditorActionsForDraft(draft);
+
+				pageEditorActionsMenu.classList.remove('mockup-open');
+				show('page-editor');
+			}
+
+			// Name is mandatory: every resolving action (Keep as Main Draft, Publish, Save, Ready
+			// to Publish, Add to a Launch) lives behind this one Actions button, so disabling it
+			// on a blank name is enough to block all of them at once, same "disable the trigger
+			// until valid" precedent as the Schedule modal's Confirm button and the Add Asset
+			// modal's Add button.
+			pageEditorTitle.addEventListener('input', function () {
+				var editorPage = PAGES.filter(function (p) { return p.id === currentEditorPageId; })[0];
+
+				if (editorPage) {
+					editorPage.name = pageEditorTitle.value;
+				}
+
+				pageEditorActionsBtn.disabled = !pageEditorTitle.value.trim();
+			});
+
+			pageEditorActionsBtn.addEventListener('click', function (event) {
+				event.stopPropagation();
+				pageEditorActionsMenu.classList.toggle('mockup-open');
+			});
+
+			document.addEventListener('click', function (event) {
+				if (!pageEditorActionsMenu.classList.contains('mockup-open')) {
+					return;
+				}
+
+				if (!pageEditorActionsMenu.contains(event.target) && event.target !== pageEditorActionsBtn) {
+					pageEditorActionsMenu.classList.remove('mockup-open');
+				}
+			});
+
+			pageEditorActionsMenu.querySelectorAll('.dropdown-item').forEach(function (item) {
+				item.addEventListener('click', function () {
+					pageEditorActionsMenu.classList.remove('mockup-open');
+
+					var editorPage = PAGES.filter(function (p) { return p.id === currentEditorPageId; })[0];
+					var drafts = PAGE_DRAFTS[currentEditorPageId] || [];
+					var currentDraft = drafts.filter(function (d) { return d.id === currentEditorDraftId; })[0];
+
+					if (!editorPage || !currentDraft) {
+						return;
+					}
+
+					var action = item.getAttribute('data-editor-action');
+
+					if (action === 'keepAsMainDraft') {
+						// Only one Main Draft per page: if a separate one already exists, this
+						// draft replaces it.
+						PAGE_DRAFTS[currentEditorPageId] = drafts.filter(function (d) {
+							return d === currentDraft || d.id !== 'main';
+						});
+						currentDraft.id = 'main';
+						currentDraft.launchId = null;
+						currentDraft.updated = new Date().toLocaleString();
+
+						editorPage.status = 'secondary';
+						editorPage.statusLabel = 'Draft';
+						editorPage.updated = currentDraft.updated;
+
+						renderPageRows();
+						navigate('pages');
+					}
+					else if (action === 'save') {
+						// Keeps the draft attached to its launch, untouched otherwise, until
+						// someone decides to publish it — just persists progress and exits.
+						currentDraft.updated = new Date().toLocaleString();
+						renderPageRows();
+						navigate('pages');
+					}
+					else if (action === 'readyToPublish') {
+						// A workflow signal, not an actual publish: the draft stays a draft
+						// (not removed from PAGE_DRAFTS, no version bump) — just marks the page's
+						// status so reviewers know it's awaiting an actual Publish. Per user rule
+						// (2026-09-18): "Ready to Publish" is no longer a status of its own — this
+						// action still exists (Launch-tied drafts only) but now sets "Launch Draft"
+						// instead, the same status "Add to a Launch" sets.
+						editorPage.status = 'primary';
+						editorPage.statusLabel = 'Launch Draft';
+						editorPage.updated = new Date().toLocaleString();
+						currentDraft.updated = editorPage.updated;
+						renderPageRows();
+						navigate('pages');
+					}
+					else if (action === 'publish') {
+						openConfirmModal({
+							title: 'Publish Page',
+							message: 'You are going to publish "' + editorPage.name + '" right now. Are you sure?',
+							confirmLabel: 'Publish',
+							onConfirm: function () {
+								var newVersion = bumpVersion(editorPage.version);
+								editorPage.version = newVersion;
+								editorPage.status = 'success';
+								editorPage.statusLabel = 'Published';
+								editorPage.updated = new Date().toLocaleString();
+
+								var versions = PAGE_VERSIONS[currentEditorPageId] || (PAGE_VERSIONS[currentEditorPageId] = []);
+								versions.unshift({version: newVersion, updated: editorPage.updated, launchId: null, launchElementId: null});
+
+								// This draft is resolved now that it's published — remove it.
+								PAGE_DRAFTS[currentEditorPageId] = drafts.filter(function (d) { return d !== currentDraft; });
+
+								renderPageRows();
+								navigate('pages');
+							}
+						});
+					}
+					else if (action === 'addToLaunch') {
+						openAddToLaunchModal({
+							pageName: editorPage.name,
+							version: editorPage.version,
+							onAdded: function (launchId, newElement) {
+								// Per user rule: associating a page with a Launch keeps its Main
+								// Draft intact — the page ends up with BOTH the Main Draft
+								// (currentDraft, left untouched) and a separate Launch-tied Draft,
+								// rather than converting the Main Draft into the Launch draft.
+								// "Add to a Launch" is only ever offered for a Main Draft (see
+								// updatePageEditorActionsForDraft), so currentDraft here is always
+								// the Main Draft being preserved, not the one this creates/reuses.
+								// Only one draft per launch: an existing draft for that same
+								// launch is reused (and its `updated` bumped) instead of a
+								// duplicate being created.
+								var launchDraft = drafts.filter(function (d) { return d.launchId === launchId; })[0];
+
+								if (!launchDraft) {
+									launchDraft = {id: 'draft-' + launchId, launchId: launchId, updated: null};
+									drafts.push(launchDraft);
+								}
+
+								launchDraft.id = 'draft-' + launchId;
+								launchDraft.launchId = launchId;
+								launchDraft.updated = new Date().toLocaleString();
+
+								// The editor now follows the new/updated Launch-tied draft, without
+								// leaving the editor — refresh the Actions menu live (Publish/Keep
+								// as Main Draft/Add to a Launch hide, Ready to Publish/Save show)
+								// and reflect the new status on the page.
+								currentEditorDraftId = launchDraft.id;
+								pageEditorDraftLabel.textContent = '(' + draftLabel(launchDraft) + ')';
+								updatePageEditorActionsForDraft(launchDraft);
+
+								editorPage.status = 'primary';
+								editorPage.statusLabel = 'Launch Draft';
+								editorPage.updated = launchDraft.updated;
+								renderPageRows();
+
+								// Keep Page History in sync too, if this exact version has a row there.
+								var versions = PAGE_VERSIONS[currentEditorPageId] || [];
+								var matchingRow = versions.filter(function (v) { return v.version === editorPage.version; })[0];
+
+								if (matchingRow) {
+									matchingRow.launchId = launchId;
+									matchingRow.launchElementId = newElement.id;
+								}
+							}
+						});
+					}
+				});
+			});
+
+			// ---- Page version history ----
+
+			var PAGE_VERSIONS = {
+				home: [
+					{version: '4.0', updated: '9/15/2026, 10:12:00 AM', launchId: null, launchElementId: null},
+					{version: '3.0', updated: '8/20/2026, 2:00:00 PM', launchId: 'holidayStorefront', launchElementId: 10},
+					{version: '2.0', updated: '7/1/2026, 9:30:00 AM', launchId: null, launchElementId: null}
+				],
+				'about-us': [
+					{version: '2.1', updated: '9/14/2026, 4:30:00 PM', launchId: 'myLaunche', launchElementId: 11},
+					{version: '2.0', updated: '8/2/2026, 11:15:00 AM', launchId: null, launchElementId: null}
+				],
+				contact: [
+					{version: '1.3', updated: '9/13/2026, 9:05:00 AM', launchId: null, launchElementId: null},
+					{version: '1.2', updated: '6/10/2026, 3:40:00 PM', launchId: null, launchElementId: null}
+				],
+				products: [
+					{version: '3.2', updated: '9/12/2026, 3:47:00 PM', launchId: 'fallCampaign', launchElementId: 12},
+					{version: '3.1', updated: '8/28/2026, 10:00:00 AM', launchId: null, launchElementId: null},
+					{version: '3.0', updated: '7/15/2026, 1:20:00 PM', launchId: null, launchElementId: null}
+				],
+				careers: [
+					{version: '1.0', updated: '9/11/2026, 1:22:00 PM', launchId: null, launchElementId: null}
+				]
+			};
+
+			var historyRowsEl = document.getElementById('historyRows');
+			var historyPaginationSummary = document.getElementById('historyPaginationSummary');
+			var historyTitle = document.getElementById('historyTitle');
+			var currentHistoryPageId = null;
+			var openHistoryDropdown = null;
+
+			function renderHistoryRows() {
+				var versions = PAGE_VERSIONS[currentHistoryPageId] || [];
+
+				historyRowsEl.innerHTML = versions.map(function (v, index) {
+					var launch = v.launchId ? LAUNCHES.filter(function (l) { return l.id === v.launchId; })[0] : null;
+					var launchText = launch ? launch.name : '—';
+
+					return '' +
+						'<tr data-index="' + index + '">' +
+							'<td>' + v.version + '</td>' +
+							'<td class="text-nowrap">' + v.updated + '</td>' +
+							'<td>' + launchText + '</td>' +
+							'<td class="lfr-entry-action-column">' +
+								'<button type="button" class="component-action btn btn-monospaced btn-unstyled" aria-label="Actions for version ' + v.version + '" data-history-kebab="' + index + '">' +
+									icon('ellipsis-v') +
+								'</button>' +
+							'</td>' +
+						'</tr>';
+				}).join('');
+
+				historyPaginationSummary.textContent = (versions.length ? '1 to ' + versions.length + ' of ' + versions.length : '0 of 0') + ' versions';
+			}
+
+			function openHistoryView(pageId) {
+				currentHistoryPageId = pageId;
+
+				var page = PAGES.filter(function (p) { return p.id === pageId; })[0];
+				historyTitle.textContent = (page ? page.name : 'Page') + ' — Version History';
+
+				renderHistoryRows();
+				show('history');
+			}
+
+			// Searches every version-history store (Pages' and CMS Content's, not just whichever one
+			// is currently open) for a row pointing at this now-removed LAUNCH_ELEMENTS id, and
+			// detaches it. Needed whenever an element is removed from a launch as a side effect of
+			// something else (e.g. the one-version-per-launch swap), not through that row's own
+			// "Remove from the Launch". Reads `CMS_CONTENT_VERSIONS` even though it's declared later
+			// in the file — safe, since this only runs from a later click, by which point the whole
+			// script has already executed once top-to-bottom.
+			function clearPageVersionsByElementId(elementId) {
+				[PAGE_VERSIONS, CMS_CONTENT_VERSIONS].forEach(function (store) {
+					Object.keys(store).forEach(function (itemId) {
+						store[itemId].forEach(function (versionRow) {
+							if (versionRow.launchElementId === elementId) {
+								versionRow.launchId = null;
+								versionRow.launchElementId = null;
+							}
+						});
+					});
+				});
+			}
+
+			function closeHistoryDropdown() {
+				if (openHistoryDropdown) {
+					openHistoryDropdown.remove();
+					openHistoryDropdown = null;
+				}
+			}
+
+			document.addEventListener('click', function (event) {
+				var kebabButton = event.target.closest('[data-history-kebab]');
+
+				if (!kebabButton) {
+					closeHistoryDropdown();
+					return;
+				}
+
+				event.preventDefault();
+				event.stopPropagation();
+
+				var index = Number(kebabButton.dataset.historyKebab);
+
+				if (openHistoryDropdown && Number(openHistoryDropdown.dataset.owner) === index) {
+					closeHistoryDropdown();
+					return;
+				}
+
+				closeHistoryDropdown();
+
+				var versions = PAGE_VERSIONS[currentHistoryPageId] || [];
+				var versionRow = versions[index];
+
+				if (!versionRow) {
+					return;
+				}
+
+				var items = [{icon: 'view', label: 'View'}];
+
+				if (versionRow.launchId) {
+					items.push({icon: 'minus-circle', label: 'Remove from the Launch', perform: 'removeFromLaunch', danger: true});
+				}
+				else {
+					items.push({icon: 'plus', label: 'Add to a Launch', perform: 'addToLaunch'});
+				}
+
+				var menu = document.createElement('div');
+				menu.className = 'dropdown-menu mockup-open';
+				menu.dataset.owner = String(index);
+				menu.setAttribute('role', 'menu');
+				menu.innerHTML = items.map(function (item) {
+					return '<button type="button" role="menuitem" class="dropdown-item' + (item.danger ? ' text-danger' : '') + '"' + (item.perform ? ' data-perform="' + item.perform + '"' : '') + '>' +
+						'<span class="inline-item inline-item-before">' + icon(item.icon) + '</span>' + item.label +
+					'</button>';
+				}).join('');
+
+				document.body.appendChild(menu);
+
+				var rect = kebabButton.getBoundingClientRect();
+				var menuRect = menu.getBoundingClientRect();
+				var top = rect.bottom + 4;
+				var left = rect.right - menuRect.width;
+
+				if (left < 10) {
+					left = 10;
+				}
+
+				menu.style.position = 'fixed';
+				menu.style.top = top + 'px';
+				menu.style.left = left + 'px';
+
+				menu.querySelectorAll('.dropdown-item').forEach(function (item) {
+					item.addEventListener('click', function (itemEvent) {
+						itemEvent.stopPropagation();
+						closeHistoryDropdown();
+
+						var perform = item.getAttribute('data-perform');
+
+						if (perform === 'addToLaunch') {
+							var page = PAGES.filter(function (p) { return p.id === currentHistoryPageId; })[0];
+
+							openAddToLaunchModal({
+								pageName: page ? page.name : 'Page',
+								version: versionRow.version,
+								onAdded: function (launchId, newElement) {
+									versionRow.launchId = launchId;
+									versionRow.launchElementId = newElement.id;
+									renderHistoryRows();
+								}
+							});
+						}
+						else if (perform === 'removeFromLaunch') {
+							removeVersionFromLaunch(index);
+						}
+					});
+				});
+
+				openHistoryDropdown = menu;
+			});
+
+			window.addEventListener('scroll', closeHistoryDropdown, true);
+			window.addEventListener('resize', closeHistoryDropdown);
+
+			function removeVersionFromLaunch(index) {
+				var versions = PAGE_VERSIONS[currentHistoryPageId] || [];
+				var versionRow = versions[index];
+
+				if (!versionRow || !versionRow.launchId) {
+					return;
+				}
+
+				var launchElements = LAUNCH_ELEMENTS[versionRow.launchId];
+
+				if (launchElements) {
+					LAUNCH_ELEMENTS[versionRow.launchId] = launchElements.filter(function (el) { return el.id !== versionRow.launchElementId; });
+				}
+
+				versionRow.launchId = null;
+				versionRow.launchElementId = null;
+				renderHistoryRows();
+			}
+
+			// ---- Add to a Launch modal ----
+			// Generic: any caller (Page History's per-version row, the Page Editor's top-right
+			// dropdown, ...) supplies {pageName, version, onAdded(launchId, newElement)} and this
+			// modal handles the launch picker + the one-version-per-launch conflict check. The
+			// caller decides what to do with the result (e.g. which specific row to update).
+
+			var addToLaunchModal = document.getElementById('addToLaunchModal');
+			var addToLaunchVersionLabel = document.getElementById('addToLaunchVersionLabel');
+			var addToLaunchSelect = document.getElementById('addToLaunchSelect');
+			var addToLaunchModalConfirmBtn = document.getElementById('addToLaunchModalConfirm');
+			var addToLaunchModalCancelBtn = document.getElementById('addToLaunchModalCancel');
+			var addToLaunchModalCloseBtn = document.getElementById('addToLaunchModalClose');
+			var addToLaunchContext = null;
+
+			function openAddToLaunchModal(context) {
+				addToLaunchContext = context;
+
+				addToLaunchVersionLabel.textContent = context.pageName + ' v' + context.version;
+
+				addToLaunchSelect.innerHTML = '<option value="">Select a Launch</option>' +
+					LAUNCHES.map(function (l) { return '<option value="' + l.id + '">' + l.name + '</option>'; }).join('');
+
+				addToLaunchModalConfirmBtn.disabled = true;
+				showModal(addToLaunchModal);
+			}
+
+			function closeAddToLaunchModal() {
+				hideModal(addToLaunchModal);
+				addToLaunchContext = null;
+			}
+
+			addToLaunchSelect.addEventListener('change', function () {
+				addToLaunchModalConfirmBtn.disabled = !addToLaunchSelect.value;
+			});
+
+			addToLaunchModalConfirmBtn.addEventListener('click', function () {
+				var launchId = addToLaunchSelect.value;
+				var context = addToLaunchContext;
+
+				if (!launchId || !context) {
+					return;
+				}
+
+				closeAddToLaunchModal();
+
+				if (!LAUNCH_ELEMENTS[launchId]) {
+					LAUNCH_ELEMENTS[launchId] = [];
+				}
+
+				checkElementConflict(LAUNCH_ELEMENTS[launchId], context.pageName, context.version, function (existingConflict) {
+					if (existingConflict) {
+						LAUNCH_ELEMENTS[launchId] = LAUNCH_ELEMENTS[launchId].filter(function (el) { return el.id !== existingConflict.id; });
+
+						// The removed element may have been another version of THIS SAME page,
+						// tracked by a Page History row (e.g. v4.0 already in this launch, now
+						// being swapped for v2.0) — clear that row's launch link too, or it'd keep
+						// showing a launch it no longer actually belongs to.
+						clearPageVersionsByElementId(existingConflict.id);
+					}
+
+					nextElementId += 1;
+
+					var newElement = {
+						id: nextElementId,
+						name: context.pageName,
+						version: context.version,
+						author: 'Test Test',
+						type: 'Web Content Article',
+						scope: 'Site',
+						scopeName: 'Guest',
+						modified: new Date().toLocaleString(),
+						status: 'info',
+						statusLabel: 'Pending'
+					};
+
+					LAUNCH_ELEMENTS[launchId].push(newElement);
+
+					if (context.onAdded) {
+						context.onAdded(launchId, newElement);
+					}
+				});
+			});
+
+			addToLaunchModalCancelBtn.addEventListener('click', closeAddToLaunchModal);
+			addToLaunchModalCloseBtn.addEventListener('click', closeAddToLaunchModal);
+
+			// ==== CMS Content — built the same way as Pages (list / editor / history), a fully
+			// self-contained parallel implementation with its own data, own kebab dropdown state,
+			// own views, sharing only the truly generic helpers (openConfirmModal, checkElementConflict,
+			// openAddToLaunchModal, show/hideModal, icon()). Same duplication trade-off already made
+			// for the Pages kebab vs. the Launches kebab — avoids coupling unrelated features' state. ====
+
+			// ---- CMS Content list ----
+
+			var CMS_CONTENT = [
+				{id: 'company-overview', name: 'Company Overview', version: '2.0', updated: '9/14/2026, 1:00:00 PM', status: 'success', statusLabel: 'Published'},
+				{id: 'product-spec-sheet', name: 'Product Spec Sheet', version: '1.4', updated: '9/13/2026, 10:30:00 AM', status: 'warning', statusLabel: 'Ready to Publish'},
+				{id: 'press-release-template', name: 'Press Release Template', version: '3.1', updated: '9/12/2026, 4:15:00 PM', status: 'success', statusLabel: 'Published'},
+				{id: 'faq-article', name: 'FAQ Article', version: '1.0', updated: '9/11/2026, 9:00:00 AM', status: 'info', statusLabel: 'Pending'},
+				{id: 'newsletter-signup-copy', name: 'Newsletter Signup Copy', version: '2.2', updated: '9/10/2026, 2:45:00 PM', status: 'warning', statusLabel: 'Ready to Publish'}
+			];
+
+			var cmsContentRowsEl = document.getElementById('cmsContentRows');
+			var cmsContentPaginationSummary = document.getElementById('cmsContentPaginationSummary');
+			var openCmsContentDropdown = null;
+
+			function renderCmsContentRows() {
+				cmsContentRowsEl.innerHTML = CMS_CONTENT.map(function (item) {
+					return '' +
+						'<tr data-id="' + item.id + '">' +
+							'<td class="table-cell-expand-small table-cell-minw-200 table-title"><span class="text-truncate-inline">' + item.name + '</span></td>' +
+							'<td class="table-cell-expand-smallest table-cell-ws-nowrap">' + item.version + '</td>' +
+							'<td class="table-cell-expand-smallest table-cell-ws-nowrap">' + item.updated + '</td>' +
+							'<td class="table-cell-expand-smallest table-cell-ws-nowrap">' +
+								'<span class="label label-' + item.status + '"><span class="label-item label-item-expand">' + item.statusLabel + '</span></span>' +
+							'</td>' +
+							'<td class="lfr-entry-action-column">' +
+								'<button type="button" class="component-action btn btn-monospaced btn-unstyled" aria-label="Actions for ' + item.name + '" data-cms-kebab="' + item.id + '">' +
+									icon('ellipsis-v') +
+								'</button>' +
+							'</td>' +
+						'</tr>';
+				}).join('');
+
+				cmsContentPaginationSummary.textContent = '1 to ' + CMS_CONTENT.length + ' of ' + CMS_CONTENT.length + ' items';
+			}
+
+			function closeCmsContentDropdown() {
+				if (openCmsContentDropdown) {
+					openCmsContentDropdown.remove();
+					openCmsContentDropdown = null;
+				}
+			}
+
+			document.addEventListener('click', function (event) {
+				var kebabButton = event.target.closest('[data-cms-kebab]');
+
+				if (!kebabButton) {
+					closeCmsContentDropdown();
+					return;
+				}
+
+				event.preventDefault();
+				event.stopPropagation();
+
+				var itemId = kebabButton.dataset.cmsKebab;
+
+				if (openCmsContentDropdown && openCmsContentDropdown.dataset.owner === itemId) {
+					closeCmsContentDropdown();
+					return;
+				}
+
+				closeCmsContentDropdown();
+
+				var items = [
+					{icon: 'pencil', label: 'Edit', perform: 'editContent'},
+					{icon: 'time', label: 'History View', perform: 'history'}
+				];
+
+				var menu = document.createElement('div');
+				menu.className = 'dropdown-menu mockup-open';
+				menu.dataset.owner = itemId;
+				menu.setAttribute('role', 'menu');
+				menu.innerHTML = items.map(function (item) {
+					return '<button type="button" role="menuitem" class="dropdown-item"' + (item.perform ? ' data-perform="' + item.perform + '"' : '') + '>' +
+						'<span class="inline-item inline-item-before">' + icon(item.icon) + '</span>' + item.label +
+					'</button>';
+				}).join('');
+
+				document.body.appendChild(menu);
+
+				var rect = kebabButton.getBoundingClientRect();
+				var menuRect = menu.getBoundingClientRect();
+				var top = rect.bottom + 4;
+				var left = rect.right - menuRect.width;
+
+				if (left < 10) {
+					left = 10;
+				}
+
+				menu.style.position = 'fixed';
+				menu.style.top = top + 'px';
+				menu.style.left = left + 'px';
+
+				menu.querySelectorAll('.dropdown-item').forEach(function (item) {
+					item.addEventListener('click', function (itemEvent) {
+						itemEvent.stopPropagation();
+						closeCmsContentDropdown();
+
+						var perform = item.getAttribute('data-perform');
+
+						if (perform === 'history') {
+							navigate('cms-history', null, itemId);
+						}
+						else if (perform === 'editContent') {
+							navigate('cms-editor', null, itemId);
+						}
+					});
+				});
+
+				openCmsContentDropdown = menu;
+			});
+
+			window.addEventListener('scroll', closeCmsContentDropdown, true);
+			window.addEventListener('resize', closeCmsContentDropdown);
+
+			renderCmsContentRows();
+
+			// ---- CMS Content editor (simulated) ----
+
+			var currentCmsEditorContentId = null;
+			var cmsEditorTitle = document.getElementById('cmsEditorTitle');
+			var cmsEditorActionsBtn = document.getElementById('cmsEditorActionsBtn');
+			var cmsEditorActionsMenu = document.getElementById('cmsEditorActionsMenu');
+
+			function openCmsEditor(contentId) {
+				currentCmsEditorContentId = contentId;
+
+				var editorContent = CMS_CONTENT.filter(function (c) { return c.id === contentId; })[0];
+				cmsEditorTitle.textContent = editorContent ? editorContent.name : 'Content';
+
+				cmsEditorActionsMenu.classList.remove('mockup-open');
+				show('cms-editor');
+			}
+
+			cmsEditorActionsBtn.addEventListener('click', function (event) {
+				event.stopPropagation();
+				cmsEditorActionsMenu.classList.toggle('mockup-open');
+			});
+
+			document.addEventListener('click', function (event) {
+				if (!cmsEditorActionsMenu.classList.contains('mockup-open')) {
+					return;
+				}
+
+				if (!cmsEditorActionsMenu.contains(event.target) && event.target !== cmsEditorActionsBtn) {
+					cmsEditorActionsMenu.classList.remove('mockup-open');
+				}
+			});
+
+			cmsEditorActionsMenu.querySelectorAll('.dropdown-item').forEach(function (item) {
+				item.addEventListener('click', function () {
+					cmsEditorActionsMenu.classList.remove('mockup-open');
+
+					var editorContent = CMS_CONTENT.filter(function (c) { return c.id === currentCmsEditorContentId; })[0];
+
+					if (!editorContent) {
+						return;
+					}
+
+					var action = item.getAttribute('data-editor-action');
+
+					if (action === 'publish') {
+						openConfirmModal({
+							title: 'Publish Content',
+							message: 'You are going to publish "' + editorContent.name + '" right now. Are you sure?',
+							confirmLabel: 'Publish',
+							onConfirm: function () {
+								editorContent.status = 'success';
+								editorContent.statusLabel = 'Published';
+								renderCmsContentRows();
+							}
+						});
+					}
+					else if (action === 'addToLaunch') {
+						openAddToLaunchModal({
+							pageName: editorContent.name,
+							version: editorContent.version,
+							onAdded: function (launchId, newElement) {
+								var versions = CMS_CONTENT_VERSIONS[currentCmsEditorContentId] || [];
+								var matchingRow = versions.filter(function (v) { return v.version === editorContent.version; })[0];
+
+								if (matchingRow) {
+									matchingRow.launchId = launchId;
+									matchingRow.launchElementId = newElement.id;
+								}
+							}
+						});
+					}
+				});
+			});
+
+			// ---- CMS Content version history ----
+
+			var CMS_CONTENT_VERSIONS = {
+				'company-overview': [
+					{version: '2.0', updated: '9/14/2026, 1:00:00 PM', launchId: null, launchElementId: null},
+					{version: '1.0', updated: '7/2/2026, 11:00:00 AM', launchId: 'myLaunche', launchElementId: 13}
+				],
+				'product-spec-sheet': [
+					{version: '1.4', updated: '9/13/2026, 10:30:00 AM', launchId: null, launchElementId: null},
+					{version: '1.3', updated: '8/1/2026, 3:00:00 PM', launchId: null, launchElementId: null}
+				],
+				'press-release-template': [
+					{version: '3.1', updated: '9/12/2026, 4:15:00 PM', launchId: null, launchElementId: null},
+					{version: '3.0', updated: '8/20/2026, 9:00:00 AM', launchId: null, launchElementId: null}
+				],
+				'faq-article': [
+					{version: '1.0', updated: '9/11/2026, 9:00:00 AM', launchId: null, launchElementId: null}
+				],
+				'newsletter-signup-copy': [
+					{version: '2.2', updated: '9/10/2026, 2:45:00 PM', launchId: null, launchElementId: null},
+					{version: '2.1', updated: '8/5/2026, 5:30:00 PM', launchId: null, launchElementId: null}
+				]
+			};
+
+			var cmsHistoryRowsEl = document.getElementById('cmsHistoryRows');
+			var cmsHistoryPaginationSummary = document.getElementById('cmsHistoryPaginationSummary');
+			var cmsHistoryTitle = document.getElementById('cmsHistoryTitle');
+			var currentCmsHistoryContentId = null;
+			var openCmsHistoryDropdown = null;
+
+			function renderCmsHistoryRows() {
+				var versions = CMS_CONTENT_VERSIONS[currentCmsHistoryContentId] || [];
+
+				cmsHistoryRowsEl.innerHTML = versions.map(function (v, index) {
+					var launch = v.launchId ? LAUNCHES.filter(function (l) { return l.id === v.launchId; })[0] : null;
+					var launchText = launch ? launch.name : '—';
+
+					return '' +
+						'<tr data-index="' + index + '">' +
+							'<td>' + v.version + '</td>' +
+							'<td class="text-nowrap">' + v.updated + '</td>' +
+							'<td>' + launchText + '</td>' +
+							'<td class="lfr-entry-action-column">' +
+								'<button type="button" class="component-action btn btn-monospaced btn-unstyled" aria-label="Actions for version ' + v.version + '" data-cms-history-kebab="' + index + '">' +
+									icon('ellipsis-v') +
+								'</button>' +
+							'</td>' +
+						'</tr>';
+				}).join('');
+
+				cmsHistoryPaginationSummary.textContent = (versions.length ? '1 to ' + versions.length + ' of ' + versions.length : '0 of 0') + ' versions';
+			}
+
+			function openCmsHistoryView(contentId) {
+				currentCmsHistoryContentId = contentId;
+
+				var content = CMS_CONTENT.filter(function (c) { return c.id === contentId; })[0];
+				cmsHistoryTitle.textContent = (content ? content.name : 'Content') + ' — Version History';
+
+				renderCmsHistoryRows();
+				show('cms-history');
+			}
+
+			function closeCmsHistoryDropdown() {
+				if (openCmsHistoryDropdown) {
+					openCmsHistoryDropdown.remove();
+					openCmsHistoryDropdown = null;
+				}
+			}
+
+			document.addEventListener('click', function (event) {
+				var kebabButton = event.target.closest('[data-cms-history-kebab]');
+
+				if (!kebabButton) {
+					closeCmsHistoryDropdown();
+					return;
+				}
+
+				event.preventDefault();
+				event.stopPropagation();
+
+				var index = Number(kebabButton.dataset.cmsHistoryKebab);
+
+				if (openCmsHistoryDropdown && Number(openCmsHistoryDropdown.dataset.owner) === index) {
+					closeCmsHistoryDropdown();
+					return;
+				}
+
+				closeCmsHistoryDropdown();
+
+				var versions = CMS_CONTENT_VERSIONS[currentCmsHistoryContentId] || [];
+				var versionRow = versions[index];
+
+				if (!versionRow) {
+					return;
+				}
+
+				var items = [{icon: 'view', label: 'View'}];
+
+				if (versionRow.launchId) {
+					items.push({icon: 'minus-circle', label: 'Remove from the Launch', perform: 'removeFromLaunch', danger: true});
+				}
+				else {
+					items.push({icon: 'plus', label: 'Add to a Launch', perform: 'addToLaunch'});
+				}
+
+				var menu = document.createElement('div');
+				menu.className = 'dropdown-menu mockup-open';
+				menu.dataset.owner = String(index);
+				menu.setAttribute('role', 'menu');
+				menu.innerHTML = items.map(function (item) {
+					return '<button type="button" role="menuitem" class="dropdown-item' + (item.danger ? ' text-danger' : '') + '"' + (item.perform ? ' data-perform="' + item.perform + '"' : '') + '>' +
+						'<span class="inline-item inline-item-before">' + icon(item.icon) + '</span>' + item.label +
+					'</button>';
+				}).join('');
+
+				document.body.appendChild(menu);
+
+				var rect = kebabButton.getBoundingClientRect();
+				var menuRect = menu.getBoundingClientRect();
+				var top = rect.bottom + 4;
+				var left = rect.right - menuRect.width;
+
+				if (left < 10) {
+					left = 10;
+				}
+
+				menu.style.position = 'fixed';
+				menu.style.top = top + 'px';
+				menu.style.left = left + 'px';
+
+				menu.querySelectorAll('.dropdown-item').forEach(function (item) {
+					item.addEventListener('click', function (itemEvent) {
+						itemEvent.stopPropagation();
+						closeCmsHistoryDropdown();
+
+						var perform = item.getAttribute('data-perform');
+
+						if (perform === 'addToLaunch') {
+							var content = CMS_CONTENT.filter(function (c) { return c.id === currentCmsHistoryContentId; })[0];
+
+							openAddToLaunchModal({
+								pageName: content ? content.name : 'Content',
+								version: versionRow.version,
+								onAdded: function (launchId, newElement) {
+									versionRow.launchId = launchId;
+									versionRow.launchElementId = newElement.id;
+									renderCmsHistoryRows();
+								}
+							});
+						}
+						else if (perform === 'removeFromLaunch') {
+							removeCmsVersionFromLaunch(index);
+						}
+					});
+				});
+
+				openCmsHistoryDropdown = menu;
+			});
+
+			window.addEventListener('scroll', closeCmsHistoryDropdown, true);
+			window.addEventListener('resize', closeCmsHistoryDropdown);
+
+			function removeCmsVersionFromLaunch(index) {
+				var versions = CMS_CONTENT_VERSIONS[currentCmsHistoryContentId] || [];
+				var versionRow = versions[index];
+
+				if (!versionRow || !versionRow.launchId) {
+					return;
+				}
+
+				var launchElements = LAUNCH_ELEMENTS[versionRow.launchId];
+
+				if (launchElements) {
+					LAUNCH_ELEMENTS[versionRow.launchId] = launchElements.filter(function (el) { return el.id !== versionRow.launchElementId; });
+				}
+
+				versionRow.launchId = null;
+				versionRow.launchElementId = null;
+				renderCmsHistoryRows();
+			}
+
+			// ---- Launch form (Info / Elements tabs) ----
+
+			var MAX_ELEMENTS = 1000;
+
+			var ELEMENTS_DEFAULT = [
+				{id: 1, name: 'Launch Test Asset', version: '1.0', author: 'Test Test', type: 'Blog Posting', scope: 'Site', scopeName: 'Guest', modified: '9/15/2026, 6:54:58 AM', status: 'info', statusLabel: 'Pending'},
+				{id: 2, name: 'Winter Sale Landing Page', version: '2.0', author: 'Maria Alonso', type: 'Web Content Article', scope: 'Site', scopeName: 'Guest', modified: '9/14/2026, 3:21:07 PM', status: 'success', statusLabel: 'Ready to Publish'},
+				{id: 3, name: 'Homepage Banner — Winter', version: '1.3', author: 'Carlos Vidal', type: 'Web Content Article', scope: 'Site', scopeName: 'Guest', modified: '9/13/2026, 11:05:44 AM', status: 'danger', statusLabel: 'Rejected'}
+			];
+
+			// Per-launch element lists, keyed by launch id. Every sample launch has seed data; an id
+			// with no entry here is treated as zero elements.
+			var LAUNCH_ELEMENTS = {
+				myLaunche: ELEMENTS_DEFAULT.map(function (el) { return Object.assign({}, el); }),
+				// Every element is Ready to Publish, so this Launch passes the Publish/Schedule gate.
+				winterNewsletter: [
+					{id: 14, name: 'Winter Newsletter Landing Page', version: '1.0', author: 'Maria Alonso', type: 'Web Content Article', scope: 'Site', scopeName: 'Guest', modified: '9/16/2026, 9:58:21 AM', status: 'success', statusLabel: 'Ready to Publish'},
+					{id: 15, name: 'Newsletter Signup Banner', version: '1.1', author: 'Carlos Vidal', type: 'Web Content Article', scope: 'Site', scopeName: 'Guest', modified: '9/16/2026, 9:41:07 AM', status: 'success', statusLabel: 'Ready to Publish'}
+				],
+				// Also every element Ready to Publish, but "Deals Countdown Banner" is flagged to fail
+				// during the publish, to demo the Failed outcome (and the no-rollback rule).
+				blackFriday: [
+					{id: 16, name: 'Black Friday Landing Page', version: '1.0', author: 'Test Test', type: 'Web Content Article', scope: 'Site', scopeName: 'Guest', modified: '9/16/2026, 11:12:40 AM', status: 'success', statusLabel: 'Ready to Publish'},
+					{id: 17, name: 'Deals Countdown Banner', version: '2.0', author: 'Maria Alonso', type: 'Web Content Article', scope: 'Site', scopeName: 'Guest', modified: '9/16/2026, 11:05:18 AM', status: 'success', statusLabel: 'Ready to Publish', failOnPublish: true}
+				],
+				fallCampaign: [
+					{id: 4, name: 'Fall Sale Banner', version: '1.0', author: 'Maria Alonso', type: 'Web Content Article', scope: 'Site', scopeName: 'Guest', modified: '9/12/2026, 2:10:18 PM', status: 'success', statusLabel: 'Ready to Publish'},
+					{id: 5, name: 'Fall Landing Page Copy', version: '2.1', author: 'Carlos Vidal', type: 'Web Content Article', scope: 'Site', scopeName: 'Guest', modified: '9/12/2026, 1:47:52 PM', status: 'info', statusLabel: 'Pending'}
+				],
+				q3Announcement: [
+					{id: 6, name: 'Q3 Announcement Blog Post', version: '1.0', author: 'Test Test', type: 'Blog Posting', scope: 'Site', scopeName: 'Guest', modified: '9/9/2026, 8:50:12 AM', status: 'danger', statusLabel: 'Rejected'},
+					{id: 7, name: 'Pricing Table Fragment', version: '1.2', author: 'Maria Alonso', type: 'Page Fragment', scope: 'Site', scopeName: 'Guest', modified: '9/9/2026, 8:44:29 AM', status: 'info', statusLabel: 'Pending'}
+				],
+				holidayStorefront: [
+					{id: 8, name: 'Holiday Homepage Banner', version: '3.0', author: 'Carlos Vidal', type: 'Web Content Article', scope: 'Site', scopeName: 'Guest', modified: '8/30/2026, 4:40:07 PM', status: 'success', statusLabel: 'Published'},
+					{id: 9, name: 'Gift Guide Landing Page', version: '1.4', author: 'Maria Alonso', type: 'Web Content Article', scope: 'Site', scopeName: 'Guest', modified: '8/30/2026, 4:12:55 PM', status: 'success', statusLabel: 'Published'},
+					{id: 10, name: 'Home', version: '3.0', author: 'Test Test', type: 'Web Content Article', scope: 'Site', scopeName: 'Guest', modified: '8/20/2026, 2:00:00 PM', status: 'success', statusLabel: 'Published'}
+				]
+			};
+
+			// Cross-links a Pages version history row to the LAUNCH_ELEMENTS entry it created, so
+			// "Remove from the Launch" can remove precisely that element (not just any element that
+			// happens to match name/version). Seeded here for the versions that start out attached.
+			LAUNCH_ELEMENTS.myLaunche.push({id: 11, name: 'About Us', version: '2.1', author: 'Test Test', type: 'Web Content Article', scope: 'Site', scopeName: 'Guest', modified: '9/14/2026, 4:30:00 PM', status: 'info', statusLabel: 'Pending'});
+			LAUNCH_ELEMENTS.fallCampaign.push({id: 12, name: 'Products', version: '3.2', author: 'Test Test', type: 'Web Content Article', scope: 'Site', scopeName: 'Guest', modified: '9/12/2026, 3:47:00 PM', status: 'info', statusLabel: 'Pending'});
+			LAUNCH_ELEMENTS.myLaunche.push({id: 13, name: 'Company Overview', version: '1.0', author: 'Test Test', type: 'Web Content Article', scope: 'Site', scopeName: 'Guest', modified: '7/2/2026, 11:00:00 AM', status: 'success', statusLabel: 'Published'});
+
+			var elements = [];
+			var currentLaunchId = null;
+			var nextElementId = 17;
+			var nextLaunchId = 0;
+
+			var launchFormTitle = document.getElementById('launchFormTitle');
+			var launchFormSaveBtn = document.getElementById('launchFormSaveBtn');
+			var launchFormCancelBtn = document.getElementById('launchFormCancelBtn');
+			var launchFormPreviewBtn = document.getElementById('launchFormPreviewBtn');
+			var launchFormName = document.getElementById('launchFormName');
+			var launchFormDescription = document.getElementById('launchFormDescription');
+			var elementRowsEl = document.getElementById('elementRows');
+			var elementsPaginationSummary = document.getElementById('elementsPaginationSummary');
+			var elementsCapSummary = document.getElementById('elementsCapSummary');
+			var addElementBtn = document.getElementById('addElementBtn');
+			var isFormReadOnly = false;
+
+			function renderElementRows() {
+				if (!elements.length) {
+					elementRowsEl.innerHTML = '<tr><td colspan="9" class="text-center text-secondary" style="padding: 32px">No assets yet' + (isFormReadOnly ? '.' : '. Click Add Asset to add one.') + '</td></tr>';
+				}
+				else {
+					elementRowsEl.innerHTML = elements.map(function (el) {
+						return '' +
+							'<tr data-id="' + el.id + '">' +
+								'<td class="table-cell-expand-small table-cell-minw-200 table-title"><span class="text-truncate-inline">' + el.name + '</span></td>' +
+								'<td class="table-cell-expand-smallest table-cell-ws-nowrap">' + el.version + '</td>' +
+								'<td class="table-cell-expand-smallest table-cell-ws-nowrap">' + el.author + '</td>' +
+								'<td class="table-cell-expand-smallest table-cell-ws-nowrap">' + el.type + '</td>' +
+								'<td class="table-cell-expand-smallest table-cell-ws-nowrap">' + el.scope + '</td>' +
+								'<td class="table-cell-expand-smallest table-cell-ws-nowrap">' + el.scopeName + '</td>' +
+								'<td class="table-cell-expand-smallest table-cell-ws-nowrap">' + el.modified + '</td>' +
+								'<td class="table-cell-expand-smallest table-cell-ws-nowrap">' +
+									'<span class="label label-' + el.status + '"><span class="label-item label-item-expand">' + el.statusLabel + '</span></span>' +
+								'</td>' +
+								'<td class="lfr-entry-action-column">' +
+									(isFormReadOnly ? '' :
+										'<button type="button" class="component-action btn btn-monospaced btn-unstyled" aria-label="Remove ' + el.name + '" data-remove="' + el.id + '">' +
+											icon('minus-circle') +
+										'</button>') +
+								'</td>' +
+							'</tr>';
+					}).join('');
+				}
+
+				elementsPaginationSummary.textContent = (elements.length ? '1 to ' + elements.length + ' of ' + elements.length : '0 of 0') + ' assets';
+				elementsCapSummary.textContent = elements.length + ' of ' + MAX_ELEMENTS.toLocaleString() + ' assets';
+
+				var atCap = elements.length >= MAX_ELEMENTS;
+				addElementBtn.disabled = atCap;
+				addElementBtn.title = atCap ? 'A launch can have at most ' + MAX_ELEMENTS.toLocaleString() + ' assets' : '';
+			}
+
+			elementRowsEl.addEventListener('click', function (event) {
+				var removeBtn = event.target.closest('[data-remove]');
+
+				if (!removeBtn) {
+					return;
+				}
+
+				var removeId = removeBtn.getAttribute('data-remove');
+				elements = elements.filter(function (el) { return String(el.id) !== removeId; });
+				renderElementRows();
+			});
+
+			addElementBtn.addEventListener('click', function () {
+				if (elements.length >= MAX_ELEMENTS) {
+					return;
+				}
+
+				openAddElementModal();
+			});
+
+			function switchFormTab(tabName) {
+				document.querySelectorAll('[data-form-tab]').forEach(function (tab) {
+					var active = tab.getAttribute('data-form-tab') === tabName;
+					tab.classList.toggle('active', active);
+					tab.setAttribute('aria-selected', active ? 'true' : 'false');
+				});
+
+				document.querySelectorAll('[data-form-pane]').forEach(function (pane) {
+					var active = pane.getAttribute('data-form-pane') === tabName;
+					pane.classList.toggle('show', active);
+					pane.classList.toggle('active', active);
+				});
+			}
+
+			document.querySelectorAll('[data-form-tab]').forEach(function (tab) {
+				tab.addEventListener('click', function (event) {
+					event.preventDefault();
+					switchFormTab(tab.getAttribute('data-form-tab'));
+				});
+			});
+
+			function openLaunchForm(mode, launchId) {
+				isFormReadOnly = (mode === 'view');
+
+				if (mode === 'new') {
+					currentLaunchId = null;
+					launchFormTitle.textContent = 'New Launch';
+					launchFormSaveBtn.textContent = 'Create';
+					launchFormName.value = '';
+					launchFormDescription.value = '';
+					elements = [];
+				}
+				else {
+					var launch = LAUNCHES.filter(function (l) { return l.id === launchId; })[0] || LAUNCHES[0];
+					currentLaunchId = launch.id;
+					launchFormTitle.textContent = launch.name;
+					launchFormSaveBtn.textContent = 'Save';
+					launchFormName.value = launch.name;
+					launchFormDescription.value = launch.description || '';
+					elements = (LAUNCH_ELEMENTS[launch.id] || []).map(function (el) { return Object.assign({}, el); });
+				}
+
+				launchFormName.disabled = isFormReadOnly;
+				launchFormDescription.disabled = isFormReadOnly;
+				launchFormSaveBtn.hidden = isFormReadOnly;
+				launchFormCancelBtn.textContent = isFormReadOnly ? 'Close' : 'Cancel';
+				addElementBtn.hidden = isFormReadOnly;
+
+				// No Launch exists yet to preview in "New Launch" mode.
+				launchFormPreviewBtn.hidden = (mode === 'new');
+				updateLaunchFormPublishGroup();
+
+				renderElementRows();
+				switchFormTab('info');
+				show('form');
+			}
+
+			// ---- Publish / Schedule button on the Launch page (shown on both Info and Assets tabs) ----
+			// Same rule as the kebab menu: only for an existing Open Launch with no publish running.
+			// After confirming, the user goes back to the list, where the progress bar or the new
+			// status shows up.
+
+			var launchFormPublishGroup = document.getElementById('launchFormPublishGroup');
+			var launchFormPublishBtn = document.getElementById('launchFormPublishBtn');
+			var launchFormPublishMenu = document.getElementById('launchFormPublishMenu');
+
+			function getCurrentFormLaunch() {
+				return LAUNCHES.filter(function (l) { return l.id === currentLaunchId; })[0] || null;
+			}
+
+			function updateLaunchFormPublishGroup() {
+				var launch = currentLaunchId ? getCurrentFormLaunch() : null;
+				var visible = !!launch && launch.statusKey === 'open' && typeof launch.publishProgress !== 'number';
+
+				// Toggled through inline display (not [hidden]) because the group needs inline-block.
+				launchFormPublishGroup.style.display = visible ? 'inline-block' : 'none';
+				launchFormPublishMenu.classList.remove('mockup-open');
+			}
+
+			launchFormPublishBtn.addEventListener('click', function (event) {
+				event.stopPropagation();
+				launchFormPublishMenu.classList.toggle('mockup-open');
+			});
+
+			document.addEventListener('click', function (event) {
+				if (!launchFormPublishMenu.classList.contains('mockup-open')) {
+					return;
+				}
+
+				if (!launchFormPublishMenu.contains(event.target) && !launchFormPublishBtn.contains(event.target)) {
+					launchFormPublishMenu.classList.remove('mockup-open');
+				}
+			});
+
+			launchFormPublishMenu.querySelectorAll('[data-launch-form-action]').forEach(function (item) {
+				item.addEventListener('click', function () {
+					launchFormPublishMenu.classList.remove('mockup-open');
+
+					var launch = getCurrentFormLaunch();
+
+					if (!launch) {
+						return;
+					}
+
+					var backToList = function () { show('landing'); };
+
+					if (item.getAttribute('data-launch-form-action') === 'publish') {
+						confirmPublishLaunch(launch, backToList);
+					}
+					else {
+						confirmScheduleLaunch(launch, backToList);
+					}
+				});
+			});
+
+			// ---- Shared modal backdrop (used by both modals below; only one modal opens at a time) ----
+
+			var modalBackdrop = document.getElementById('modalBackdrop');
+			var openModalEl = null;
+
+			function showModal(modalEl) {
+				closeAnyModal();
+				modalEl.hidden = false;
+				modalEl.classList.add('mockup-open');
+				modalBackdrop.hidden = false;
+				modalBackdrop.classList.add('show');
+				openModalEl = modalEl;
+			}
+
+			function hideModal(modalEl) {
+				modalEl.hidden = true;
+				modalEl.classList.remove('mockup-open');
+				modalBackdrop.hidden = true;
+				modalBackdrop.classList.remove('show');
+
+				if (openModalEl === modalEl) {
+					openModalEl = null;
+				}
+			}
+
+			function closeAnyModal() {
+				if (!openModalEl) {
+					return;
+				}
+
+				// Route through the confirm modal's own cancel path (fires onCancel) rather than a
+				// bare hideModal, so dismissing via the backdrop behaves the same as clicking Cancel —
+				// callers relying on onCancel (e.g. a version-conflict queue) still get to continue.
+				if (openModalEl === confirmModal) {
+					cancelConfirmModal();
+				}
+				else {
+					hideModal(openModalEl);
+				}
+			}
+
+			modalBackdrop.addEventListener('click', closeAnyModal);
+
+			// ---- Confirm modal (reused by Publish, and future confirm-before-action items) ----
+
+			var confirmModal = document.getElementById('confirmModal');
+			var confirmModalTitle = document.getElementById('confirmModalTitle');
+			var confirmModalMessage = document.getElementById('confirmModalMessage');
+			var confirmModalConfirmBtn = document.getElementById('confirmModalConfirm');
+			var confirmModalCancelBtn = document.getElementById('confirmModalCancel');
+			var confirmModalCloseBtn = document.getElementById('confirmModalClose');
+			var confirmModalOnConfirm = null;
+			var confirmModalOnCancel = null;
+
+			function openConfirmModal(options) {
+				confirmModalTitle.textContent = options.title;
+				confirmModalMessage.textContent = options.message;
+				confirmModalConfirmBtn.textContent = options.confirmLabel || 'Confirm';
+				confirmModalConfirmBtn.className = 'btn ' + (options.confirmDanger ? 'btn-danger' : 'btn-primary');
+				confirmModalOnConfirm = options.onConfirm;
+				confirmModalOnCancel = options.onCancel || null;
+				showModal(confirmModal);
+			}
+
+			function closeConfirmModal() {
+				hideModal(confirmModal);
+				confirmModalOnConfirm = null;
+				confirmModalOnCancel = null;
+			}
+
+			function cancelConfirmModal() {
+				var onCancel = confirmModalOnCancel;
+				closeConfirmModal();
+
+				if (onCancel) {
+					onCancel();
+				}
+			}
+
+			confirmModalConfirmBtn.addEventListener('click', function () {
+				var onConfirm = confirmModalOnConfirm;
+				closeConfirmModal();
+
+				if (onConfirm) {
+					onConfirm();
+				}
+			});
+
+			confirmModalCancelBtn.addEventListener('click', cancelConfirmModal);
+			confirmModalCloseBtn.addEventListener('click', cancelConfirmModal);
+
+			// Rule: only one version of a given element (matched by name) can be part of a Launch at
+			// a time. Shared by both places an element gets added to a launch's element list — the
+			// Add Asset modal (against the in-session `elements` working array) and Add to a Launch
+			// (against `LAUNCH_ELEMENTS[launchId]` directly). `targetList` must be the actual array
+			// reference the caller will mutate (this function only reads it to find a conflict).
+			function checkElementConflict(targetList, name, version, onProceed, onSkip) {
+				var existing = targetList.filter(function (el) { return el.name === name; })[0];
+
+				if (!existing) {
+					onProceed(null);
+					return;
+				}
+
+				if (existing.version === version) {
+					// Identical name+version already present — nothing to do.
+					if (onSkip) {
+						onSkip();
+					}
+					return;
+				}
+
+				openConfirmModal({
+					title: 'Replace Asset Version',
+					message: 'There\'s another version of the asset inside this Launch. Do you want to change one for the other?',
+					confirmLabel: 'Change',
+					onConfirm: function () { onProceed(existing); },
+					onCancel: function () {
+						if (onSkip) {
+							onSkip();
+						}
+					}
+				});
+			}
+
+			// ---- Not Ready to Publish guard (blocks Publish/Schedule until every element is Ready to Publish) ----
+
+			var notReadyModal = document.getElementById('notReadyModal');
+			var notReadyModalTitle = document.getElementById('notReadyModalTitle');
+			var notReadyModalMessage = document.getElementById('notReadyModalMessage');
+			var notReadyModalList = document.getElementById('notReadyModalList');
+			var notReadyModalCloseBtn = document.getElementById('notReadyModalClose');
+			var notReadyModalDismissBtn = document.getElementById('notReadyModalDismiss');
+
+			// Rule: a Launch can only be Published or Scheduled once every element it contains is
+			// itself Ready to Publish. Returns the elements that are blocking the action, if any.
+			function getElementsNotReadyToPublish(launch) {
+				var elements = LAUNCH_ELEMENTS[launch.id] || [];
+
+				return elements.filter(function (el) { return el.statusLabel !== 'Ready to Publish'; });
+			}
+
+			function openNotReadyModal(launch, notReadyElements, title, message) {
+				notReadyModalTitle.textContent = title;
+				notReadyModalMessage.textContent = message;
+				notReadyModalList.innerHTML = notReadyElements.map(function (el) {
+					return '<li>' + el.name + ' (v' + el.version + ') — ' + el.statusLabel + '</li>';
+				}).join('');
+				showModal(notReadyModal);
+			}
+
+			function closeNotReadyModal() {
+				hideModal(notReadyModal);
+			}
+
+			notReadyModalCloseBtn.addEventListener('click', closeNotReadyModal);
+			notReadyModalDismissBtn.addEventListener('click', closeNotReadyModal);
+
+			// ---- Concurrent promotion processes (LPD-109753) ----
+			// Only one content promotion process can run at a time in the whole instance. The
+			// "Simulate running promotion process" select in the mockup nav fakes a process that is
+			// already running; a Launch whose publish is in progress in this mockup counts too.
+
+			var SIMULATED_PROCESSES = [
+				{type: 'Publication', name: 'Summer Campaign'},
+				{type: 'Launch', name: 'Spring Sale'},
+				{type: 'Site Template Sync', name: 'Corporate Template'},
+				{type: 'Staging Publish to Live', name: 'Marketing Site'},
+				{type: 'LAR Import', name: 'products.lar'}
+			];
+
+			var simRunningProcess = document.getElementById('simRunningProcess');
+			var simReachScheduledTimeBtn = document.getElementById('simReachScheduledTime');
+			var promoAlertContainer = document.getElementById('promoAlertContainer');
+
+			simRunningProcess.addEventListener('change', function () {
+				simRunningProcess.classList.toggle('mockup-sim-running', simRunningProcess.value !== '');
+			});
+
+			function getRunningPromotionProcess(exceptLaunch) {
+				if (simRunningProcess.value !== '') {
+					return SIMULATED_PROCESSES[Number(simRunningProcess.value)];
+				}
+
+				var publishing = LAUNCHES.filter(function (l) {
+					return l !== exceptLaunch && typeof l.publishProgress === 'number';
+				})[0];
+
+				return publishing ? {type: 'Launch', name: publishing.name} : null;
+			}
+
+			function escapeAlertText(text) {
+				return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+			}
+
+			function showPromoAlert(title, message, info) {
+				var alert = document.createElement('div');
+				alert.className = 'promo-alert' + (info ? ' promo-alert-info' : '');
+				alert.setAttribute('role', 'alert');
+				alert.innerHTML =
+					'<div class="promo-alert-body"><strong>' + escapeAlertText(title) + '</strong> ' + escapeAlertText(message) + '</div>' +
+					'<button type="button" class="promo-alert-close" aria-label="Close">&times;</button>';
+				alert.querySelector('.promo-alert-close').addEventListener('click', function () {
+					alert.remove();
+				});
+				promoAlertContainer.appendChild(alert);
+			}
+
+			function getPromotionBlockedMessage(running, blockedName) {
+				return 'The ' + running.type + ' "' + running.name + '" is currently in progress. The Launch "' + blockedName + '" cannot start until all other content promotion processes have finished. Please try again later.';
+			}
+
+			// A scheduled Launch that reaches its time while another promotion process is running
+			// does not run: it is marked as Failed, and Error Details name the blocking process.
+			simReachScheduledTimeBtn.addEventListener('click', function () {
+				var scheduled = LAUNCHES.filter(function (l) { return l.statusKey === 'scheduled'; });
+
+				if (!scheduled.length) {
+					showPromoAlert('Info:', 'There are no Scheduled Launches. Schedule a Launch first.', true);
+					return;
+				}
+
+				scheduled.forEach(function (launch) {
+					var running = getRunningPromotionProcess(launch);
+
+					if (!running) {
+						runLaunchPublish(launch);
+						return;
+					}
+
+					var now = new Date().toLocaleString('en-US');
+
+					ERRORS.push({id: ERRORS.length + 1, launchId: launch.id, message: 'The scheduled publish did not start because the ' + running.type + ' "' + running.name + '" was in progress. Reschedule the Launch or publish it manually once all other content promotion processes have finished.', element: '—', date: now, severity: 'danger', severityLabel: 'Critical'});
+
+					launch.status = 'danger';
+					launch.statusLabel = 'Failed';
+					launch.statusKey = 'failed';
+					launch.modified = now;
+
+					showPromoAlert('Error:', 'The scheduled Launch "' + launch.name + '" failed to start because the ' + running.type + ' "' + running.name + '" was in progress. See View Error Details.');
+				});
+
+				renderLaunchRows(searchInput ? searchInput.value : '');
+			});
+
+			function confirmPublishLaunch(launch, onConfirmed) {
+				var notReady = getElementsNotReadyToPublish(launch);
+
+				if (notReady.length) {
+					openNotReadyModal(
+						launch,
+						notReady,
+						'Cannot Publish Launch',
+						'"' + launch.name + '" can\'t be published yet because not every asset inside it is Ready to Publish:'
+					);
+					return;
+				}
+
+				openConfirmModal({
+					title: 'Publish Launch',
+					message: 'You are going to publish "' + launch.name + '" right now. Are you sure?',
+					confirmLabel: 'Publish',
+					onConfirm: function () {
+						// Checked when the user confirms, not when the dialog opens.
+						var running = getRunningPromotionProcess(launch);
+
+						if (running) {
+							showPromoAlert('Error:', getPromotionBlockedMessage(running, launch.name));
+							return;
+						}
+
+						runLaunchPublish(launch);
+
+						if (onConfirmed) {
+							onConfirmed();
+						}
+					}
+				});
+			}
+
+			// No intermediate "Publishing" status: the status column shows a progress bar while the
+			// publish runs, then the Launch goes straight from Open to Published or Failed. Publishing
+			// is not transactional: elements that published stay published even if another one fails;
+			// the failed ones keep their previous state and get an entry in Error Details.
+			function runLaunchPublish(launch) {
+				launch.publishProgress = 0;
+				updateStatusCell(launch);
+
+				var timer = setInterval(function () {
+					launch.publishProgress = Math.min(100, launch.publishProgress + 8 + Math.random() * 12);
+					updateStatusCell(launch);
+
+					if (launch.publishProgress < 100) {
+						return;
+					}
+
+					clearInterval(timer);
+
+					setTimeout(function () {
+						var failed = [];
+						var now = new Date().toLocaleString('en-US');
+
+						(LAUNCH_ELEMENTS[launch.id] || []).forEach(function (el) {
+							if (el.failOnPublish) {
+								failed.push(el);
+								return;
+							}
+
+							el.status = 'success';
+							el.statusLabel = 'Published';
+						});
+
+						failed.forEach(function (el) {
+							ERRORS.push({id: ERRORS.length + 1, launchId: launch.id, message: 'Failed to publish "' + el.name + '" — the scheduled display date is later than the expiration date.', element: el.name, date: now, severity: 'danger', severityLabel: 'Critical'});
+						});
+
+						delete launch.publishProgress;
+						launch.modified = now;
+
+						if (failed.length) {
+							launch.status = 'danger';
+							launch.statusLabel = 'Failed';
+							launch.statusKey = 'failed';
+						}
+						else {
+							launch.status = 'success';
+							launch.statusLabel = 'Published';
+							launch.statusKey = 'published';
+						}
+
+						renderLaunchRows(searchInput ? searchInput.value : '');
+					}, 300);
+				}, 250);
+			}
+
+			// ---- Schedule modal (date + time, sets status to Scheduled) ----
+
+			var scheduleModal = document.getElementById('scheduleModal');
+			var scheduleModalLaunchName = document.getElementById('scheduleModalLaunchName');
+			var scheduleModalDate = document.getElementById('scheduleModalDate');
+			var scheduleModalTime = document.getElementById('scheduleModalTime');
+			var scheduleModalConfirmBtn = document.getElementById('scheduleModalConfirm');
+			var scheduleModalCancelBtn = document.getElementById('scheduleModalCancel');
+			var scheduleModalCloseBtn = document.getElementById('scheduleModalClose');
+			var scheduleModalLaunch = null;
+			var scheduleModalOnConfirmed = null;
+
+			function updateScheduleModalConfirmState() {
+				scheduleModalConfirmBtn.disabled = !scheduleModalDate.value || !scheduleModalTime.value;
+			}
+
+			scheduleModalDate.addEventListener('input', updateScheduleModalConfirmState);
+			scheduleModalTime.addEventListener('input', updateScheduleModalConfirmState);
+
+			function openScheduleModal(launch, onConfirmed) {
+				scheduleModalLaunch = launch;
+				scheduleModalOnConfirmed = onConfirmed || null;
+				scheduleModalLaunchName.textContent = launch.name;
+				scheduleModalDate.value = '';
+				scheduleModalTime.value = '';
+				updateScheduleModalConfirmState();
+				showModal(scheduleModal);
+			}
+
+			function closeScheduleModal() {
+				hideModal(scheduleModal);
+				scheduleModalLaunch = null;
+				scheduleModalOnConfirmed = null;
+			}
+
+			scheduleModalConfirmBtn.addEventListener('click', function () {
+				if (scheduleModalConfirmBtn.disabled || !scheduleModalLaunch) {
+					return;
+				}
+
+				var launch = scheduleModalLaunch;
+				var onConfirmed = scheduleModalOnConfirmed;
+				closeScheduleModal();
+
+				launch.status = 'warning';
+				launch.statusLabel = 'Scheduled';
+				launch.statusKey = 'scheduled';
+				renderLaunchRows(searchInput ? searchInput.value : '');
+
+				if (onConfirmed) {
+					onConfirmed();
+				}
+			});
+
+			scheduleModalCancelBtn.addEventListener('click', closeScheduleModal);
+			scheduleModalCloseBtn.addEventListener('click', closeScheduleModal);
+
+			function confirmScheduleLaunch(launch, onConfirmed) {
+				var notReady = getElementsNotReadyToPublish(launch);
+
+				if (notReady.length) {
+					openNotReadyModal(
+						launch,
+						notReady,
+						'Cannot Schedule Launch',
+						'"' + launch.name + '" can\'t be scheduled yet because not every asset inside it is Ready to Publish:'
+					);
+					return;
+				}
+
+				openScheduleModal(launch, onConfirmed);
+			}
+
+			// ---- Preview (Site + Page picker modal -> new tab with a simulated Site) ----
+
+			var previewModal = document.getElementById('previewModal');
+			var previewSiteStep = document.getElementById('previewSiteStep');
+			var previewPageStep = document.getElementById('previewPageStep');
+			var previewSiteList = document.getElementById('previewSiteList');
+			var previewPageList = document.getElementById('previewPageList');
+			var previewLaunchNameLabel = document.getElementById('previewLaunchNameLabel');
+			var previewSiteNameLabel = document.getElementById('previewSiteNameLabel');
+			var previewModalCancelBtn = document.getElementById('previewModalCancel');
+			var previewModalCloseBtn = document.getElementById('previewModalClose');
+			var previewModalBackBtn = document.getElementById('previewModalBack');
+			var currentPreviewLaunch = null;
+
+			function openPreviewModal(launch) {
+				currentPreviewLaunch = launch;
+				previewLaunchNameLabel.textContent = launch.name;
+				showPreviewSiteStep();
+				showModal(previewModal);
+			}
+
+			// Step 1: pick a Site.
+			function showPreviewSiteStep() {
+				previewModalBackBtn.hidden = true;
+				previewPageStep.hidden = true;
+				previewSiteStep.hidden = false;
+
+				var siteNames = Object.keys(AVAILABLE_ELEMENTS.site);
+
+				previewSiteList.innerHTML = siteNames.map(function (siteName, index) {
+					return '<button type="button" class="btn btn-secondary d-flex justify-content-between align-items-center mb-2" style="width: 100%" data-site-index="' + index + '">' +
+						'<span>' + siteName + '</span>' +
+					'</button>';
+				}).join('');
+
+				previewSiteList.querySelectorAll('[data-site-index]').forEach(function (btn) {
+					btn.addEventListener('click', function () {
+						var siteName = siteNames[Number(btn.dataset.siteIndex)];
+						showPreviewPageStep(siteName);
+					});
+				});
+			}
+
+			// Step 2: pick a Page on the chosen Site — the preview opens starting at this Page.
+			function showPreviewPageStep(siteName) {
+				previewSiteNameLabel.textContent = siteName;
+				previewSiteStep.hidden = true;
+				previewPageStep.hidden = false;
+				previewModalBackBtn.hidden = false;
+
+				var pages = PAGES.filter(function (page) { return page.site === siteName; });
+
+				if (!pages.length) {
+					previewPageList.innerHTML = '<p class="text-secondary">No Pages found on this Site.</p>';
+					return;
+				}
+
+				previewPageList.innerHTML = pages.map(function (page, index) {
+					return '<button type="button" class="btn btn-secondary d-flex justify-content-between align-items-center mb-2" style="width: 100%" data-page-index="' + index + '">' +
+						'<span>' + page.name + '</span>' +
+					'</button>';
+				}).join('');
+
+				previewPageList.querySelectorAll('[data-page-index]').forEach(function (btn) {
+					btn.addEventListener('click', function () {
+						var page = pages[Number(btn.dataset.pageIndex)];
+						hideModal(previewModal);
+						openSitePreview(currentPreviewLaunch, siteName, page.name);
+					});
+				});
+			}
+
+			previewModalBackBtn.addEventListener('click', function () { showPreviewSiteStep(); });
+			previewModalCancelBtn.addEventListener('click', function () { hideModal(previewModal); });
+			previewModalCloseBtn.addEventListener('click', function () { hideModal(previewModal); });
+
+			launchFormPreviewBtn.addEventListener('click', function () {
+				var launch = LAUNCHES.filter(function (l) { return l.id === currentLaunchId; })[0];
+
+				if (launch) {
+					openPreviewModal(launch);
+				}
+			});
+
+			// Functional rule: the simulated Site shows every item normally on that Site, except
+			// items also included in this Launch, which show the version associated with the
+			// Launch instead of the Site's own current version. A Launch element for that Site
+			// with no matching base item (new content the Launch introduces) is appended too, so
+			// nothing the Launch carries is silently missing from the preview.
+			function openSitePreview(launch, siteName, pageName) {
+				var baseItems = (AVAILABLE_ELEMENTS.site[siteName] || []).map(function (item) {
+					return {name: item.name, version: item.version, type: item.type};
+				});
+
+				var launchElements = (LAUNCH_ELEMENTS[launch.id] || []).filter(function (el) {
+					return el.scope === 'Site' && el.scopeName === siteName;
+				});
+
+				var overriddenNames = {};
+
+				var previewItems = baseItems.map(function (item) {
+					var override = launchElements.filter(function (el) { return el.name === item.name; })[0];
+
+					if (!override) {
+						return item;
+					}
+
+					overriddenNames[item.name] = true;
+
+					return {name: item.name, version: override.version, type: item.type, overridden: true};
+				});
+
+				launchElements.forEach(function (el) {
+					if (!overriddenNames[el.name]) {
+						previewItems.push({name: el.name, version: el.version, type: el.type, overridden: true, isNew: true});
+					}
+				});
+
+				var rowsHtml = previewItems.map(function (item) {
+					var badge = '';
+
+					if (item.isNew) {
+						badge = '<span class="site-preview-badge site-preview-badge-new">New in this Launch</span>';
+					}
+					else if (item.overridden) {
+						badge = '<span class="site-preview-badge site-preview-badge-launch">Launch version</span>';
+					}
+
+					return '' +
+						'<tr>' +
+							'<td>' + item.name + badge + '</td>' +
+							'<td>' + item.type + '</td>' +
+							'<td>' + item.version + '</td>' +
+						'</tr>';
+				}).join('');
+
+				var html = '' +
+					'<!DOCTYPE html>' +
+					'<html>' +
+					'<head>' +
+						'<meta charset="utf-8">' +
+						'<title>' + siteName + ' — Simulated Site Preview</title>' +
+						'<style>' +
+							'body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #F4F5F7; color: #1F2430; }' +
+							'.site-preview-banner { background: #1F2430; color: #fff; padding: 12px 24px; font-size: 14px; }' +
+							'.site-preview-banner strong { color: #80acff; }' +
+							'.site-preview-header { padding: 24px; background: #fff; border-bottom: 1px solid #E5E7EB; }' +
+							'.site-preview-header h1 { margin: 0; font-size: 22px; }' +
+							'.site-preview-header p { margin: 4px 0 0; color: #6B7280; font-size: 13px; }' +
+							'table { border-collapse: collapse; background: #fff; margin: 24px; width: calc(100% - 48px); box-shadow: 0 1px 3px rgba(0, 0, 0, .08); }' +
+							'th, td { text-align: left; padding: 10px 16px; border-bottom: 1px solid #E5E7EB; }' +
+							'th { font-size: 12px; text-transform: uppercase; color: #6B7280; background: #F4F5F7; }' +
+							'.site-preview-badge { margin-left: 8px; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }' +
+							'.site-preview-badge-launch { background: #E5F5EC; color: #1A7F4B; }' +
+							'.site-preview-badge-new { background: #E7EFFC; color: #2360C5; }' +
+						'</style>' +
+					'</head>' +
+					'<body>' +
+						'<div class="site-preview-banner">Simulated Site Preview — Launch: <strong>' + launch.name + '</strong></div>' +
+						'<div class="site-preview-header">' +
+							'<h1>' + siteName + '</h1>' +
+							'<p>Starting page: <strong>' + pageName + '</strong></p>' +
+							'<p>All Site content is shown below. Items included in this Launch display the version associated with it.</p>' +
+						'</div>' +
+						'<table>' +
+							'<thead><tr><th>Name</th><th>Type</th><th>Version</th></tr></thead>' +
+							'<tbody>' + rowsHtml + '</tbody>' +
+						'</table>' +
+					'</body>' +
+					'</html>';
+
+				var previewWindow = window.open('', '_blank');
+
+				if (previewWindow) {
+					previewWindow.document.write(html);
+					previewWindow.document.close();
+				}
+			}
+
+			// ---- Delete (confirm before removing) ----
+
+			function confirmDeleteLaunch(launch) {
+				openConfirmModal({
+					title: 'Delete Launch',
+					message: 'Are you sure you want to delete the Launch "' + launch.name + '"?',
+					confirmLabel: 'Delete',
+					confirmDanger: true,
+					onConfirm: function () {
+						LAUNCHES = LAUNCHES.filter(function (l) { return l.id !== launch.id; });
+						delete LAUNCH_ELEMENTS[launch.id];
+						renderLaunchRows(searchInput ? searchInput.value : '');
+					}
+				});
+			}
+
+			// ---- Error Details (search, filter, sort) ----
+
+			var ERRORS = [
+				{id: 1, launchId: 'q3Announcement', message: 'Failed to publish "Homepage Banner" — Web Content structure validation failed.', element: 'Homepage Banner', date: '9/9/2026, 9:02:31 AM', severity: 'danger', severityLabel: 'Critical'},
+				{id: 2, launchId: 'q3Announcement', message: 'Image asset "banner-hero.jpg" exceeds the maximum allowed size (10 MB).', element: 'Hero Banner Image', date: '9/9/2026, 9:01:14 AM', severity: 'danger', severityLabel: 'Critical'},
+				{id: 3, launchId: 'q3Announcement', message: 'Missing translation for locale es-ES on "Product Overview" article.', element: 'Product Overview', date: '9/9/2026, 8:58:02 AM', severity: 'warning', severityLabel: 'Warning'},
+				{id: 4, launchId: 'q3Announcement', message: 'Workflow approval still pending for "Pricing Table" fragment.', element: 'Pricing Table', date: '9/9/2026, 8:55:40 AM', severity: 'info', severityLabel: 'Info'},
+				{id: 5, launchId: 'q3Announcement', message: 'Broken internal link detected in "Q3 Announcement" blog post.', element: 'Q3 Announcement', date: '9/9/2026, 8:50:12 AM', severity: 'warning', severityLabel: 'Warning'}
+			];
+
+			var errorRowsEl = document.getElementById('errorRows');
+			var errorsSearchInput = document.getElementById('errorsSearchInput');
+			var errorsSeverityFilter = document.getElementById('errorsSeverityFilter');
+			var errorsPaginationSummary = document.getElementById('errorsPaginationSummary');
+			var errorsTitle = document.getElementById('errorsTitle');
+			var errorsSort = {field: 'date', dir: 'desc'};
+			var errorsLaunchId = null;
+
+			function renderErrorRows() {
+				var q = (errorsSearchInput.value || '').trim().toLowerCase();
+				var severity = errorsSeverityFilter.value;
+
+				var list = ERRORS.filter(function (err) {
+					if (err.launchId !== errorsLaunchId) {
+						return false;
+					}
+
+					var matchesQuery = !q || err.message.toLowerCase().indexOf(q) !== -1 || err.element.toLowerCase().indexOf(q) !== -1;
+					var matchesSeverity = !severity || err.severity === severity;
+					return matchesQuery && matchesSeverity;
+				});
+
+				var severityRank = {danger: 0, warning: 1, info: 2};
+
+				list.sort(function (a, b) {
+					var result;
+
+					if (errorsSort.field === 'severity') {
+						result = severityRank[a.severity] - severityRank[b.severity];
+					}
+					else {
+						result = new Date(a.date).getTime() - new Date(b.date).getTime();
+					}
+
+					return errorsSort.dir === 'asc' ? result : -result;
+				});
+
+				if (!list.length) {
+					errorRowsEl.innerHTML = '<tr><td colspan="4" class="text-center text-secondary" style="padding: 32px">No errors match your search.</td></tr>';
+				}
+				else {
+					errorRowsEl.innerHTML = list.map(function (err) {
+						return '' +
+							'<tr>' +
+								'<td>' + err.message + '</td>' +
+								'<td><span class="text-truncate-inline">' + err.element + '</span></td>' +
+								'<td class="text-nowrap">' + err.date + '</td>' +
+								'<td>' +
+									'<span class="label label-' + err.severity + '"><span class="label-item label-item-expand">' + err.severityLabel + '</span></span>' +
+								'</td>' +
+							'</tr>';
+					}).join('');
+				}
+
+				errorsPaginationSummary.textContent = (list.length ? '1 to ' + list.length + ' of ' + list.length : '0 of 0') + ' errors';
+
+				document.querySelectorAll('[data-sort-icon]').forEach(function (iconEl) {
+					var field = iconEl.getAttribute('data-sort-icon');
+					var symbolId = 'order-arrow';
+
+					if (field === errorsSort.field) {
+						symbolId = errorsSort.dir === 'asc' ? 'order-arrow-up' : 'order-arrow-down';
+					}
+
+					iconEl.innerHTML = icon(symbolId, '; width:12px; height:12px');
+				});
+			}
+
+			errorsSearchInput.addEventListener('input', renderErrorRows);
+			errorsSeverityFilter.addEventListener('change', renderErrorRows);
+
+			document.querySelectorAll('[data-sort-field]').forEach(function (sortBtn) {
+				sortBtn.addEventListener('click', function () {
+					var field = sortBtn.getAttribute('data-sort-field');
+
+					if (errorsSort.field === field) {
+						errorsSort.dir = errorsSort.dir === 'asc' ? 'desc' : 'asc';
+					}
+					else {
+						errorsSort.field = field;
+						errorsSort.dir = 'asc';
+					}
+
+					renderErrorRows();
+				});
+			});
+
+			function openErrorsPage(launchId) {
+				var launch = LAUNCHES.filter(function (l) { return l.id === launchId; })[0];
+				errorsTitle.textContent = launch ? launch.name + ' — Error Details' : 'Error Details';
+				errorsLaunchId = launchId;
+				errorsSearchInput.value = '';
+				errorsSeverityFilter.value = '';
+				errorsSort = {field: 'date', dir: 'desc'};
+				renderErrorRows();
+				show('errors');
+			}
+
+			// ---- Add Asset modal (cascading Scope -> Site/Space -> checklist) ----
+
+			// Only element types that support versioning can be added to a Launch. Web Content
+			// Article is the only versioned type modeled here (matches the real JournalArticle
+			// version model); Blog Posting and Document do not support versioning in this mockup
+			// (matches the real BlogsEntry finding from earlier research — no numbered versions).
+			var TYPE_SUPPORTS_VERSIONING = {
+				'Web Content Article': true,
+				'Blog Posting': false,
+				'Document': false
+			};
+
+			var AVAILABLE_ELEMENTS = {
+				site: {
+					Guest: [
+						{name: 'Homepage Banner', version: '1.0', type: 'Web Content Article', status: 'success', statusLabel: 'Ready to Publish'},
+						{name: 'About Us Page', version: '2.3', type: 'Web Content Article', status: 'info', statusLabel: 'Pending'},
+						{name: 'Contact Form', version: '1.1', type: 'Document', status: 'danger', statusLabel: 'Rejected'}
+					],
+					Global: [
+						{name: 'Global Footer Content', version: '1.0', type: 'Web Content Article', status: 'success', statusLabel: 'Ready to Publish'},
+						{name: 'Company Policies', version: '3.0', type: 'Document', status: 'info', statusLabel: 'Pending'}
+					],
+					Intranet: [
+						{name: 'Employee Handbook', version: '4.2', type: 'Document', status: 'info', statusLabel: 'Pending'},
+						{name: 'IT Support FAQ', version: '1.5', type: 'Web Content Article', status: 'success', statusLabel: 'Ready to Publish'}
+					],
+					'Partner Portal': [
+						{name: 'Partner Onboarding Guide', version: '1.0', type: 'Document', status: 'danger', statusLabel: 'Rejected'},
+						{name: 'Co-Marketing Assets', version: '2.1', type: 'Web Content Article', status: 'info', statusLabel: 'Pending'}
+					]
+				},
+				space: {
+					'Marketing Space': [
+						{name: 'Q4 Campaign Brief', version: '1.0', type: 'Document', status: 'info', statusLabel: 'Pending'},
+						{name: 'Brand Guidelines', version: '5.0', type: 'Web Content Article', status: 'success', statusLabel: 'Ready to Publish'}
+					],
+					'Design Space': [
+						{name: 'Icon Library', version: '2.0', type: 'Document', status: 'success', statusLabel: 'Ready to Publish'},
+						{name: 'UI Kit', version: '3.1', type: 'Document', status: 'info', statusLabel: 'Pending'}
+					],
+					'Engineering Space': [
+						{name: 'API Reference Doc', version: '1.2', type: 'Document', status: 'info', statusLabel: 'Pending'},
+						{name: 'Release Notes Template', version: '1.0', type: 'Web Content Article', status: 'success', statusLabel: 'Ready to Publish'}
+					]
+				}
+			};
+
+			var addElementModal = document.getElementById('addElementModal');
+			var addElementScopeType = document.getElementById('addElementScopeType');
+			var addElementScopeValueGroup = document.getElementById('addElementScopeValueGroup');
+			var addElementScopeValueLabel = document.getElementById('addElementScopeValueLabel');
+			var addElementScopeValue = document.getElementById('addElementScopeValue');
+			var addElementListGroup = document.getElementById('addElementListGroup');
+			var addElementListEl = document.getElementById('addElementList');
+			var addElementEmptyMessage = document.getElementById('addElementEmptyMessage');
+			var addElementModalConfirmBtn = document.getElementById('addElementModalConfirm');
+			var addElementModalCancelBtn = document.getElementById('addElementModalCancel');
+			var addElementModalCloseBtn = document.getElementById('addElementModalClose');
+
+			function resetAddElementModal() {
+				addElementScopeType.value = '';
+				addElementScopeValue.innerHTML = '<option value="">Select...</option>';
+				addElementScopeValueGroup.hidden = true;
+				addElementListGroup.hidden = true;
+				addElementEmptyMessage.hidden = true;
+				addElementListEl.innerHTML = '';
+				addElementModalConfirmBtn.disabled = true;
+			}
+
+			function openAddElementModal() {
+				resetAddElementModal();
+				showModal(addElementModal);
+			}
+
+			function closeAddElementModal() {
+				hideModal(addElementModal);
+			}
+
+			addElementScopeType.addEventListener('change', function () {
+				var scopeType = addElementScopeType.value;
+
+				addElementListGroup.hidden = true;
+				addElementEmptyMessage.hidden = true;
+				addElementListEl.innerHTML = '';
+				addElementModalConfirmBtn.disabled = true;
+
+				if (!scopeType) {
+					addElementScopeValueGroup.hidden = true;
+					return;
+				}
+
+				addElementScopeValueLabel.textContent = scopeType === 'site' ? 'Site' : 'Space';
+
+				var names = Object.keys(AVAILABLE_ELEMENTS[scopeType]);
+				addElementScopeValue.innerHTML = '<option value="">Select...</option>' +
+					names.map(function (name) { return '<option value="' + name + '">' + name + '</option>'; }).join('');
+
+				addElementScopeValueGroup.hidden = false;
+			});
+
+			addElementScopeValue.addEventListener('change', function () {
+				var scopeType = addElementScopeType.value;
+				var scopeValue = addElementScopeValue.value;
+
+				addElementModalConfirmBtn.disabled = true;
+
+				if (!scopeValue) {
+					addElementListGroup.hidden = true;
+					addElementEmptyMessage.hidden = true;
+					return;
+				}
+
+				var candidates = (AVAILABLE_ELEMENTS[scopeType] && AVAILABLE_ELEMENTS[scopeType][scopeValue]) || [];
+
+				if (!candidates.length) {
+					addElementListGroup.hidden = true;
+					addElementEmptyMessage.hidden = false;
+					return;
+				}
+
+				addElementEmptyMessage.hidden = true;
+				addElementListEl.innerHTML = candidates.map(function (candidate, index) {
+					var versioned = !!TYPE_SUPPORTS_VERSIONING[candidate.type];
+					var disabledAttr = versioned ? '' : ' disabled';
+					var indexAttr = versioned ? ' data-candidate-index="' + index + '"' : '';
+					var rowStyle = versioned ? '' : ' style="opacity: .55"';
+					var versionOrNote = versioned ?
+						'<span class="text-secondary">v' + candidate.version + '</span>' :
+						'<span class="text-secondary font-italic" title="' + candidate.type + ' doesn\'t support versioning">Versioning not supported</span>';
+
+					return '' +
+						'<div class="custom-control custom-checkbox d-flex align-items-center justify-content-between mb-2"' + rowStyle + '>' +
+							'<label class="d-flex align-items-center mb-0" title="' + (versioned ? '' : candidate.type + ' doesn\'t support versioning') + '">' +
+								'<input class="custom-control-input" type="checkbox"' + indexAttr + disabledAttr + '>' +
+								'<span class="custom-control-label">' + candidate.name + ' <span class="text-secondary" style="font-weight: normal">(' + candidate.type + ')</span></span>' +
+							'</label>' +
+							'<span class="d-flex align-items-center" style="gap: .5rem">' +
+								'<span class="label label-' + candidate.status + '"><span class="label-item label-item-expand">' + candidate.statusLabel + '</span></span>' +
+								versionOrNote +
+							'</span>' +
+						'</div>';
+				}).join('');
+
+				addElementListGroup.hidden = false;
+			});
+
+			addElementListEl.addEventListener('change', function (event) {
+				if (!event.target.matches('input[type="checkbox"]')) {
+					return;
+				}
+
+				var anyChecked = Array.prototype.some.call(
+					addElementListEl.querySelectorAll('input[type="checkbox"]'),
+					function (checkbox) { return checkbox.checked; }
+				);
+
+				addElementModalConfirmBtn.disabled = !anyChecked;
+			});
+
+			addElementModalConfirmBtn.addEventListener('click', function () {
+				var scopeType = addElementScopeType.value;
+				var scopeValue = addElementScopeValue.value;
+				var candidates = (AVAILABLE_ELEMENTS[scopeType] && AVAILABLE_ELEMENTS[scopeType][scopeValue]) || [];
+
+				var checkedIndexes = Array.prototype.map.call(
+					addElementListEl.querySelectorAll('input[type="checkbox"]:checked'),
+					function (checkbox) { return Number(checkbox.getAttribute('data-candidate-index')); }
+				);
+
+				closeAddElementModal();
+
+				// Defense in depth: disabled checkboxes for non-versioned types can't actually be
+				// checked, but never add one even if this ever gets called some other way.
+				var queue = checkedIndexes
+					.map(function (index) { return candidates[index]; })
+					.filter(function (candidate) { return candidate && TYPE_SUPPORTS_VERSIONING[candidate.type]; });
+
+				// Processed one at a time (not in parallel) because a version conflict pops the
+				// shared confirm modal — only one can be on screen, and each answer determines
+				// whether that candidate gets added before moving to the next.
+				function processNextCandidate() {
+					if (!queue.length) {
+						return;
+					}
+
+					var candidate = queue.shift();
+
+					if (elements.length >= MAX_ELEMENTS) {
+						processNextCandidate();
+						return;
+					}
+
+					checkElementConflict(elements, candidate.name, candidate.version, function (existingConflict) {
+						if (existingConflict) {
+							elements = elements.filter(function (el) { return el.id !== existingConflict.id; });
+						}
+
+						nextElementId += 1;
+						elements.push({
+							id: nextElementId,
+							name: candidate.name,
+							version: candidate.version,
+							author: 'Test Test',
+							type: candidate.type,
+							scope: scopeType === 'site' ? 'Site' : 'Space',
+							scopeName: scopeValue,
+							modified: new Date().toLocaleString(),
+							status: candidate.status,
+							statusLabel: candidate.statusLabel
+						});
+
+						renderElementRows();
+						processNextCandidate();
+					}, processNextCandidate);
+				}
+
+				processNextCandidate();
+			});
+
+			addElementModalCancelBtn.addEventListener('click', closeAddElementModal);
+			addElementModalCloseBtn.addEventListener('click', closeAddElementModal);
+		})();
+	</script>
+
+</body>
+</html>

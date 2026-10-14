@@ -1,0 +1,476 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Page Status Flow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+	:root {
+		--paper: #f6f4ef;
+		--card: #ffffff;
+		--ink: #1c1a16;
+		--muted: #6c6558;
+		--line: #ddd6c9;
+		--accent: #0f6e64;
+
+		--c-draft: #5b6472;
+		--c-launchdraft: #4338ca;
+		--c-published: #15803d;
+		--c-pending: #2360c5;
+		--c-warn: #b4650a;
+	}
+
+	@media (prefers-color-scheme: dark) {
+		:root:not([data-theme="light"]) {
+			--paper: #16171a; --card: #1e2023; --ink: #f1efe9; --muted: #a19b8d; --line: #34363b; --accent: #4fd1c5;
+			--c-draft: #9aa4b2; --c-launchdraft: #a5b4fc; --c-published: #4ade80; --c-pending: #7fa8ff; --c-warn: #fbbf24;
+		}
+	}
+
+	:root[data-theme="dark"] {
+		--paper: #16171a; --card: #1e2023; --ink: #f1efe9; --muted: #a19b8d; --line: #34363b; --accent: #4fd1c5;
+		--c-draft: #9aa4b2; --c-launchdraft: #a5b4fc; --c-published: #4ade80; --c-pending: #7fa8ff; --c-warn: #fbbf24;
+	}
+
+	* { box-sizing: border-box; }
+
+	body {
+		margin: 0;
+		background: var(--paper);
+		color: var(--ink);
+		font: 14px/1.55 "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+		padding: 32px 16px 56px;
+	}
+
+	main { max-width: 1000px; margin-inline: auto; display: flex; flex-direction: column; gap: 36px; }
+	h1, h2 { font-family: "Libre Franklin", ui-sans-serif, sans-serif; font-weight: 800; letter-spacing: -.01em; margin: 0; text-wrap: balance; }
+	h1 { font-size: clamp(24px, 4vw, 32px); }
+	h2 { font-size: 19px; }
+	h3 { font-family: "IBM Plex Mono", monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 0 0 10px; font-weight: 600; }
+	p { margin: 0; }
+	.mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+
+	header.top { display: flex; flex-direction: column; gap: 8px; border-bottom: 2px solid var(--ink); padding-bottom: 18px; }
+	.lede { color: var(--muted); max-width: 70ch; font-size: 14.5px; }
+
+	section { display: flex; flex-direction: column; gap: 14px; }
+	.section-note { color: var(--muted); font-size: 13px; max-width: 72ch; }
+
+	/* ---- Status legend ---- */
+
+	.legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+	.legend-card { background: var(--card); border: 1px solid var(--line); border-left: 4px solid var(--c); border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
+	.legend-card b { color: var(--c); font-size: 15px; }
+	.legend-card span { color: var(--muted); font-size: 13px; }
+	.legend-card.orphan { border-style: dashed; border-left-style: solid; }
+
+	/* ---- Diagram ---- */
+
+	.diagram-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px 14px 0 0; background: var(--card); padding: 8px; }
+	#page-diagram { display: block; width: 100%; min-width: 780px; height: auto; }
+
+	.node { cursor: pointer; transition: opacity .15s ease; }
+	.node rect { stroke-width: 2; transition: stroke-width .15s ease; }
+	.node .label { font-weight: 600; font-size: 16px; }
+	.node .sub { font-size: 11px; font-weight: 500; fill: var(--muted); }
+	.node.dimmed { opacity: .32; }
+	.node.selected rect { stroke-width: 4; }
+	.node:focus { outline: none; }
+	.node:focus-visible rect { stroke-dasharray: 5 3; }
+
+	.n-draft rect { fill: color-mix(in srgb, var(--c-draft) 12%, var(--card)); stroke: var(--c-draft); }
+	.n-draft .label { fill: var(--c-draft); }
+	.n-launchdraft rect { fill: color-mix(in srgb, var(--c-launchdraft) 14%, var(--card)); stroke: var(--c-launchdraft); }
+	.n-launchdraft .label { fill: var(--c-launchdraft); }
+	.n-published rect { fill: color-mix(in srgb, var(--c-published) 14%, var(--card)); stroke: var(--c-published); }
+	.n-published .label { fill: var(--c-published); }
+	.n-pending rect { fill: color-mix(in srgb, var(--c-pending) 10%, var(--card)); stroke: var(--c-pending); stroke-dasharray: 6 4; }
+	.n-pending .label { fill: var(--c-pending); }
+
+	.n-start circle { fill: color-mix(in srgb, var(--ink) 6%, var(--card)); stroke: var(--muted); stroke-width: 2; stroke-dasharray: 4 3; }
+	.n-start text { fill: var(--muted); font-size: 12.5px; font-weight: 600; }
+
+	.edge path { fill: none; stroke-width: 2; transition: opacity .15s ease, stroke-width .15s ease; }
+	.edge.active path { stroke-width: 3.5; }
+	.edge.dimmed path { opacity: .15; }
+	.edge .lbl-bg, .edge .lbl { transition: opacity .15s ease; }
+	.edge.dimmed .lbl-bg, .edge.dimmed .lbl { opacity: 0; }
+	.edge-neutral path { stroke: var(--muted); }
+	.edge-launchdraft path { stroke: var(--c-launchdraft); }
+	.edge-published path { stroke: var(--c-published); }
+
+	.lbl-bg { fill: var(--card); opacity: .95; }
+	.lbl text { text-anchor: middle; }
+	.lbl .main { font-size: 12.5px; font-weight: 600; fill: var(--ink); }
+	.lbl .muted { font-size: 11px; fill: var(--muted); }
+
+	.panel { border: 1px solid var(--line); border-top: none; border-radius: 0 0 14px 14px; background: var(--card); padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+	.panel-hint { color: var(--muted); text-align: center; padding: 16px 0; }
+	.panel-status { display: flex; align-items: center; gap: 10px; }
+	.panel-title { font-family: "Libre Franklin", sans-serif; font-weight: 800; font-size: 20px; }
+	.dot { width: 12px; height: 12px; border-radius: 999px; flex: none; }
+	.panel-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+	.panel-col ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+	.step-card { border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px; display: flex; flex-direction: column; gap: 3px; }
+	.step-card .trigger { font-weight: 600; font-size: 13.5px; display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+	.step-card .target { font-size: 12.5px; color: var(--muted); }
+	.step-card .note { font-size: 11.5px; color: var(--muted); font-style: italic; }
+	.step-empty { font-size: 13px; color: var(--muted); font-style: italic; }
+	.kind { font-family: "IBM Plex Mono", monospace; font-size: 9.5px; text-transform: uppercase; letter-spacing: .04em; padding: 1px 6px; border-radius: 999px; background: color-mix(in srgb, var(--muted) 16%, transparent); color: var(--muted); font-weight: 600; }
+
+	/* ---- Transitions table ---- */
+
+	.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: var(--card); }
+	table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+	th, td { padding: 10px 14px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+	th { font-family: "IBM Plex Mono", monospace; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-weight: 600; }
+	tbody tr:last-child td { border-bottom: none; }
+	td.note-cell { color: var(--muted); font-size: 12.5px; }
+	.pill { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; white-space: nowrap; }
+	.pill .dot { width: 9px; height: 9px; }
+	.arrow { color: var(--muted); }
+
+	/* ---- Actions ---- */
+
+	.actions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 16px; }
+	.actions-card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+	.actions-card h2 { font-size: 16px; }
+	.actions-card .where { color: var(--muted); font-size: 12.5px; margin-top: -8px; }
+	.row { display: flex; flex-direction: column; gap: 6px; padding-top: 10px; border-top: 1px solid var(--line); }
+	.row:first-of-type { border-top: none; padding-top: 0; }
+	.row .ctx { font-size: 12.5px; font-weight: 600; }
+	.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+	.chip { font-size: 12px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line); background: color-mix(in srgb, var(--ink) 4%, var(--card)); }
+	.chip.danger { color: var(--c-warn); border-color: color-mix(in srgb, var(--c-warn) 40%, var(--line)); }
+	.actions-card .foot { font-size: 12px; color: var(--muted); font-style: italic; }
+
+	/* ---- Gaps ---- */
+
+	.gaps { display: flex; flex-direction: column; gap: 10px; }
+	.callout { display: flex; gap: 12px; border: 1px solid var(--line); border-left: 4px solid var(--c-warn); background: color-mix(in srgb, var(--c-warn) 8%, var(--card)); border-radius: 10px; padding: 14px 16px; font-size: 13.5px; }
+	.callout .mark { font-weight: 800; color: var(--c-warn); font-size: 15px; }
+
+	footer { border-top: 1px solid var(--line); padding-top: 16px; font-size: 12.5px; color: var(--muted); }
+
+	@media (max-width: 600px) {
+		.panel-cols { grid-template-columns: 1fr; }
+	}
+</style>
+</head>
+<body>
+<main>
+
+	<header class="top">
+		<h1>Page Status Flow</h1>
+		<p class="lede">How a Page moves between statuses while it's edited, added to a Launch, and published — and which actions are available at each point. Editing never happens on the published version: it always happens on a draft, and how that draft is resolved decides the Page's status.</p>
+	</header>
+
+	<section>
+		<h2>Statuses</h2>
+		<div class="legend">
+			<div class="legend-card" style="--c: var(--c-draft)"><b>Draft</b><span>The Page has an open Main Draft, not tied to any Launch.</span></div>
+			<div class="legend-card" style="--c: var(--c-launchdraft)"><b>Launch Draft</b><span>The Page has a draft tied to a Launch.</span></div>
+			<div class="legend-card" style="--c: var(--c-published)"><b>Published</b><span>The live version.</span></div>
+			<div class="legend-card orphan" style="--c: var(--c-pending)"><b>Pending</b><span>Only on seed data ("Products") — no action leads to it yet.</span></div>
+		</div>
+	</section>
+
+	<section>
+		<h2>Transitions</h2>
+		<p class="section-note">Click a status to see what leads into it and what comes next.</p>
+		<div>
+			<div class="diagram-wrap">
+				<svg id="page-diagram" viewBox="0 0 860 450" role="group" aria-label="Page status diagram, interactive">
+					<defs>
+						<marker id="arr-neutral" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker>
+						<marker id="arr-launchdraft" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--c-launchdraft)"/></marker>
+						<marker id="arr-published" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--c-published)"/></marker>
+					</defs>
+
+					<g class="edge edge-neutral" data-from="" data-to="draft">
+						<path d="M112,160 C170,100 200,62 262,62" marker-end="url(#arr-neutral)"/>
+						<rect class="lbl-bg" x="128" y="80" width="134" height="34" rx="7"/>
+						<g class="lbl"><text class="main" x="195" y="95">Keep as Main Draft</text><text class="muted" x="195" y="108">user action</text></g>
+					</g>
+
+					<g class="edge edge-neutral" data-from="" data-to="published">
+						<path d="M134,200 L618,200" marker-end="url(#arr-neutral)"/>
+						<rect class="lbl-bg" x="280" y="183" width="176" height="34" rx="7"/>
+						<g class="lbl"><text class="main" x="368" y="198">Publish</text><text class="muted" x="368" y="211">Main Draft only · version +1</text></g>
+					</g>
+
+					<g class="edge edge-launchdraft" data-from="" data-to="launchdraft">
+						<path d="M112,240 C170,300 200,338 262,338" marker-end="url(#arr-launchdraft)"/>
+						<rect class="lbl-bg" x="128" y="286" width="124" height="34" rx="7"/>
+						<g class="lbl"><text class="main" x="190" y="301">Add to a Launch</text><text class="muted" x="190" y="314">user action</text></g>
+					</g>
+
+					<g class="edge edge-launchdraft" data-from="launchdraft" data-to="launchdraft">
+						<path d="M300,306 C300,256 400,256 400,306" marker-end="url(#arr-launchdraft)"/>
+						<rect class="lbl-bg" x="282" y="236" width="136" height="34" rx="7"/>
+						<g class="lbl"><text class="main" x="350" y="251">Save · Ready to Publish</text><text class="muted" x="350" y="264">stays Launch Draft</text></g>
+					</g>
+
+					<g class="edge edge-launchdraft" data-from="launchdraft" data-to="published">
+						<path d="M432,338 C510,338 540,250 618,222" marker-end="url(#arr-launchdraft)"/>
+						<rect class="lbl-bg" x="470" y="286" width="150" height="34" rx="7"/>
+						<g class="lbl"><text class="main" x="545" y="301">Launch publishes</text><text class="muted" x="545" y="314">automatic</text></g>
+					</g>
+
+					<g class="edge edge-published" data-from="published" data-to="">
+						<path d="M705,232 C705,440 110,440 80,252" marker-end="url(#arr-published)"/>
+						<rect class="lbl-bg" x="320" y="390" width="190" height="38" rx="8"/>
+						<g class="lbl"><text class="main" x="415" y="406">Edit again</text><text class="muted" x="415" y="420">opens a new draft</text></g>
+					</g>
+
+					<g class="n-start">
+						<circle cx="80" cy="200" r="54"/>
+						<text x="80" y="196" text-anchor="middle">Editing a</text>
+						<text x="80" y="211" text-anchor="middle">Main Draft</text>
+					</g>
+
+					<g class="node n-draft" data-id="draft" tabindex="0" role="button" aria-label="Draft status">
+						<rect x="262" y="30" width="170" height="64" rx="14"/>
+						<text class="label" x="347" y="60" text-anchor="middle">Draft</text>
+						<text class="sub" x="347" y="79" text-anchor="middle">Main Draft kept open</text>
+					</g>
+
+					<g class="node n-published" data-id="published" tabindex="0" role="button" aria-label="Published status">
+						<rect x="620" y="168" width="170" height="64" rx="14"/>
+						<text class="label" x="705" y="198" text-anchor="middle">Published</text>
+						<text class="sub" x="705" y="217" text-anchor="middle">live version</text>
+					</g>
+
+					<g class="node n-launchdraft" data-id="launchdraft" tabindex="0" role="button" aria-label="Launch Draft status">
+						<rect x="262" y="306" width="170" height="64" rx="14"/>
+						<text class="label" x="347" y="336" text-anchor="middle">Launch Draft</text>
+						<text class="sub" x="347" y="355" text-anchor="middle">tied to one Launch</text>
+					</g>
+
+					<g class="node n-pending" data-id="pending" tabindex="0" role="button" aria-label="Pending status">
+						<rect x="620" y="30" width="170" height="64" rx="14"/>
+						<text class="label" x="705" y="60" text-anchor="middle">Pending</text>
+						<text class="sub" x="705" y="79" text-anchor="middle">seed data only · no transitions</text>
+					</g>
+				</svg>
+			</div>
+			<div class="panel" id="page-panel"></div>
+		</div>
+
+		<div class="table-wrap">
+			<table>
+				<thead>
+					<tr><th>From</th><th>Action</th><th>To</th><th>Notes</th></tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>Editing a Main Draft</td>
+						<td><b>Keep as Main Draft</b></td>
+						<td><span class="pill"><span class="dot" style="background: var(--c-draft)"></span>Draft</span></td>
+						<td class="note-cell">Only one Main Draft per Page; a new one replaces the old one.</td>
+					</tr>
+					<tr>
+						<td>Editing a Main Draft</td>
+						<td><b>Publish</b> (with confirmation)</td>
+						<td><span class="pill"><span class="dot" style="background: var(--c-published)"></span>Published</span></td>
+						<td class="note-cell">Standalone publish, only from the Main Draft. The version goes up (4.0 → 5.0).</td>
+					</tr>
+					<tr>
+						<td>Editing a Main Draft</td>
+						<td><b>Add to a Launch</b></td>
+						<td><span class="pill"><span class="dot" style="background: var(--c-launchdraft)"></span>Launch Draft</span></td>
+						<td class="note-cell">The Page keeps its Main Draft and also gets a draft for that Launch.</td>
+					</tr>
+					<tr>
+						<td><span class="pill"><span class="dot" style="background: var(--c-launchdraft)"></span>Launch Draft</span></td>
+						<td><b>Save</b></td>
+						<td><span class="pill"><span class="dot" style="background: var(--c-launchdraft)"></span>Launch Draft</span></td>
+						<td class="note-cell">Keeps the draft open and tied to the Launch.</td>
+					</tr>
+					<tr>
+						<td><span class="pill"><span class="dot" style="background: var(--c-launchdraft)"></span>Launch Draft</span></td>
+						<td><b>Ready to Publish</b></td>
+						<td><span class="pill"><span class="dot" style="background: var(--c-launchdraft)"></span>Launch Draft</span></td>
+						<td class="note-cell">The Page's status doesn't change. It marks the Page's entry in the Launch as "Ready to Publish" — what the Launch's Publish/Schedule check looks at.</td>
+					</tr>
+					<tr>
+						<td><span class="pill"><span class="dot" style="background: var(--c-launchdraft)"></span>Launch Draft</span></td>
+						<td><b>The Launch publishes</b> <span class="kind">automatic</span></td>
+						<td><span class="pill"><span class="dot" style="background: var(--c-published)"></span>Published</span></td>
+						<td class="note-cell">When the Launch is published manually or at its scheduled time.</td>
+					</tr>
+					<tr>
+						<td><span class="pill"><span class="dot" style="background: var(--c-published)"></span>Published</span></td>
+						<td><b>Edit again</b></td>
+						<td>A new open draft</td>
+						<td class="note-cell">Starts the cycle again. A Page can have one Main Draft plus one draft per Launch at the same time.</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</section>
+
+	<section>
+		<h2>Actions</h2>
+		<div class="actions-grid">
+			<div class="actions-card">
+				<h2>Page editor</h2>
+				<p class="where">Actions menu — depends on which draft is being edited</p>
+				<div class="row">
+					<span class="ctx">Main Draft</span>
+					<div class="chips"><span class="chip">Keep as Main Draft</span><span class="chip">Publish</span><span class="chip">Add to a Launch</span></div>
+				</div>
+				<div class="row">
+					<span class="ctx">Draft tied to a Launch</span>
+					<div class="chips"><span class="chip">Ready to Publish</span><span class="chip">Save</span></div>
+				</div>
+				<p class="foot">A draft tied to a Launch has no Publish action — it's published only as part of its Launch.</p>
+			</div>
+
+			<div class="actions-card">
+				<h2>Pages list</h2>
+				<p class="where">Kebab menu — depends on the Page's status</p>
+				<div class="row">
+					<span class="ctx">Launch Draft</span>
+					<div class="chips"><span class="chip">Edit</span></div>
+				</div>
+				<div class="row">
+					<span class="ctx">Draft · Published · Pending</span>
+					<div class="chips"><span class="chip">Edit</span><span class="chip">History View</span></div>
+				</div>
+			</div>
+
+			<div class="actions-card">
+				<h2>Page History</h2>
+				<p class="where">Kebab menu — per version</p>
+				<div class="row">
+					<span class="ctx">Version not in a Launch</span>
+					<div class="chips"><span class="chip">View</span><span class="chip">Add to a Launch</span></div>
+				</div>
+				<div class="row">
+					<span class="ctx">Version already in a Launch</span>
+					<div class="chips"><span class="chip">View</span><span class="chip danger">Remove from the Launch</span></div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section>
+		<h2>Open questions</h2>
+		<div class="gaps">
+			<div class="callout"><span class="mark">!</span><span><b>Launch publish doesn't update the Page.</b> In the mockup, publishing a Launch changes its elements to Published, but the Page itself still shows "Launch Draft" in the Pages list — the diagram says it should become Published.</span></div>
+			<div class="callout"><span class="mark">!</span><span><b>Pending has no way in.</b> No action leads to it — either it needs a transition, or the "Products" seed data should use a different status.</span></div>
+			<div class="callout"><span class="mark">!</span><span><b>Failed Launch is undefined for Pages.</b> Nothing says what happens to a Page whose element failed. Under the no-rollback rule it should stay Launch Draft, but that isn't stated anywhere.</span></div>
+		</div>
+	</section>
+
+	<footer>Launches — Pages only. Based on the Launches mockups and LPD-106028, as of 2026-09-24.</footer>
+
+</main>
+
+<script>
+	(function () {
+		var STATUSES = {
+			draft: {label: 'Draft', color: '--c-draft'},
+			launchdraft: {label: 'Launch Draft', color: '--c-launchdraft'},
+			published: {label: 'Published', color: '--c-published'},
+			pending: {label: 'Pending', color: '--c-pending'}
+		};
+
+		var TRANSITIONS = [
+			{from: null, to: 'draft', trigger: 'Keep as Main Draft', kind: 'action', note: 'Only one Main Draft per Page; a new one replaces the old one.'},
+			{from: null, to: 'published', trigger: 'Publish', kind: 'action', note: 'Standalone, Main Draft only. The version goes up.'},
+			{from: null, to: 'launchdraft', trigger: 'Add to a Launch', kind: 'action', note: 'The Page keeps its Main Draft and gets a draft for that Launch.'},
+			{from: 'launchdraft', to: 'launchdraft', trigger: 'Save', kind: 'action', note: 'Keeps the draft open and tied to the Launch.'},
+			{from: 'launchdraft', to: 'launchdraft', trigger: 'Ready to Publish', kind: 'action', note: 'Marks the Page\'s entry in the Launch as Ready to Publish.'},
+			{from: 'launchdraft', to: 'published', trigger: 'Launch publishes', kind: 'automatic', note: 'Manually or at the Launch\'s scheduled time.'},
+			{from: 'published', to: null, trigger: 'Edit again', kind: 'action', note: 'Opens a new draft. One Main Draft plus one draft per Launch can be open at once.'}
+		];
+
+		var EMPTY = {
+			draft: {next: 'Resting status. Editing the Page again reopens the Main Draft, which can then be kept, published or added to a Launch.'},
+			pending: {prev: 'Nothing leads here — only on seed data.', next: 'No transitions defined.'}
+		};
+
+		var svg = document.getElementById('page-diagram');
+		var panel = document.getElementById('page-panel');
+		var nodes = Array.prototype.slice.call(svg.querySelectorAll('.node'));
+		var edges = Array.prototype.slice.call(svg.querySelectorAll('.edge'));
+		var selected = 'launchdraft';
+
+		function step(t, dir) {
+			var other = dir === 'prev' ? t.from : t.to;
+			var target;
+
+			if (t.from === t.to) {
+				target = 'Stays <b>' + STATUSES[t.to].label + '</b>';
+			}
+			else if (!other) {
+				target = dir === 'prev' ? 'From editing a Main Draft' : 'Opens a new draft';
+			}
+			else {
+				target = (dir === 'prev' ? 'From ' : 'To ') + '<b style="color: var(' + STATUSES[other].color + ')">' + STATUSES[other].label + '</b>';
+			}
+
+			return '<li class="step-card"><div class="trigger">' + t.trigger + ' <span class="kind">' + t.kind + '</span></div><div class="target">' + target + '</div>' + (t.note ? '<div class="note">' + t.note + '</div>' : '') + '</li>';
+		}
+
+		function render() {
+			nodes.forEach(function (n) {
+				var id = n.getAttribute('data-id');
+				var related = TRANSITIONS.some(function (t) {
+					return (t.from === selected && t.to === id) || (t.to === selected && t.from === id);
+				});
+
+				n.classList.toggle('selected', !!selected && id === selected);
+				n.classList.toggle('dimmed', !!selected && id !== selected && !related);
+			});
+
+			edges.forEach(function (e) {
+				var hit = e.getAttribute('data-from') === selected || e.getAttribute('data-to') === selected;
+
+				e.classList.toggle('active', !!selected && hit);
+				e.classList.toggle('dimmed', !!selected && !hit);
+			});
+
+			if (!selected) {
+				panel.innerHTML = '<p class="panel-hint">Click a status above to see what leads into it and what happens next.</p>';
+				return;
+			}
+
+			var st = STATUSES[selected];
+			var prev = TRANSITIONS.filter(function (t) { return t.to === selected && t.from !== selected; });
+			var next = TRANSITIONS.filter(function (t) { return t.from === selected; });
+			var empty = EMPTY[selected] || {};
+
+			panel.innerHTML = '' +
+				'<div class="panel-status"><span class="dot" style="background: var(' + st.color + ')"></span><span class="panel-title">' + st.label + '</span></div>' +
+				'<div class="panel-cols">' +
+					'<div class="panel-col"><h3>Came from</h3><ul>' + (prev.length ? prev.map(function (t) { return step(t, 'prev'); }).join('') : '<li class="step-empty">' + (empty.prev || 'Nothing leads here.') + '</li>') + '</ul></div>' +
+					'<div class="panel-col"><h3>Leads to</h3><ul>' + (next.length ? next.map(function (t) { return step(t, 'next'); }).join('') : '<li class="step-empty">' + (empty.next || 'No further transition.') + '</li>') + '</ul></div>' +
+				'</div>';
+		}
+
+		function select(id) {
+			selected = selected === id ? null : id;
+			render();
+		}
+
+		nodes.forEach(function (n) {
+			n.addEventListener('click', function () { select(n.getAttribute('data-id')); });
+			n.addEventListener('keydown', function (event) {
+				if (event.key === 'Enter' || event.key === ' ') {
+					event.preventDefault();
+					select(n.getAttribute('data-id'));
+				}
+			});
+		});
+
+		render();
+	})();
+</script>
+</body>
+</html>

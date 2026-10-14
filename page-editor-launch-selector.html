@@ -1,0 +1,913 @@
+<!doctype html>
+<html lang="en-US">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Page Editor — Launch Selector Prototype</title>
+	<link rel="stylesheet" href="atlas.css">
+	<style>
+		body {
+			background-color: #f7f8f9;
+			margin: 0;
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+		}
+
+		.review-toolbar {
+			position: sticky;
+			top: 0;
+			z-index: 1050;
+			display: flex;
+			align-items: center;
+			gap: .5rem;
+			padding: .375rem 1rem;
+			background: #272833;
+			color: #fff;
+			font-size: .6875rem;
+		}
+
+		.review-toolbar strong {
+			margin-right: .5rem;
+			opacity: .7;
+			font-weight: 600;
+			letter-spacing: .02em;
+			text-transform: uppercase;
+		}
+
+		.review-toolbar span {
+			opacity: .75;
+		}
+
+		.review-toolbar-spacer {
+			flex: 1 1 auto;
+		}
+
+		.review-toolbar a {
+			display: inline-flex;
+			align-items: center;
+			gap: .375rem;
+			border: 1px solid rgba(255, 255, 255, .3);
+			border-radius: 3px;
+			padding: .25rem .625rem;
+			color: #fff;
+			text-decoration: none;
+			white-space: nowrap;
+			font-size: .6875rem;
+		}
+
+		.review-toolbar a:hover {
+			background: rgba(255, 255, 255, .12);
+		}
+
+		.review-toolbar a svg {
+			width: 11px;
+			height: 11px;
+		}
+
+		.editor-topbar {
+			position: sticky;
+			top: 28px;
+			z-index: 1030;
+			display: flex;
+			align-items: center;
+			gap: .75rem;
+			padding: .625rem 1rem;
+			background: #fff;
+			border-bottom: 1px solid #dfe1e6;
+		}
+
+		.editor-back-btn {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			width: 32px;
+			height: 32px;
+			border-radius: 50%;
+			border: none;
+			background: transparent;
+			color: #6b6c7e;
+			cursor: pointer;
+			flex: 0 0 auto;
+		}
+
+		.editor-back-btn:hover {
+			background: #f1f2f5;
+		}
+
+		.editor-title-group {
+			display: flex;
+			flex-direction: column;
+			min-width: 0;
+			flex: 0 0 auto;
+		}
+
+		.editor-title-group input {
+			border: none;
+			font-size: .9375rem;
+			font-weight: 600;
+			color: #272833;
+			padding: 0;
+			max-width: 260px;
+		}
+
+		.editor-title-group input:focus {
+			outline: 1px solid #4b9bff;
+			border-radius: 2px;
+		}
+
+		.editor-title-group small {
+			color: #6b6c7e;
+			font-size: .6875rem;
+		}
+
+		.topbar-divider {
+			width: 1px;
+			align-self: stretch;
+			background: #e7e7ed;
+			flex: 0 0 auto;
+		}
+
+		.context-switcher {
+			position: relative;
+			flex: 0 0 auto;
+		}
+
+		.context-switcher-btn {
+			display: inline-flex;
+			align-items: center;
+			gap: .5rem;
+			border: 1px solid #dfe1e6;
+			background: #fff;
+			border-radius: 2rem;
+			padding: .3125rem .5rem .3125rem .625rem;
+			cursor: pointer;
+			font-size: .8125rem;
+			color: #272833;
+		}
+
+		.context-switcher-btn:hover {
+			background: #f7f8f9;
+		}
+
+		.context-switcher-icon {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			width: 22px;
+			height: 22px;
+			border-radius: 50%;
+			flex: 0 0 auto;
+		}
+
+		.context-switcher-icon.is-live {
+			background: #eaf2ff;
+			color: #4b9bff;
+		}
+
+		.context-switcher-icon.is-launch {
+			background: #fff2e0;
+			color: #ff9932;
+		}
+
+		.context-switcher-icon svg {
+			width: 12px;
+			height: 12px;
+		}
+
+		.context-switcher-label {
+			display: flex;
+			flex-direction: column;
+			line-height: 1.15;
+			text-align: left;
+		}
+
+		.context-switcher-label b {
+			font-weight: 600;
+		}
+
+		.context-switcher-label small {
+			color: #6b6c7e;
+			font-size: .6875rem;
+		}
+
+		.context-switcher .dropdown-menu {
+			min-width: 320px;
+			padding: .5rem 0;
+		}
+
+		.context-option {
+			display: flex;
+			align-items: center;
+			gap: .625rem;
+			width: 100%;
+			border: none;
+			background: transparent;
+			padding: .5rem .875rem;
+			cursor: pointer;
+			text-align: left;
+			font-size: .8125rem;
+			color: #272833;
+		}
+
+		.context-option:hover {
+			background: #f1f2f5;
+		}
+
+		.context-option.is-active {
+			background: #eaf2ff;
+		}
+
+		.context-option-icon {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			width: 24px;
+			height: 24px;
+			border-radius: 50%;
+			flex: 0 0 auto;
+		}
+
+		.context-option-icon.is-live {
+			background: #eaf2ff;
+			color: #4b9bff;
+		}
+
+		.context-option-icon.is-launch {
+			background: #fff2e0;
+			color: #ff9932;
+		}
+
+		.context-option-icon svg {
+			width: 13px;
+			height: 13px;
+		}
+
+		.context-option-body {
+			flex: 1 1 auto;
+			min-width: 0;
+		}
+
+		.context-option-body .co-title {
+			display: block;
+			font-weight: 600;
+		}
+
+		.context-option-body .co-meta {
+			display: block;
+			color: #6b6c7e;
+			font-size: .6875rem;
+		}
+
+		.context-option-check {
+			flex: 0 0 auto;
+			color: #4b9bff;
+			width: 14px;
+			height: 14px;
+		}
+
+		.context-option-check svg {
+			width: 14px;
+			height: 14px;
+		}
+
+		.topbar-spacer {
+			flex: 1 1 auto;
+		}
+
+		.topbar-actions {
+			display: flex;
+			align-items: center;
+			gap: .5rem;
+			flex: 0 0 auto;
+		}
+
+		.editor-banner-wrap {
+			padding: .625rem 1rem 0 1rem;
+		}
+
+		.editor-banner-wrap .alert {
+			margin-bottom: 0;
+			display: flex;
+			align-items: center;
+			gap: .625rem;
+		}
+
+		.editor-banner-wrap .alert svg {
+			width: 18px;
+			height: 18px;
+			flex: 0 0 auto;
+		}
+
+		.editor-canvas {
+			max-width: 860px;
+			margin: 1.5rem auto 4rem;
+			padding: 0 1rem;
+		}
+
+		.editor-canvas-caption {
+			text-align: center;
+			color: #6b6c7e;
+			font-size: .75rem;
+			margin-bottom: 1rem;
+		}
+
+		.page-block {
+			position: relative;
+			border: 1px dashed #c7c8d1;
+			border-left: 4px solid #c7c8d1;
+			border-radius: 4px;
+			background: #fff;
+			padding: 1.25rem 1.25rem 1.25rem 1.5rem;
+			margin-bottom: 1rem;
+		}
+
+		.page-block.is-changed {
+			border-left-color: #ff9932;
+			background: #fffaf3;
+		}
+
+		.page-block.is-new {
+			border-left-color: #4b9bff;
+			background: #f3f8ff;
+		}
+
+		.page-block-head {
+			display: flex;
+			align-items: center;
+			gap: .5rem;
+			margin-bottom: .375rem;
+		}
+
+		.page-block-head h3 {
+			margin: 0;
+			font-size: .875rem;
+			font-weight: 600;
+			color: #272833;
+		}
+
+		.page-block-body {
+			color: #6b6c7e;
+			font-size: .8125rem;
+			line-height: 1.5;
+		}
+
+		.hero-block h2 {
+			margin: 0 0 .375rem;
+			font-size: 1.375rem;
+			color: #272833;
+		}
+
+		.hero-block p {
+			margin: 0;
+			color: #6b6c7e;
+			font-size: .875rem;
+		}
+
+		.live-locked-note {
+			display: flex;
+			align-items: center;
+			gap: .5rem;
+			justify-content: center;
+			color: #6b6c7e;
+			font-size: .75rem;
+			margin-top: -.5rem;
+			margin-bottom: 1.25rem;
+		}
+
+		.live-locked-note svg {
+			width: 14px;
+			height: 14px;
+		}
+
+		#addToLaunchModal .modal-body .custom-control {
+			padding: .5rem .625rem;
+			border: 1px solid #dfe1e6;
+			border-radius: 4px;
+			margin-bottom: .5rem;
+		}
+
+		#addToLaunchModal .modal-body .custom-control:hover {
+			background: #f7f8f9;
+		}
+
+		.toast-wrap {
+			position: fixed;
+			bottom: 1.25rem;
+			right: 1.25rem;
+			z-index: 1200;
+		}
+
+		.toast-wrap .alert {
+			box-shadow: 0 4px 16px rgba(0,0,0,.15);
+			display: flex;
+			align-items: center;
+			gap: .5rem;
+		}
+
+		.toast-wrap .alert svg {
+			width: 16px;
+			height: 16px;
+		}
+
+		[hidden] {
+			display: none !important;
+		}
+
+		.dropdown-menu.mockup-open {
+			display: block;
+		}
+
+		.modal.mockup-open {
+			display: block;
+		}
+
+		.modal-backdrop.show {
+			display: block;
+		}
+	</style>
+</head>
+<body>
+
+	<div class="review-toolbar">
+		<strong>Prototype</strong>
+		<span>Page Editor — Launch / Live selector, Marketer &amp; Content Contributor point of view. Not a functional canvas — content blocks are illustrative.</span>
+		<div class="review-toolbar-spacer"></div>
+		<a href="launches-mockup-clay.html" target="_blank" rel="noopener">
+			<svg class="lexicon-icon"><use href="#shortcut"></use></svg>
+			Manage Launches (create, edit, delete, preview)
+		</a>
+	</div>
+
+	<div class="editor-topbar">
+		<button class="editor-back-btn" type="button" title="Back to Pages" aria-label="Back to Pages">
+			<svg class="lexicon-icon"><use href="#angle-left"></use></svg>
+		</button>
+
+		<div class="editor-title-group">
+			<input type="text" id="pageTitle" value="Fall Sale Landing Page">
+			<small>Site: Guest</small>
+		</div>
+
+		<div class="topbar-divider"></div>
+
+		<div class="context-switcher">
+			<button class="context-switcher-btn" type="button" id="contextSwitcherBtn">
+				<span class="context-switcher-icon is-live" id="contextSwitcherIcon">
+					<svg class="lexicon-icon"><use href="#globe"></use></svg>
+				</span>
+				<span class="context-switcher-label">
+					<b id="contextSwitcherTitle">Live</b>
+					<small id="contextSwitcherMeta">Published version</small>
+				</span>
+				<svg class="lexicon-icon" style="width:11px;height:11px;color:#6b6c7e;">
+					<use href="#caret-bottom"></use>
+				</svg>
+			</button>
+
+			<div class="dropdown-menu" id="contextSwitcherMenu" hidden>
+				<div class="dropdown-header">Viewing</div>
+				<div id="contextOptionLive"></div>
+
+				<div class="dropdown-divider"></div>
+				<div class="dropdown-header">Launches this page is part of</div>
+				<div id="contextOptionsLaunches"></div>
+
+				<div class="dropdown-divider"></div>
+				<button class="dropdown-item" type="button" id="addToLaunchTrigger">
+					<svg class="lexicon-icon" style="width:12px;height:12px;margin-right:.375rem;"><use href="#plus"></use></svg>
+					Add this page to another Launch
+				</button>
+			</div>
+		</div>
+
+		<div class="topbar-spacer"></div>
+
+		<div class="topbar-actions" id="topbarActions"></div>
+	</div>
+
+	<div class="editor-banner-wrap" id="editorBannerWrap"></div>
+
+	<div class="editor-canvas">
+		<p class="editor-canvas-caption">Simulated page canvas — not an editable drag-and-drop surface in this prototype.</p>
+		<div id="pageBlocks"></div>
+	</div>
+
+	<!-- Add to a Launch modal -->
+	<div class="modal" id="addToLaunchModal" hidden>
+		<div class="modal-dialog" style="max-width:420px;margin:8vh auto;">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Add this page to a Launch</h5>
+					<button class="close" type="button" id="addToLaunchClose" aria-label="Close">
+						<svg class="lexicon-icon"><use href="#times"></use></svg>
+					</button>
+				</div>
+				<div class="modal-body">
+					<p style="color:#6b6c7e;font-size:.8125rem;margin-top:0;">
+						This creates a new draft of this page for the selected Launch. Your Live page won't change until that Launch is published.
+					</p>
+					<div id="addToLaunchOptions"></div>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-secondary" type="button" id="addToLaunchCancel">Cancel</button>
+					<button class="btn btn-primary" type="button" id="addToLaunchConfirm" disabled>Add to Launch</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal-backdrop" id="modalBackdrop" hidden></div>
+
+	<div class="toast-wrap" id="toastWrap" hidden></div>
+
+	<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+		<symbol id="angle-left" viewBox="0 0 512 512">
+			<path class="lexicon-icon-outline" d="M114.106 254.607c0.22 6.936 2.972 13.811 8.272 19.11l227.222 227.221c11.026 11.058 28.94 11.058 39.999 0 11.058-11.026 11.058-28.94 0-39.999l-206.333-206.333c0 0 206.333-206.333 206.333-206.333 11.058-11.059 11.058-28.973 0-39.999-11.058-11.059-28.973-11.059-39.999 0l-227.221 227.221c-5.3 5.3-8.052 12.174-8.273 19.111z"/>
+		</symbol>
+		<symbol id="plus" viewBox="0 0 512 512">
+			<path class="lexicon-icon-outline" d="M479.82 224.002h-192.41v-191.91c0-17.6-14.4-32-32-32v0c-17.6 0-32 14.4-32 32v191.91h-191.41c-17.6 0-32 14.4-32 32v0c0 17.6 14.4 32 32 32h191.41v191.91c0 17.6 14.4 32 32 32v0c17.6 0 32-14.4 32-32v-191.909h192.41c17.6 0 32-14.4 32-32v0c0-17.6-14.4-32-32-32z"/>
+		</symbol>
+		<symbol id="caret-bottom" viewBox="0 0 512 512">
+			<path class="lexicon-icon-outline" d="M103.5,204.3l136.1,136.1c9,9,23.7,9,32.7,0l136.1-136.1c14.6-14.6,4.3-39.5-16.4-39.5H119.9C99.2,164.8,88.9,189.7,103.5,204.3L103.5,204.3z"/>
+		</symbol>
+		<symbol id="times" viewBox="0 0 512 512">
+			<path class="lexicon-icon-outline" d="M301.1,256.1L502.3,54.9c30.1-30.1-16.8-73.6-45.2-45.2L255.9,210.8L54.6,9.7C24.6-20.4-19,26.5,9.4,54.9l201.2,201.2L9.3,457.3c-28.9,28.9,15.8,74.6,45.2,45.2l201.3-201.2l201.3,201.2c28.9,28.9,74.2-16.3,45.2-45.2L301.1,256.1z"/>
+		</symbol>
+		<symbol id="check" viewBox="0 0 512 512">
+			<path class="lexicon-icon-outline" d="M502.091 60.993c-9.909-9.91-25.962-9.91-35.843 0l-336.988 336.988-83.508-83.451c-9.881-9.909-25.962-9.909-35.843 0-9.909 9.909-9.909 25.962 0 35.843l98.257 98.257c2.608 2.608 5.679 4.433 8.924 5.679 4.028 2.464 8.403 4.115 12.952 4.115 6.49 0 12.981-2.464 17.936-7.418l354.112-354.141c9.909-9.909 9.909-25.962 0-35.871l0-0.001z"/>
+		</symbol>
+		<symbol id="check-circle" viewBox="0 0 512 512">
+			<path class="lexicon-icon-outline" d="M254.2,304.9c49.9-58.2,134-156.4,169.5-197.8l0,0c5.9-6.8,14.6-11.2,24.3-11.2c17.7,0,32,14.3,32,32c0,8-2.9,15.2-7.7,20.8l0,0c-41.7,48.6-150.3,175.4-192,224l0,0c-5.9,6.8-14.6,11.2-24.3,11.2c-8.8,0-16.8-3.6-22.6-9.4c-45.3-45.3-50.7-50.7-96-96c-5.8-5.8-9.4-13.8-9.4-22.6c0-17.7,14.3-32,32-32c8.8,0,16.8,3.6,22.6,9.4C218.2,268.9,229.2,279.9,254.2,304.9z M507.3,207.1c-18.3,21.4-39.5,46.1-60.6,70.6C435.9,373.6,354.7,448,256,448c-106,0-192-86-192-192S150,64,256,64c35.5,0,68.7,9.6,97.2,26.4c15.1-17.6,29.5-34.4,42.1-49.2C355.3,15.2,307.4,0,256,0C114.6,0,0,114.6,0,256s114.6,256,256,256s256-114.6,256-256C512,239.3,510.4,223,507.3,207.1z"/>
+		</symbol>
+		<symbol id="view" viewBox="0 0 512 512">
+			<path class="lexicon-icon-outline" d="M499.7,228.2C412.4,101.9,291,96,260.4,96c-3.1,0-10.7,0-14.8,0C210,96,81.3,106.5,3.2,244.5c-9.1,16.1,3.3,30.7,9.2,39.3C99.8,410.1,222.6,416,253.6,416c3.2,0,10.8,0,14.9,0c35.2,0,162.2-10.5,240.2-148.5C517.8,251.4,505.7,236.8,499.7,228.2z M253.1,313.5c-28.2,0-51-22.8-51-51c0-28.2,22.8-51,51-51c28.2,0,51,22.8,51,51C304.1,290.7,281.3,313.5,253.1,313.5z M56,256.6c26.8-42.1,62-72.7,104.9-91c6.6-2.8,13.1-5.2,19.4-7.3c-32.8,23-54.3,61.1-54.3,104.2c0,29.7,10.2,57,27.3,78.7C120.7,325.4,86,299.3,56,256.6z M346,349.3c21.2-22.7,34.3-53.2,34.3-86.8c0-44.2-22.6-83.2-56.9-106c40.9,12.1,91.1,39.2,133,98.9C423.3,307.6,382.1,335,346,349.3z"/>
+		</symbol>
+		<symbol id="rocket" viewBox="0 0 16 16">
+			<path class="lexicon-icon-outline" d="M4.142 10.275c.218.218.225.583.09.86-.134.28-.218.592-.09.72.129.129.44.045.72-.09.278-.135.643-.127.861.09l.395.396-.462.23a3.019 3.019 0 0 1-2.304.165 3.019 3.019 0 0 1 .164-2.304l.231-.462.395.395Zm.775-4.364c-.6 1.095-.992 2.137-1.149 3.047a.226.226 0 0 1-.09.02H.222a.224.224 0 0 1-.158-.382L2.748 5.91h2.17Zm5.169 7.338-2.684 2.684a.224.224 0 0 1-.382-.158v-3.543c.914-.154 1.963-.548 3.066-1.152v2.169Z" />
+			<path class="lexicon-icon-outline" clip-rule="evenodd" d="M14.257 6.048a9.224 9.224 0 0 1-1.42 1.856c-2.013 2.012-4.236 3.313-5.892 3.593L4.5 9.053c.28-1.656 1.58-3.879 3.593-5.891A9.225 9.225 0 0 1 9.95 1.74a4.456 4.456 0 0 0 1.306 3.003 4.455 4.455 0 0 0 3.001 1.305Zm-4.582.275a1.118 1.118 0 1 0-1.58 1.581 1.118 1.118 0 0 0 1.58-1.58Z" fill-rule="evenodd" />
+			<path class="lexicon-icon-outline" d="M15.998 0s-.059 2.644-1.32 5.258a3.679 3.679 0 0 1-2.869-1.069 3.68 3.68 0 0 1-1.07-2.87C13.353.06 16 0 16 0Z" />
+		</symbol>
+		<symbol id="globe" viewBox="0 0 512 512">
+			<path class="lexicon-icon-outline" d="M256,0C115.2,0,0,115.2,0,256s115.2,256,256,256s256-115.2,256-256S396.8,0,256,0z M320,384c12.8,9.6,25.6,76.8,25.6,76.8c-28.8,12.8-73.6,25.2-121.6,16c0,0-32-16-32-60.8s16-67.2-32-96s-86.4-22.4-96-32s-16-38.4,0-64c12.8,0,19.2,0,32,0c0-22.4,0-48,0-64c25.6,0,35.2,0,64,0c19.2-12.8,64-124.8,64-124.8c19.2-6.4,52.8-6.9,64,0C183.3,161.3,348.7,46.7,320,96c-19.2,35.2-96,83.2-96,96s22.4,32,32,32s51.2-64,64-64s41.6,54.4,32,64s-115.2,16-128,32s-16,80,0,96S307.2,374.4,320,384z M425.6,403.2c0,0,25.6-86.4,22.4-115.2s-22.4-60.8-32-64s-25.6,6.4-32,0c0-6.4,0-19.2,0-32c6.4-6.4,67.2-6.4,86.4,0C476.8,195.2,506.5,308.9,425.6,403.2z"></path>
+		</symbol>
+		<symbol id="shortcut" viewBox="0 0 512 512">
+			<path class="lexicon-icon-outline lx-shortcut-border" d="M480,320c-17.6729,0-32,14.3271-32,32v96H64V64h96c17.6729,0,32-14.3271,32-32S177.6729,0,160,0H64C28.7104,0,0,28.7104,0,64v384c0,35.29,28.7104,64,64,64h384c35.29,0,64-28.71,64-64v-96C512,334.3271,497.6729,320,480,320z"/>
+			<path class="lexicon-icon-outline lx-shortcut-arrow" d="M480,0H320c-17.6729,0-32,14.3267-32,32s14.3271,32,32,32h82.7456L265.373,201.3726c-12.4971,12.4971-12.4971,32.7578,0,45.2549C271.6211,252.876,279.8105,256,288,256s16.3789-3.124,22.627-9.3726L448,109.2544V192c0,17.6733,14.3271,32,32,32s32-14.3267,32-32V32C512,14.3267,497.6729,0,480,0z"/>
+		</symbol>
+		<symbol id="info-circle" viewBox="0 0 512 512">
+			<path class="lexicon-icon-outline" d="M437,75C388.7,26.6,324.4,0,256,0C187.6,0,123.3,26.6,75,75C26.6,123.3,0,187.6,0,256c0,68.4,26.6,132.7,75,181c48.4,48.4,112.6,75,181,75c68.4,0,132.7-26.6,181-75c48.4-48.4,75-112.6,75-181C512,187.6,485.4,123.3,437,75z M288,384c0,17.7-14.3,32-32,32c-17.7,0-32-14.3-32-32V224c0-17.7,14.3-32,32-32c17.7,0,32,14.3,32,32V384z M256,160c-17.7,0-32-14.3-32-32c0-17.7,14.3-32,32-32s32,14.3,32,32C288,145.7,273.7,160,256,160z"/>
+		</symbol>
+	</svg>
+
+	<script>
+		(function () {
+			// ---- Seed data ----------------------------------------------------
+
+			var LAUNCHES = {
+				fallCampaign: { id: 'fallCampaign', name: 'Fall Campaign Refresh', status: 'Open' },
+				holidayStorefront: { id: 'holidayStorefront', name: 'Holiday Storefront', status: 'Scheduled' },
+				q3Announcement: { id: 'q3Announcement', name: 'Q3 Product Announcement', status: 'Open' },
+				springRefresh: { id: 'springRefresh', name: 'Spring Refresh 2027', status: 'Open' }
+			};
+
+			// Page currently has a draft in fallCampaign + holidayStorefront.
+			// q3Announcement / springRefresh are available to add the page to.
+			var pageDrafts = ['fallCampaign', 'holidayStorefront'];
+
+			var PAGE_CONTENT = {
+				live: {
+					version: '4.0',
+					blocks: [
+						{ title: 'Hero Banner', kind: 'hero', headline: 'Fall Sale — Up to 20% Off', sub: 'Ends October 15. Shop new markdowns across every category.' },
+						{ title: 'Rich Text Intro', body: 'Welcome copy introducing the Fall Sale, unchanged since the last publish.' },
+						{ title: 'Product Grid', body: '12 featured products, pulled from the "Fall Sale" collection.' },
+						{ title: 'Newsletter CTA', body: 'Button: "Shop Now" — links to the Fall Sale category page.' },
+						{ title: 'Footer', body: 'Standard site footer.' }
+					]
+				},
+				fallCampaign: {
+					readyToPublish: false,
+					blocks: [
+						{ title: 'Hero Banner', kind: 'hero', headline: 'Fall Refresh — New Arrivals Every Week', sub: 'Discover what just landed, restocked weekly through November.', status: 'changed' },
+						{ title: 'Rich Text Intro', body: 'Welcome copy introducing the Fall Sale, unchanged since the last publish.', status: 'unchanged' },
+						{ title: 'Product Grid', body: '12 featured products, pulled from the "Fall Sale" collection.', status: 'unchanged' },
+						{ title: 'Limited-Time Promo Banner', body: 'New block: countdown banner for a 48-hour flash promo, added for this Launch only.', status: 'new' },
+						{ title: 'Newsletter CTA', body: 'Button: "Get Early Access" — links to the new-arrivals signup form.', status: 'changed' },
+						{ title: 'Footer', body: 'Standard site footer.', status: 'unchanged' }
+					]
+				},
+				holidayStorefront: {
+					readyToPublish: true,
+					blocks: [
+						{ title: 'Hero Banner', kind: 'hero', headline: 'Holiday Shop Is Live!', sub: 'Gift guides, bundles, and free shipping through December 24.', status: 'changed' },
+						{ title: 'Rich Text Intro', body: 'Welcome copy introducing the Fall Sale, unchanged since the last publish.', status: 'unchanged' },
+						{ title: 'Product Grid', body: '12 featured products, pulled from the "Fall Sale" collection.', status: 'unchanged' },
+						{ title: 'Gift Guide Banner', body: 'New block: link-out to the curated Holiday Gift Guide.', status: 'new' },
+						{ title: 'Newsletter CTA', body: 'Button: "Shop Now" — links to the Fall Sale category page.', status: 'unchanged' },
+						{ title: 'Footer', body: 'Standard site footer.', status: 'unchanged' }
+					]
+				}
+			};
+
+			var currentContext = 'live'; // 'live' | launch id
+
+			// ---- Icon helper ----------------------------------------------------
+
+			function icon(id) {
+				return '<svg class="lexicon-icon"><use href="#' + id + '"></use></svg>';
+			}
+
+			// ---- Context switcher -------------------------------------------------
+
+			var switcherBtn = document.getElementById('contextSwitcherBtn');
+			var switcherMenu = document.getElementById('contextSwitcherMenu');
+			var switcherIcon = document.getElementById('contextSwitcherIcon');
+			var switcherTitle = document.getElementById('contextSwitcherTitle');
+			var switcherMeta = document.getElementById('contextSwitcherMeta');
+			var optionLiveEl = document.getElementById('contextOptionLive');
+			var optionsLaunchesEl = document.getElementById('contextOptionsLaunches');
+
+			function renderContextOptions() {
+				optionLiveEl.innerHTML =
+					'<button class="context-option' + (currentContext === 'live' ? ' is-active' : '') + '" type="button" data-context="live">' +
+						'<span class="context-option-icon is-live">' + icon('globe') + '</span>' +
+						'<span class="context-option-body">' +
+							'<span class="co-title">Live</span>' +
+							'<span class="co-meta">Published version &middot; v' + PAGE_CONTENT.live.version + '</span>' +
+						'</span>' +
+						(currentContext === 'live' ? '<span class="context-option-check">' + icon('check') + '</span>' : '') +
+					'</button>';
+
+				optionsLaunchesEl.innerHTML = pageDrafts.map(function (launchId) {
+					var launch = LAUNCHES[launchId];
+					var isActive = currentContext === launchId;
+					return (
+						'<button class="context-option' + (isActive ? ' is-active' : '') + '" type="button" data-context="' + launchId + '">' +
+							'<span class="context-option-icon is-launch">' + icon('rocket') + '</span>' +
+							'<span class="context-option-body">' +
+								'<span class="co-title">' + launch.name + '</span>' +
+								'<span class="co-meta">' + launch.status + ' &middot; ' + (PAGE_CONTENT[launchId].readyToPublish ? 'Ready to publish' : 'In progress') + '</span>' +
+							'</span>' +
+							(isActive ? '<span class="context-option-check">' + icon('check') + '</span>' : '') +
+						'</button>'
+					);
+				}).join('');
+
+				if (pageDrafts.length === 0) {
+					optionsLaunchesEl.innerHTML = '<div style="padding:.5rem .875rem;color:#6b6c7e;font-size:.75rem;">This page isn\'t part of any Launch yet.</div>';
+				}
+			}
+
+			function openSwitcherMenu() {
+				renderContextOptions();
+				switcherMenu.hidden = false;
+				switcherMenu.classList.add('mockup-open');
+			}
+
+			function closeSwitcherMenu() {
+				switcherMenu.hidden = true;
+				switcherMenu.classList.remove('mockup-open');
+			}
+
+			function isSwitcherMenuOpen() {
+				return switcherMenu.classList.contains('mockup-open');
+			}
+
+			switcherBtn.addEventListener('click', function (event) {
+				event.stopPropagation();
+				if (!isSwitcherMenuOpen()) {
+					openSwitcherMenu();
+				} else {
+					closeSwitcherMenu();
+				}
+			});
+
+			document.addEventListener('click', function (event) {
+				if (isSwitcherMenuOpen() && !switcherMenu.contains(event.target) && event.target !== switcherBtn) {
+					closeSwitcherMenu();
+				}
+			});
+
+			optionLiveEl.addEventListener('click', handleContextOptionClick);
+			optionsLaunchesEl.addEventListener('click', handleContextOptionClick);
+
+			function handleContextOptionClick(event) {
+				var btn = event.target.closest('[data-context]');
+				if (!btn) { return; }
+				setContext(btn.getAttribute('data-context'));
+				closeSwitcherMenu();
+			}
+
+			// ---- Rendering per context ---------------------------------------------
+
+			var topbarActionsEl = document.getElementById('topbarActions');
+			var bannerWrapEl = document.getElementById('editorBannerWrap');
+			var blocksEl = document.getElementById('pageBlocks');
+
+			function setContext(contextId) {
+				currentContext = contextId;
+				renderSwitcherButton();
+				renderBanner();
+				renderTopbarActions();
+				renderBlocks();
+			}
+
+			function renderSwitcherButton() {
+				if (currentContext === 'live') {
+					switcherIcon.className = 'context-switcher-icon is-live';
+					switcherIcon.innerHTML = icon('globe');
+					switcherTitle.textContent = 'Live';
+					switcherMeta.textContent = 'Published version';
+				} else {
+					var launch = LAUNCHES[currentContext];
+					switcherIcon.className = 'context-switcher-icon is-launch';
+					switcherIcon.innerHTML = icon('rocket');
+					switcherTitle.textContent = launch.name;
+					switcherMeta.textContent = launch.status + ' Launch';
+				}
+			}
+
+			function renderBanner() {
+				if (currentContext === 'live') {
+					bannerWrapEl.innerHTML =
+						'<div class="alert alert-secondary">' +
+							icon('info-circle') +
+							'<div>This is the <strong>published version</strong> of this page. It can\'t be edited directly here &mdash; use <strong>Add this page to a Launch</strong> to start a draft.</div>' +
+						'</div>';
+				} else {
+					var launch = LAUNCHES[currentContext];
+					bannerWrapEl.innerHTML =
+						'<div class="alert alert-warning">' +
+							icon('rocket') +
+							'<div>You\'re editing the draft of this page for the Launch <strong>' + launch.name + '</strong> (' + launch.status + '). Changes here are saved to this draft &mdash; they won\'t affect the live page until this Launch is published.</div>' +
+						'</div>';
+				}
+			}
+
+			function renderTopbarActions() {
+				if (currentContext === 'live') {
+					topbarActionsEl.innerHTML =
+						'<button class="btn btn-secondary btn-sm" type="button" id="previewBtn">' + icon('view') + ' Preview</button>' +
+						'<button class="btn btn-primary btn-sm" type="button" id="addToLaunchTopbarBtn">' + icon('plus') + ' Add to a Launch</button>';
+					document.getElementById('addToLaunchTopbarBtn').addEventListener('click', openAddToLaunchModal);
+				} else {
+					var ready = PAGE_CONTENT[currentContext].readyToPublish;
+					topbarActionsEl.innerHTML =
+						'<button class="btn btn-secondary btn-sm" type="button" id="previewBtn">' + icon('view') + ' Preview</button>' +
+						'<button class="btn btn-secondary btn-sm" type="button" id="saveDraftBtn">Save</button>' +
+						'<button class="btn ' + (ready ? 'btn-secondary' : 'btn-primary') + ' btn-sm" type="button" id="readyBtn" ' + (ready ? 'disabled' : '') + '>' +
+							(ready ? icon('check-circle') + ' Ready to Publish' : 'Ready to Publish') +
+						'</button>';
+					document.getElementById('saveDraftBtn').addEventListener('click', function () {
+						showToast('Draft saved.');
+					});
+					document.getElementById('readyBtn').addEventListener('click', function () {
+						PAGE_CONTENT[currentContext].readyToPublish = true;
+						renderTopbarActions();
+						renderContextOptions();
+						showToast('Marked ready to publish.');
+					});
+				}
+				document.getElementById('previewBtn').addEventListener('click', function () {
+					showToast('Preview would open this ' + (currentContext === 'live' ? 'Live' : 'draft') + ' version in a new tab.');
+				});
+			}
+
+			function renderBlocks() {
+				var content = PAGE_CONTENT[currentContext];
+				blocksEl.innerHTML = content.blocks.map(renderBlock).join('');
+			}
+
+			function renderBlock(block) {
+				var statusClass = block.status === 'changed' ? ' is-changed' : (block.status === 'new' ? ' is-new' : '');
+				var badge = '';
+				if (block.status === 'changed') {
+					badge = '<span class="label label-warning"><span class="label-item label-item-expand">Changed from Live</span></span>';
+				} else if (block.status === 'new') {
+					badge = '<span class="label label-primary"><span class="label-item label-item-expand">New in this draft</span></span>';
+				}
+
+				if (block.kind === 'hero') {
+					return (
+						'<div class="page-block hero-block' + statusClass + '">' +
+							'<div class="page-block-head"><h3>' + block.title + '</h3>' + badge + '</div>' +
+							'<h2>' + block.headline + '</h2>' +
+							'<p>' + block.sub + '</p>' +
+						'</div>'
+					);
+				}
+
+				return (
+					'<div class="page-block' + statusClass + '">' +
+						'<div class="page-block-head"><h3>' + block.title + '</h3>' + badge + '</div>' +
+						'<div class="page-block-body">' + block.body + '</div>' +
+					'</div>'
+				);
+			}
+
+			// ---- Add to a Launch modal ---------------------------------------------
+
+			var addToLaunchModal = document.getElementById('addToLaunchModal');
+			var addToLaunchOptions = document.getElementById('addToLaunchOptions');
+			var addToLaunchConfirm = document.getElementById('addToLaunchConfirm');
+			var modalBackdrop = document.getElementById('modalBackdrop');
+			var selectedLaunchToAdd = null;
+
+			function availableLaunchesToAdd() {
+				return Object.keys(LAUNCHES).filter(function (id) {
+					return pageDrafts.indexOf(id) === -1;
+				});
+			}
+
+			function openAddToLaunchModal() {
+				selectedLaunchToAdd = null;
+				addToLaunchConfirm.disabled = true;
+
+				var available = availableLaunchesToAdd();
+				if (available.length === 0) {
+					addToLaunchOptions.innerHTML = '<p style="color:#6b6c7e;font-size:.8125rem;">This page already has a draft in every available Launch.</p>';
+				} else {
+					addToLaunchOptions.innerHTML = available.map(function (id) {
+						var launch = LAUNCHES[id];
+						return (
+							'<label class="custom-control custom-radio" style="display:flex;align-items:center;cursor:pointer;">' +
+								'<input type="radio" name="addToLaunchRadio" class="custom-control-input" value="' + id + '" style="margin-right:.625rem;">' +
+								'<span class="custom-control-label" style="margin:0;">' +
+									'<strong>' + launch.name + '</strong>' +
+									'<div style="color:#6b6c7e;font-size:.6875rem;">' + launch.status + '</div>' +
+								'</span>' +
+							'</label>'
+						);
+					}).join('');
+				}
+
+				addToLaunchModal.hidden = false;
+				addToLaunchModal.classList.add('mockup-open');
+				modalBackdrop.hidden = false;
+				modalBackdrop.classList.add('show');
+			}
+
+			function closeAddToLaunchModal() {
+				addToLaunchModal.hidden = true;
+				addToLaunchModal.classList.remove('mockup-open');
+				modalBackdrop.hidden = true;
+				modalBackdrop.classList.remove('show');
+			}
+
+			document.getElementById('addToLaunchTrigger').addEventListener('click', function () {
+				closeSwitcherMenu();
+				openAddToLaunchModal();
+			});
+			document.getElementById('addToLaunchClose').addEventListener('click', closeAddToLaunchModal);
+			document.getElementById('addToLaunchCancel').addEventListener('click', closeAddToLaunchModal);
+			modalBackdrop.addEventListener('click', closeAddToLaunchModal);
+
+			addToLaunchOptions.addEventListener('change', function (event) {
+				if (event.target.name === 'addToLaunchRadio') {
+					selectedLaunchToAdd = event.target.value;
+					addToLaunchConfirm.disabled = false;
+				}
+			});
+
+			addToLaunchConfirm.addEventListener('click', function () {
+				if (!selectedLaunchToAdd) { return; }
+
+				var launchId = selectedLaunchToAdd;
+				pageDrafts.push(launchId);
+
+				// New draft starts as a copy of Live, nothing changed yet.
+				PAGE_CONTENT[launchId] = {
+					readyToPublish: false,
+					blocks: PAGE_CONTENT.live.blocks.map(function (b) {
+						var copy = {};
+						for (var k in b) { copy[k] = b[k]; }
+						copy.status = 'unchanged';
+						return copy;
+					})
+				};
+
+				closeAddToLaunchModal();
+				setContext(launchId);
+				showToast('Added to "' + LAUNCHES[launchId].name + '". You\'re now editing that draft.');
+			});
+
+			// ---- Toast ---------------------------------------------------------
+
+			var toastWrap = document.getElementById('toastWrap');
+			var toastTimer = null;
+
+			function showToast(message) {
+				toastWrap.innerHTML = '<div class="alert alert-success">' + icon('check-circle') + '<div>' + message + '</div></div>';
+				toastWrap.hidden = false;
+				clearTimeout(toastTimer);
+				toastTimer = setTimeout(function () {
+					toastWrap.hidden = true;
+				}, 3200);
+			}
+
+			// ---- Init ------------------------------------------------------------
+
+			setContext('live');
+		})();
+	</script>
+</body>
+</html>

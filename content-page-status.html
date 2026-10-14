@@ -1,0 +1,1078 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Content Status Simulator</title>
+<style>
+:root {
+	--bg: #f6f7f9;
+	--surface: #ffffff;
+	--surface-2: #f0f2f5;
+	--border: #dde1e7;
+	--text: #1c2330;
+	--muted: #5f6b7c;
+	--accent: #0b5fff;
+	--accent-soft: #e6eeff;
+	--approved: #1a7f45;
+	--approved-soft: #e3f4ea;
+	--draft: #6b7280;
+	--draft-soft: #eceef1;
+	--pending: #a15c00;
+	--pending-soft: #fdf0dc;
+	--denied: #c4291c;
+	--denied-soft: #fde6e4;
+	--scheduled: #0e7490;
+	--scheduled-soft: #dff3f8;
+	--expired: #6d4bc4;
+	--expired-soft: #efe9fb;
+	--shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.08);
+}
+@media (prefers-color-scheme: dark) {
+	:root:not([data-theme="light"]) {
+		--bg: #0f1216;
+		--surface: #171b21;
+		--surface-2: #1f242c;
+		--border: #2c333d;
+		--text: #e6e9ee;
+		--muted: #9aa4b2;
+		--accent: #6f9bff;
+		--accent-soft: #1a2640;
+		--approved: #4fcf86;
+		--approved-soft: #16301f;
+		--draft: #aab2bd;
+		--draft-soft: #262b33;
+		--pending: #f0a94a;
+		--pending-soft: #33260f;
+		--denied: #ff7a6e;
+		--denied-soft: #3a1a17;
+		--scheduled: #5ccbe6;
+		--scheduled-soft: #12303a;
+		--expired: #b39bff;
+		--expired-soft: #251d3d;
+		--shadow: none;
+	}
+}
+:root[data-theme="dark"] {
+	--bg: #0f1216;
+	--surface: #171b21;
+	--surface-2: #1f242c;
+	--border: #2c333d;
+	--text: #e6e9ee;
+	--muted: #9aa4b2;
+	--accent: #6f9bff;
+	--accent-soft: #1a2640;
+	--approved: #4fcf86;
+	--approved-soft: #16301f;
+	--draft: #aab2bd;
+	--draft-soft: #262b33;
+	--pending: #f0a94a;
+	--pending-soft: #33260f;
+	--denied: #ff7a6e;
+	--denied-soft: #3a1a17;
+	--scheduled: #5ccbe6;
+	--scheduled-soft: #12303a;
+	--expired: #b39bff;
+	--expired-soft: #251d3d;
+	--shadow: none;
+}
+
+* { box-sizing: border-box; }
+body {
+	margin: 0;
+	background: var(--bg);
+	color: var(--text);
+	font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; }
+.wrap { max-width: 1240px; margin: 0 auto; padding: 24px 16px 48px; }
+header h1 { margin: 0 0 4px; font-size: 22px; }
+header p { margin: 0; color: var(--muted); max-width: 860px; }
+
+.toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 20px 0 8px; }
+.toolbar + .toolbar { margin-top: 8px; }
+.segmented { display: inline-flex; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 3px; }
+.segmented button {
+	border: 0; background: transparent; color: var(--muted); padding: 7px 14px; border-radius: 7px;
+	font: inherit; font-weight: 600; cursor: pointer;
+}
+.segmented button[aria-pressed="true"] { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+.segmented.big button { font-size: 15px; padding: 8px 18px; }
+.ghost {
+	border: 1px solid var(--border); background: var(--surface); color: var(--text); padding: 7px 12px;
+	border-radius: 8px; font: inherit; cursor: pointer;
+}
+.ghost:hover { border-color: var(--accent); }
+.hint { color: var(--muted); font-size: 13px; }
+.options { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; padding: 8px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; }
+.options .t { font-size: 12px; font-weight: 600; color: var(--muted); }
+.options label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+.options[hidden] { display: none; }
+
+.grid { display: grid; grid-template-columns: 290px 1fr; gap: 16px; align-items: start; margin-top: 12px; }
+@media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); min-width: 0; }
+.card > h2 { margin: 0; padding: 12px 16px; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); border-bottom: 1px solid var(--border); }
+.card .body { padding: 14px 16px; }
+
+.actions { display: flex; flex-direction: column; gap: 8px; }
+.group-title { font-size: 12px; color: var(--muted); margin: 8px 0 2px; font-weight: 600; }
+.group-title:first-child { margin-top: 0; }
+.action {
+	display: block; width: 100%; text-align: left; border: 1px solid var(--border); background: var(--surface);
+	color: var(--text); border-radius: 8px; padding: 9px 12px; font: inherit; cursor: pointer;
+}
+.action strong { display: block; font-weight: 600; }
+.action span { display: block; font-size: 12px; color: var(--muted); }
+.action:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-soft); }
+.action:disabled { cursor: not-allowed; opacity: .5; }
+.check { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; padding: 6px 2px; cursor: pointer; }
+.check input { margin-top: 3px; }
+.action:focus-visible, .ghost:focus-visible, .segmented button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.stack { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 640px) { .cards { grid-template-columns: 1fr; } }
+
+.row { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px dashed var(--border); }
+.row:last-child { border-bottom: 0; }
+.row .k { color: var(--muted); }
+.row .v { text-align: right; }
+
+.badge { display: inline-flex; align-items: center; gap: 6px; padding: 2px 9px; border-radius: 999px; font-weight: 600; font-size: 12px; white-space: nowrap; }
+.badge .n { opacity: .7; font-weight: 500; }
+.s-0 { color: var(--approved); background: var(--approved-soft); }
+.s-1 { color: var(--pending); background: var(--pending-soft); }
+.s-2 { color: var(--draft); background: var(--draft-soft); }
+.s-3 { color: var(--expired); background: var(--expired-soft); }
+.s-4 { color: var(--denied); background: var(--denied-soft); }
+.s-7 { color: var(--scheduled); background: var(--scheduled-soft); }
+.s-na { color: var(--muted); background: var(--surface-2); }
+
+.title-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.title-row h3 { margin: 0; font-size: 15px; }
+.sub { color: var(--muted); font-size: 12px; margin: 2px 0 10px; }
+.flash { animation: flash 900ms ease-out; }
+@keyframes flash { 0% { background: var(--accent-soft); } 100% { background: transparent; } }
+
+.versions { width: 100%; border-collapse: collapse; font-size: 13px; }
+.versions th { text-align: left; font-size: 12px; color: var(--muted); font-weight: 600; padding: 4px 6px; border-bottom: 1px solid var(--border); }
+.versions td { padding: 5px 6px; border-bottom: 1px dashed var(--border); }
+.versions tr.new td { animation: flash 900ms ease-out; }
+
+.ui-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+@media (max-width: 760px) { .ui-grid { grid-template-columns: 1fr; } }
+.ui-tile { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; background: var(--surface-2); min-width: 0; }
+.ui-tile .t { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
+.fake-btn { display: inline-block; padding: 5px 12px; border-radius: 6px; font-weight: 600; font-size: 13px; background: var(--accent); color: #fff; }
+.fake-btn.off { background: var(--border); color: var(--muted); }
+.ui-tile .why { font-size: 12px; color: var(--muted); margin-top: 6px; overflow-wrap: anywhere; }
+
+.diagrams { display: grid; grid-template-columns: 3fr 2fr; gap: 16px; }
+.diagrams.single { grid-template-columns: 1fr; }
+@media (max-width: 900px) { .diagrams { grid-template-columns: 1fr; } }
+svg { width: 100%; height: auto; display: block; }
+svg .node rect { fill: var(--surface-2); stroke: var(--border); stroke-width: 1.5; transition: all .25s; }
+svg .node text { fill: var(--muted); font-size: 13px; font-weight: 600; text-anchor: middle; dominant-baseline: middle; }
+svg .node .code { font-size: 11px; font-weight: 500; }
+svg .node.on rect { stroke-width: 2.5; }
+svg .node.on.s0 rect { fill: var(--approved-soft); stroke: var(--approved); }
+svg .node.on.s1 rect { fill: var(--pending-soft); stroke: var(--pending); }
+svg .node.on.s2 rect { fill: var(--draft-soft); stroke: var(--draft); }
+svg .node.on.s3 rect { fill: var(--expired-soft); stroke: var(--expired); }
+svg .node.on.s4 rect { fill: var(--denied-soft); stroke: var(--denied); }
+svg .node.on.s7 rect { fill: var(--scheduled-soft); stroke: var(--scheduled); }
+svg .node.on.s0 text { fill: var(--approved); }
+svg .node.on.s1 text { fill: var(--pending); }
+svg .node.on.s2 text { fill: var(--text); }
+svg .node.on.s3 text { fill: var(--expired); }
+svg .node.on.s4 text { fill: var(--denied); }
+svg .node.on.s7 text { fill: var(--scheduled); }
+svg .edge path { fill: none; stroke: var(--border); stroke-width: 1.6; transition: stroke .25s; }
+svg .edge text { fill: var(--muted); font-size: 11px; text-anchor: middle; }
+svg .edge.hot path { stroke: var(--accent); stroke-width: 2.4; }
+svg .edge.hot text { fill: var(--accent); font-weight: 600; }
+svg .edge-label { fill: var(--accent); font-size: 11px; font-weight: 600; text-anchor: middle; paint-order: stroke; stroke: var(--surface); stroke-width: 4px; }
+svg .caption { fill: var(--muted); font-size: 12px; text-anchor: middle; }
+svg marker path { fill: var(--border); }
+svg marker.hot path { fill: var(--accent); }
+
+.log { list-style: none; margin: 0; padding: 0; max-height: 420px; overflow: auto; }
+.log li { padding: 10px 0; border-bottom: 1px solid var(--border); }
+.log li:last-child { border-bottom: 0; }
+.log .step { display: flex; gap: 10px; align-items: baseline; }
+.log .num { color: var(--muted); font-size: 12px; min-width: 22px; }
+.log .what { font-weight: 600; }
+.log .detail { margin: 4px 0 0 32px; color: var(--muted); font-size: 13px; }
+.log .ref { margin: 4px 0 0 32px; }
+.log .ref code { background: var(--surface-2); border: 1px solid var(--border); padding: 1px 6px; border-radius: 5px; color: var(--text); overflow-wrap: anywhere; }
+.empty-log { color: var(--muted); }
+
+.compare { margin-top: 16px; }
+.compare table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.compare th, .compare td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.compare th { font-size: 12px; color: var(--muted); font-weight: 600; }
+.compare td:first-child { color: var(--muted); width: 22%; }
+.table-scroll { overflow-x: auto; }
+</style>
+</head>
+<body>
+<div class="wrap">
+	<header>
+		<h1>Content status simulator</h1>
+		<p>How the <code>status</code> of a <strong>Content Page</strong> and of an <strong>Object Entry</strong> changes, with and without workflow, as modeled from the code. Pick an entity and a mode, then run actions. Each step in the log names the code that does it.</p>
+	</header>
+
+	<div class="toolbar">
+		<div class="segmented big" role="group" aria-label="Entity">
+			<button type="button" data-entity="page" aria-pressed="true">Content Page</button>
+			<button type="button" data-entity="object" aria-pressed="false">Object Entry</button>
+		</div>
+		<div class="segmented" role="group" aria-label="Mode">
+			<button type="button" data-mode="none" aria-pressed="true">Without workflow</button>
+			<button type="button" data-mode="wf" aria-pressed="false">With workflow</button>
+		</div>
+		<button type="button" class="ghost" id="reset">Reset</button>
+	</div>
+	<div class="toolbar">
+		<span class="hint" id="mode-hint"></span>
+	</div>
+	<div class="options" id="object-options" hidden>
+		<span class="t">Object Definition settings (changing one resets):</span>
+		<label><input type="checkbox" data-opt="draft" checked> Drafts <code>enableObjectEntryDraft</code></label>
+		<label><input type="checkbox" data-opt="versioning" checked> Versioning <code>enableObjectEntryVersioning</code></label>
+		<label><input type="checkbox" data-opt="schedule" checked> Schedule <code>enableObjectEntrySchedule</code></label>
+	</div>
+
+	<div class="grid">
+		<section class="card" aria-labelledby="actions-h">
+			<h2 id="actions-h">Actions</h2>
+			<div class="body actions" id="actions"></div>
+		</section>
+
+		<div class="stack">
+			<div class="cards" id="cards"></div>
+
+			<section class="card">
+				<h2>What the user sees</h2>
+				<div class="body ui-grid" id="ui"></div>
+			</section>
+
+			<section class="diagrams" id="diagrams"></section>
+
+			<section class="card">
+				<h2>Event log</h2>
+				<div class="body"><ol class="log" id="log"></ol></div>
+			</section>
+		</div>
+	</div>
+
+	<section class="card compare">
+		<h2>Content Page vs Object Entry</h2>
+		<div class="body table-scroll">
+			<table>
+				<thead><tr><th></th><th>Content Page</th><th>Object Entry</th></tr></thead>
+				<tbody>
+					<tr><td>Storage</td><td>Two <code>Layout</code> rows: live + hidden draft. Edits go to the draft; live content changes only on publish/approve (<code>copyLayoutContent</code>).</td><td>One mutable <code>ObjectEntry</code> row. Every save overwrites its values, even while it is Pending. Past content survives only as <code>ObjectEntryVersion</code> JSON snapshots, and only when versioning is on.</td></tr>
+					<tr><td>Statuses without workflow</td><td>Live: Approved. Draft layout: Approved ⇄ Draft.</td><td>Draft (if drafts are on), Approved, Scheduled and Expired (if schedule is on).</td></tr>
+					<tr><td>Statuses with workflow</td><td>Live: Draft → Pending → Approved, or Denied. Draft layout: still Approved ⇄ Draft.</td><td>Adds Pending. Denied only lasts for an instant on reject: Single Approver's "update" task sets Denied then Pending.</td></tr>
+					<tr><td>After reject</td><td>Stays <strong>Denied</strong>: <code>LayoutWorkflowHandler.java:127</code> ignores Denied → Pending.</td><td>Ends <strong>Pending</strong>: no such guard.</td></tr>
+					<tr><td>Start of a new item</td><td>Live starts Approved (no workflow) or Draft (workflow).</td><td>Always inserted as Draft (<code>_getStatus</code>). Publish then moves it through <code>WorkflowHandlerRegistryUtil.startWorkflowInstance</code>.</td></tr>
+					<tr><td>Scheduling / expiration</td><td>Not modeled on the Layout status.</td><td>Future display date turns Approved into Scheduled. The scheduler then publishes it. Expiration date or Expire action sets Expired.</td></tr>
+				</tbody>
+			</table>
+		</div>
+	</section>
+</div>
+
+<script>
+const S = {APPROVED: 0, PENDING: 1, DRAFT: 2, EXPIRED: 3, DENIED: 4, SCHEDULED: 7};
+const NAMES = {0: 'Approved', 1: 'Pending', 2: 'Draft', 3: 'Expired', 4: 'Denied', 7: 'Scheduled'};
+
+let entity = 'page';
+let mode = 'none';
+let options = {draft: true, versioning: true, schedule: true};
+let state;
+
+function badge(status) {
+	if (status === null || status === undefined) return '<span class="badge s-na">—</span>';
+	return `<span class="badge s-${status}">${NAMES[status]} <span class="n">(${status})</span></span>`;
+}
+
+function addLog(what, detail, ref) {
+	state.log.push({what, detail, ref});
+}
+
+function flash(id) {
+	const el = document.getElementById(id);
+	if (!el) return;
+	el.classList.remove('flash');
+	void el.offsetWidth;
+	el.classList.add('flash');
+}
+
+const DEFS = `<defs>
+	<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z"></path></marker>
+	<marker id="arrow-hot" class="hot" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z"></path></marker>
+</defs>`;
+
+function node(id, x, y, status, on, w = 120) {
+	return `<g class="node s${status} ${on ? 'on' : ''}">
+		<rect x="${x - w / 2}" y="${y - 22}" width="${w}" height="44" rx="10"></rect>
+		<text x="${x}" y="${y - 5}">${NAMES[status]}</text>
+		<text class="code" x="${x}" y="${y + 11}">status = ${status}</text>
+	</g>`;
+}
+
+function edge(d, label, lx, ly, hot) {
+	return `<g class="edge ${hot ? 'hot' : ''}">
+		<path d="${d}" marker-end="url(#${hot ? 'arrow-hot' : 'arrow'})"></path>
+		<text x="${lx}" y="${ly}">${label}</text>
+	</g>`;
+}
+
+/* ------------------------------------------------------------------ */
+/* Content Page                                                        */
+/* ------------------------------------------------------------------ */
+
+const PAGE = {
+	init() {
+		return {
+			created: false, live: null, draft: null, published: false,
+			liveVersion: 0, draftVersion: 0, task: null,
+			lastLiveEdge: null, lastDraftEdge: null, changed: [], log: []
+		};
+	},
+	hint() {
+		return mode === 'wf'
+			? 'A workflow definition is linked to Content Page (Layout) for this site.'
+			: 'No workflow definition is linked to Content Page (Layout).';
+	},
+	pendingFlag() {
+		return [S.PENDING, S.DENIED].includes(state.live) || [S.PENDING, S.DENIED].includes(state.draft);
+	},
+	setLive(status, edgeId) {
+		if (state.live !== status) state.changed.push('live-card');
+		state.lastLiveEdge = edgeId;
+		state.live = status;
+	},
+	setDraft(status, edgeId) {
+		if (state.draft !== status) state.changed.push('draft-card');
+		state.lastDraftEdge = edgeId;
+		state.draft = status;
+	},
+	actions() {
+		const P = PAGE;
+		return [
+			{
+				id: 'create', group: 'Pages admin', title: 'Add Content Page',
+				desc: 'Creates the live layout and its draft.',
+				enabled: !state.created,
+				run() {
+					state.created = true;
+					const wf = mode === 'wf';
+					P.setLive(wf ? S.DRAFT : S.APPROVED, wf ? 'create-draft' : 'create');
+					P.setDraft(S.APPROVED, 'create');
+					state.published = false;
+					addLog(
+						'Content Page added',
+						wf
+							? 'A workflow definition is linked to Layout, so the new (non-system) content page starts as DRAFT. The draft layout is added as a system layout, so it skips the workflow branch and starts as APPROVED. published is not set yet, so the page is labeled "Draft".'
+							: 'No workflow definition is linked, so the live layout starts as APPROVED. The draft layout (system=true) is also APPROVED. published is not set yet, so the page is still labeled "Draft".',
+						'LayoutLocalServiceImpl.addLayout (lines 394-408, draft added at 498)'
+					);
+				}
+			},
+			{
+				id: 'edit', group: 'Page Editor', title: 'Edit content',
+				desc: 'Add or change a fragment on the draft.',
+				enabled: state.created,
+				run() {
+					state.draftVersion++;
+					const was = state.draft;
+					P.setDraft(S.DRAFT, was === S.DRAFT ? null : 'edit');
+					addLog(
+						`Draft edited (draft content v${state.draftVersion})`,
+						was === S.DRAFT
+							? 'The draft layout is already DRAFT; only its content changes. The live layout is untouched.'
+							: 'Any change in the editor moves the draft layout to DRAFT. The live layout is untouched.',
+						'FragmentEntryLinkLocalServiceImpl:649 · LayoutPageTemplateStructureLocalServiceImpl:241'
+					);
+				}
+			},
+			mode === 'none' && {
+				id: 'publish', group: 'Page Editor', title: 'Publish',
+				desc: 'Copies the draft content to the live page.',
+				enabled: state.created,
+				run() {
+					state.liveVersion = state.draftVersion;
+					P.setLive(S.APPROVED, 'publish');
+					P.setDraft(S.APPROVED, 'publish');
+					state.published = true;
+					addLog(
+						'Published',
+						`copyLayoutContent(draft → live) runs right away. Both layouts are set to APPROVED and the draft gets published=true. Live content is now v${state.liveVersion}.`,
+						'PublishLayoutMVCActionCommand._publishLayout (lines 138-225)'
+					);
+				}
+			},
+			mode === 'wf' && {
+				id: 'submit', group: 'Page Editor', title: 'Submit for Workflow',
+				desc: P.pendingFlag() ? 'Disabled: config.pending is true.' : 'Starts a workflow instance on the live layout.',
+				enabled: state.created && !P.pendingFlag(),
+				run() {
+					P.setLive(S.PENDING, state.live === S.APPROVED ? 'resubmit-approved' : 'submit');
+					state.task = 'review';
+					addLog(
+						'Submitted for workflow',
+						`startWorkflowInstance on the live layout sets it to PENDING and releases the editor lock. Content is NOT copied yet, so the live page keeps its current content (v${state.liveVersion}).`,
+						'PublishLayoutMVCActionCommand._publishLayout (lines 124-135)'
+					);
+				}
+			},
+			mode === 'wf' && {
+				id: 'approve', group: 'Workflow task (reviewer)', title: 'Approve',
+				desc: state.task === 'review' ? 'Review task is assigned.' : 'Needs an open review task.',
+				enabled: state.task === 'review',
+				run() {
+					state.liveVersion = state.draftVersion;
+					const from = state.live;
+					P.setDraft(S.APPROVED, 'approve');
+					state.published = true;
+					P.setLive(S.APPROVED, from === S.DENIED ? 'approve-denied' : 'approve');
+					state.task = null;
+					addLog(
+						'Approved',
+						`Only now is the draft content copied to the live page (v${state.liveVersion}). The draft is set to APPROVED (so published=true) and the live layout to APPROVED.`,
+						'LayoutWorkflowHandler.updateStatus (lines 136-168)'
+					);
+				}
+			},
+			mode === 'wf' && {
+				id: 'reject', group: 'Workflow task (reviewer)', title: 'Reject',
+				desc: state.task === 'review' ? 'Send back to the author.' : 'Needs an open review task.',
+				enabled: state.task === 'review',
+				run() {
+					P.setLive(S.DENIED, state.live === S.DENIED ? null : 'reject');
+					state.task = 'update';
+					addLog(
+						'Rejected',
+						'Single Approver\'s "update" task sets DENIED and then PENDING on assignment. LayoutWorkflowHandler ignores DENIED → PENDING, so the page stays DENIED. The UI treats DENIED like PENDING: the "Pending" label stays and Submit stays disabled.',
+						'single-approver-workflow-definition.xml (update task) · LayoutWorkflowHandler.java:127'
+					);
+				}
+			},
+			mode === 'wf' && {
+				id: 'resubmit', group: 'Workflow task (author)', title: 'Resubmit',
+				desc: state.task === 'update' ? 'Author resubmits from the update task.' : 'Needs a rejected task.',
+				enabled: state.task === 'update',
+				run() {
+					state.task = 'review';
+					state.lastLiveEdge = 'resubmit-denied';
+					addLog(
+						'Resubmitted',
+						'The resubmit transition goes back to the review task without a status action, so the live layout stays DENIED until someone approves it.',
+						'single-approver-workflow-definition.xml (resubmit → review)'
+					);
+				}
+			},
+			{
+				id: 'discard', group: 'Pages admin', title: 'Discard Draft',
+				desc: state.draft === S.DRAFT ? 'Restores the draft from the live content.' : 'Only when the draft is DRAFT.',
+				enabled: state.created && state.draft === S.DRAFT,
+				run() {
+					state.draftVersion = state.liveVersion;
+					P.setDraft(S.APPROVED, 'discard');
+					addLog(
+						'Draft discarded',
+						`copyLayoutContent(live → draft) (draft content back to v${state.draftVersion}) and the draft is set to APPROVED. The published flag keeps its previous value. The live layout is untouched.`,
+						'DiscardDraftLayoutMVCActionCommand (lines 104-116)'
+					);
+				}
+			}
+		].filter(Boolean);
+	},
+	renderCards() {
+		const content = (v) => state.created ? 'v' + v + (v === 0 ? ' (empty)' : '') : '—';
+		const task = mode === 'wf'
+			? `<div class="row"><span class="k">Workflow task</span><span class="v">${state.task === 'review' ? 'Review' : state.task === 'update' ? 'Update (rejected)' : '—'}</span></div>`
+			: '';
+		document.getElementById('cards').innerHTML = `
+			<section class="card"><div class="body" id="live-card">
+				<div class="title-row"><h3>Live layout</h3>${badge(state.live)}</div>
+				<div class="sub">What visitors see · <code>Layout.status</code></div>
+				<div class="row"><span class="k">Content</span><span class="v mono">${content(state.liveVersion)}</span></div>
+				${task}
+			</div></section>
+			<section class="card"><div class="body" id="draft-card">
+				<div class="title-row"><h3>Draft layout</h3>${badge(state.draft)}</div>
+				<div class="sub">Hidden system layout edited in the Page Editor</div>
+				<div class="row"><span class="k">Content</span><span class="v mono">${content(state.draftVersion)}</span></div>
+				<div class="row"><span class="k">typeSettings <code>published</code></span><span class="v mono">${state.created ? String(state.published) : '—'}</span></div>
+			</div></section>`;
+	},
+	renderUI() {
+		const el = document.getElementById('ui');
+		if (!state.created) {
+			el.innerHTML = '<div class="hint">Add a Content Page to start.</div>';
+			return;
+		}
+		const labels = [];
+		if (state.draft === S.DRAFT || !state.published) labels.push(`<span class="badge s-2">Draft</span>`);
+		if (state.live === S.PENDING || state.live === S.DENIED) labels.push(`<span class="badge s-1">Pending</span>`);
+		const btnOff = mode === 'wf' && PAGE.pendingFlag();
+		const liveHeld = state.live === S.PENDING || state.live === S.DENIED;
+		const viewTarget = liveHeld ? 'Draft layout URL' : state.published ? 'Live layout URL' : 'Hidden';
+		const viewWhy = liveHeld
+			? 'Live is pending/denied, so View opens the draft.'
+			: state.published ? 'The page has been published.' : 'Hidden until the page is published or pending.';
+		el.innerHTML = `
+			<div class="ui-tile">
+				<div class="t">Pages admin labels</div>
+				<div>${labels.length ? labels.join(' ') : '<span class="hint">No label (live)</span>'}</div>
+				<div class="why"><code>MillerColumnsDisplayContext._getLayoutStatesJSONArray</code></div>
+			</div>
+			<div class="ui-tile">
+				<div class="t">Page Editor button</div>
+				<div><span class="fake-btn ${btnOff ? 'off' : ''}">${mode === 'wf' ? 'Submit for Workflow' : 'Publish'}</span></div>
+				<div class="why">${btnOff ? 'Disabled: <code>config.pending</code> is true.' : 'Enabled.'} <code>PublishButton.js:46</code></div>
+			</div>
+			<div class="ui-tile">
+				<div class="t">"View" action opens</div>
+				<div><strong>${viewTarget}</strong></div>
+				<div class="why">${viewWhy} <code>LayoutsAdminDisplayContext.getViewLayoutURL</code></div>
+			</div>`;
+	},
+	renderDiagrams() {
+		const box = document.getElementById('diagrams');
+		box.className = 'diagrams';
+		const h = state.lastLiveEdge;
+		const on = (s) => state.live === s;
+		let live;
+		if (mode === 'none') {
+			live = `<svg viewBox="0 0 440 150" role="img" aria-label="Live layout status without workflow">${DEFS}
+				${edge('M40,80 L148,80', 'add page', 94, 70, h === 'create')}
+				${edge('M190,58 C170,10 270,10 250,58', 'publish (copy draft → live)', 220, 18, h === 'publish')}
+				${node('a', 220, 80, 0, on(0))}
+				<text class="caption" x="220" y="135">Always APPROVED; publishing only copies content.</text>
+			</svg>`;
+		}
+		else {
+			live = `<svg viewBox="0 0 640 260" role="img" aria-label="Live layout status with workflow">${DEFS}
+				${edge('M10,70 L38,70', '', 0, 0, h === 'create-draft')}
+				<text x="14" y="58" style="fill:var(--muted);font-size:11px">add</text>
+				${edge('M160,70 L258,70', 'submit', 209, 60, h === 'submit')}
+				${edge('M380,70 L478,70', 'approve', 429, 60, h === 'approve')}
+				${edge('M320,92 L320,168', 'reject', 342, 134, h === 'reject')}
+				${edge('M285,212 C240,250 400,250 355,212', 'resubmit (stays Denied)', 320, 252, h === 'resubmit-denied')}
+				${edge('M380,190 C470,190 540,150 540,94', 'approve', 505, 185, h === 'approve-denied')}
+				${edge('M540,48 C540,4 320,4 320,46', 'submit new changes', 430, 14, h === 'resubmit-approved')}
+				${node('d', 100, 70, 2, on(2))}
+				${node('p', 320, 70, 1, on(1))}
+				${node('ap', 540, 70, 0, on(0))}
+				${node('dn', 320, 190, 4, on(4))}
+			</svg>`;
+		}
+		const d = state.lastDraftEdge;
+		const back = mode === 'wf' ? 'approve / discard' : 'publish / discard';
+		const draft = `<svg viewBox="0 0 380 200" role="img" aria-label="Draft layout status">${DEFS}
+			${edge('M10,60 L38,60', '', 0, 0, d === 'create')}
+			<text x="14" y="48" style="fill:var(--muted);font-size:11px">add</text>
+			${edge('M160,50 L218,50', 'edit', 189, 40, d === 'edit')}
+			${edge('M218,78 C190,120 180,120 160,78', back, 190, 128, ['publish', 'approve', 'discard'].includes(d))}
+			${node('a', 100, 60, 0, state.draft === 0)}
+			${node('d', 280, 60, 2, state.draft === 2)}
+			<text class="caption" x="190" y="170">The draft only ever moves between these two.</text>
+			<text class="caption" x="190" y="188">Workflow never sets it to Pending or Denied.</text>
+		</svg>`;
+		box.innerHTML = `
+			<div class="card"><h2>Live layout status</h2><div class="body">${live}</div></div>
+			<div class="card"><h2>Draft layout status</h2><div class="body">${draft}</div></div>`;
+	},
+	afterRender() {
+		state.changed.forEach(flash);
+		state.changed = [];
+	}
+};
+
+/* ------------------------------------------------------------------ */
+/* Object Entry                                                        */
+/* ------------------------------------------------------------------ */
+
+const OBJ = {
+	init() {
+		return {
+			exists: false, status: null, content: 0, futureDisplay: false,
+			futureNext: false, task: null, versions: [], newVersion: null,
+			transitions: [], lastApprovedContent: null, changed: [], log: []
+		};
+	},
+	hint() {
+		return mode === 'wf'
+			? 'An active workflow definition is linked to this Object Definition (ObjectEntryWorkflowHandler.getWorkflowDefinitionLink).'
+			: 'No workflow definition is linked to this Object Definition.';
+	},
+	addVersion() {
+		if (!options.versioning) return;
+		const v = state.versions.length + 1;
+		state.versions.push({v, content: state.content, status: state.status});
+		state.newVersion = v;
+		state.changed.push('versions-card');
+	},
+	updateLatest() {
+		if (!options.versioning || !state.versions.length) return;
+		const last = state.versions[state.versions.length - 1];
+		last.content = state.content;
+		last.status = state.status;
+		state.newVersion = last.v;
+		state.changed.push('versions-card');
+	},
+	setStatus(status) {
+		if (state.status !== status) {
+			state.transitions.push([state.status, status]);
+			state.changed.push('entry-card');
+		}
+		state.status = status;
+		if (status === S.APPROVED) state.lastApprovedContent = state.content;
+	},
+
+	// ObjectEntryLocalServiceImpl.updateStatus (lines 2415-2545)
+
+	updateStatus(target) {
+		const orig = state.status;
+		if (orig === target && !state.futureDisplay) return 'skipped';
+		if (target === S.APPROVED && state.futureDisplay) target = S.SCHEDULED;
+		OBJ.setStatus(target);
+		if (target === S.EXPIRED || orig === S.DRAFT || orig === S.PENDING ||
+			(orig === S.SCHEDULED && target === S.APPROVED)) {
+			OBJ.updateLatest();
+		}
+		else {
+			OBJ.addVersion();
+		}
+		return target;
+	},
+
+	// WorkflowHandlerRegistryUtil.startWorkflowInstance, only for ACTION_PUBLISH
+
+	startWorkflow() {
+		if (state.task) return 'in-progress';
+		if (mode === 'wf') {
+			OBJ.updateStatus(S.PENDING);
+			state.task = 'review';
+			return 'pending';
+		}
+		return OBJ.updateStatus(S.APPROVED);
+	},
+
+	// _updateObjectEntry version bookkeeping (lines 7849-7862)
+
+	versionAfterUpdate(orig) {
+		const cur = state.status;
+		if ((cur === S.APPROVED && orig === S.SCHEDULED) || cur === S.SCHEDULED) return;
+		if (cur === S.PENDING || orig === S.DRAFT || orig === S.EXPIRED) OBJ.updateLatest();
+		else OBJ.addVersion();
+	},
+	draftAllowed() {
+		if (!options.draft) return 'Disabled: drafts are off (ObjectEntryStatusException).';
+		if (state.exists && state.status !== S.DRAFT && !options.versioning) {
+			return 'Disabled: a non-draft entry can go back to draft only with versioning on.';
+		}
+		return null;
+	},
+	actions() {
+		const O = OBJ;
+		const wf = mode === 'wf';
+		const draftBlock = O.draftAllowed();
+		const canExpire = options.schedule && state.exists && [S.APPROVED, S.SCHEDULED].includes(state.status);
+		const list = [
+			{
+				id: 'add-publish', group: 'Entry form (new entry)', title: wf ? 'Add → Submit for Workflow' : 'Add → Publish',
+				desc: 'ACTION_PUBLISH on addObjectEntry.',
+				enabled: !state.exists,
+				run() {
+					state.exists = true;
+					state.content = 1;
+					state.futureDisplay = state.futureNext;
+					state.status = S.DRAFT;
+					state.transitions.push([null, S.DRAFT]);
+					state.changed.push('entry-card');
+					const r = O.startWorkflow();
+					O.addVersion();
+					addLog(
+						'Entry added and published',
+						`The row is always inserted as DRAFT (_getStatus). startWorkflowInstance then ${wf ? 'finds a workflow link and sets PENDING (review task created)' : 'finds no workflow link and calls updateStatus(APPROVED)'}${r === S.SCHEDULED ? ', which becomes SCHEDULED because the display date is in the future' : ''}. ${options.versioning ? 'Version 1 is added with the resulting status.' : 'Versioning is off, so no snapshot is kept.'}`,
+						'ObjectEntryLocalServiceImpl.addObjectEntry (lines 427, 576, 594) · WorkflowHandlerRegistryUtil.startWorkflowInstance'
+					);
+				}
+			},
+			{
+				id: 'add-draft', group: 'Entry form (new entry)', title: 'Add → Save as Draft',
+				desc: options.draft ? 'ACTION_SAVE_DRAFT on addObjectEntry.' : 'Disabled: drafts are off.',
+				enabled: !state.exists && options.draft,
+				run() {
+					state.exists = true;
+					state.content = 1;
+					state.futureDisplay = state.futureNext;
+					state.status = S.DRAFT;
+					state.transitions.push([null, S.DRAFT]);
+					state.changed.push('entry-card');
+					O.addVersion();
+					addLog(
+						'Entry added as draft',
+						`Stays DRAFT: startWorkflowInstance only acts on ACTION_PUBLISH, so no workflow runs.${options.versioning ? ' Version 1 is added as DRAFT.' : ''}`,
+						'ObjectEntryLocalServiceImpl.addObjectEntry (lines 540-560) · _validateWorkflowAction (line 8995)'
+					);
+				}
+			},
+			{
+				id: 'edit-publish', group: 'Entry form (existing entry)', title: wf ? 'Edit → Submit for Workflow' : 'Edit → Publish',
+				desc: state.task ? 'Allowed, but a workflow is already running: values change, status does not.' : 'ACTION_PUBLISH on updateObjectEntry.',
+				enabled: state.exists,
+				run() {
+					const orig = state.status;
+					state.content++;
+					state.futureDisplay = options.schedule && state.futureNext;
+					state.changed.push('entry-card');
+					const r = O.startWorkflow();
+					O.versionAfterUpdate(orig);
+					let detail;
+					if (r === 'in-progress') {
+						detail = `A workflow instance is already in progress, so startWorkflowInstance returns without touching the status (still ${NAMES[state.status]}). The row values are still overwritten with content v${state.content}.`;
+					}
+					else if (r === 'skipped') {
+						detail = `The entry was already APPROVED, so updateStatus is a no-op. The row values are overwritten in place with content v${state.content}.`;
+					}
+					else if (r === 'pending') {
+						detail = `startWorkflowInstance sets PENDING and creates a review task. The single row already holds content v${state.content}. There is no separate published copy; the previously approved content is only kept ${options.versioning ? 'in the version history' : 'nowhere (versioning is off)'}.`;
+					}
+					else {
+						detail = `No workflow link, so updateStatus(APPROVED)${r === S.SCHEDULED ? ' becomes SCHEDULED (future display date)' : ''}. Content v${state.content} is in the row.`;
+					}
+					if (options.versioning) detail += ` History now has ${state.versions.length} version(s).`;
+					addLog('Entry edited and published', detail, 'ObjectEntryLocalServiceImpl._updateObjectEntry (lines 7777-7862) · updateStatus (lines 2431-2545)');
+				}
+			},
+			{
+				id: 'edit-draft', group: 'Entry form (existing entry)', title: 'Edit → Save as Draft',
+				desc: draftBlock || (state.status === S.PENDING ? 'Allowed; status stays PENDING.' : 'ACTION_SAVE_DRAFT on updateObjectEntry.'),
+				enabled: state.exists && !draftBlock,
+				run() {
+					const orig = state.status;
+					state.content++;
+					state.futureDisplay = options.schedule && state.futureNext;
+					if (state.status !== S.PENDING) O.setStatus(S.DRAFT);
+					state.changed.push('entry-card');
+					O.versionAfterUpdate(orig);
+					addLog(
+						'Entry saved as draft',
+						orig === S.PENDING
+							? `Save as Draft does not change a PENDING entry (the !isPending() check). The row values are overwritten with content v${state.content}.`
+							: `The same row moves to DRAFT with content v${state.content}.${orig !== S.DRAFT ? ' The approved content it replaced is no longer in the row' + (options.versioning ? '; it survives only as an earlier version.' : '.') : ''}`,
+						'ObjectEntryLocalServiceImpl._updateObjectEntry (lines 7777-7782) · _validateWorkflowAction (line 8995)'
+					);
+				}
+			}
+		];
+		if (wf) {
+			list.push(
+				{
+					id: 'approve', group: 'Workflow task (reviewer)', title: 'Approve',
+					desc: state.task === 'review' ? 'Review task is assigned.' : 'Needs an open review task.',
+					enabled: state.task === 'review',
+					run() {
+						state.task = null;
+						const r = O.updateStatus(S.APPROVED);
+						addLog(
+							'Approved',
+							`The "approved" state sets status 0 through updateStatus${r === S.SCHEDULED ? ', which turns it into SCHEDULED because the display date is still in the future' : ''}. Nothing is copied: the row already holds content v${state.content}.${options.versioning ? ' The latest version is updated in place.' : ''}`,
+							'ObjectEntryWorkflowHandler.updateStatus → ObjectEntryLocalServiceImpl.updateStatus (line 2450)'
+						);
+					}
+				},
+				{
+					id: 'reject', group: 'Workflow task (reviewer)', title: 'Reject',
+					desc: state.task === 'review' ? 'Send back to the author.' : 'Needs an open review task.',
+					enabled: state.task === 'review',
+					run() {
+						O.updateStatus(S.DENIED);
+						O.updateStatus(S.PENDING);
+						state.task = 'update';
+						addLog(
+							'Rejected',
+							`Single Approver's "update" task runs two status actions on assignment: DENIED, then PENDING. Object entries have no guard against DENIED → PENDING, so the entry ends up PENDING again.${options.versioning ? ' Because DENIED → PENDING does not count as "from draft/pending", updateStatus adds an extra version snapshot (Pending).' : ''}`,
+							'single-approver-workflow-definition.xml (update task: deny=4, pending=1) · updateStatus (lines 2524-2545)'
+						);
+					}
+				},
+				{
+					id: 'resubmit', group: 'Workflow task (author)', title: 'Resubmit',
+					desc: state.task === 'update' ? 'Author resubmits from the update task.' : 'Needs a rejected task.',
+					enabled: state.task === 'update',
+					run() {
+						state.task = 'review';
+						addLog(
+							'Resubmitted',
+							'The resubmit transition goes back to review with no status action. The entry stays PENDING.',
+							'single-approver-workflow-definition.xml (resubmit → review)'
+						);
+					}
+				}
+			);
+		}
+		if (options.schedule) {
+			list.push(
+				{
+					id: 'scheduler', group: 'Scheduler (CheckObjectEntries)', title: 'Display date reached',
+					desc: state.status === S.SCHEDULED ? 'Publishes the scheduled entry.' : 'Only for SCHEDULED entries.',
+					enabled: state.status === S.SCHEDULED,
+					run() {
+						state.futureDisplay = false;
+						O.updateStatus(S.APPROVED);
+						addLog(
+							'Display date reached',
+							`The checker picks SCHEDULED entries whose display date has passed and calls updateStatus(APPROVED).${options.versioning ? ' Scheduled → Approved updates the latest version in place.' : ''}`,
+							'ObjectEntryLocalServiceImpl._checkObjectEntriesByDisplayDate (line 3393)'
+						);
+					}
+				},
+				{
+					id: 'expire', group: 'Scheduler (CheckObjectEntries)', title: 'Expire',
+					desc: canExpire ? 'Expiration date reached, or the Expire action.' : 'Skipped for Draft, Pending, Expired and In Trash.',
+					enabled: canExpire,
+					run() {
+						state.futureDisplay = false;
+						O.updateStatus(S.EXPIRED);
+						addLog(
+							'Expired',
+							`expireObjectEntry calls updateStatus(EXPIRED) and sets the expiration date if it was empty. The checker skips DRAFT, EXPIRED, IN_TRASH and PENDING entries.${options.versioning ? ' The latest version is updated in place.' : ''}`,
+							'ObjectEntryLocalServiceImpl.expireObjectEntry (line 989) · _checkObjectEntriesByExpirationDate (line 3443)'
+						);
+					}
+				}
+			);
+		}
+		return list;
+	},
+	extraControls() {
+		if (!options.schedule) return '';
+		return `<label class="check"><input type="checkbox" id="future-next" ${state.futureNext ? 'checked' : ''}>
+			<span>Next save sets a <strong>display date in the future</strong></span></label>`;
+	},
+	renderCards() {
+		const task = mode === 'wf'
+			? `<div class="row"><span class="k">Workflow task</span><span class="v">${state.task === 'review' ? 'Review' : state.task === 'update' ? 'Update (rejected)' : '—'}</span></div>`
+			: '';
+		const sched = options.schedule
+			? `<div class="row"><span class="k">Display date</span><span class="v">${state.exists ? (state.futureDisplay ? 'In the future' : 'Now / past') : '—'}</span></div>`
+			: '';
+		let versions;
+		if (!options.versioning) {
+			versions = '<div class="hint">Versioning is off: <code>_addObjectEntryVersion</code> and <code>_updateLatestObjectEntryVersion</code> return right away, so no history is kept.</div>';
+		}
+		else if (!state.versions.length) {
+			versions = '<div class="hint">No versions yet.</div>';
+		}
+		else {
+			versions = `<table class="versions"><thead><tr><th>Version</th><th>Content</th><th>Status</th></tr></thead><tbody>
+				${state.versions.slice().reverse().map((v) => `<tr class="${v.v === state.newVersion ? 'new' : ''}"><td class="mono">${v.v}</td><td class="mono">v${v.content}</td><td>${badge(v.status)}</td></tr>`).join('')}
+			</tbody></table>`;
+		}
+		document.getElementById('cards').innerHTML = `
+			<section class="card"><div class="body" id="entry-card">
+				<div class="title-row"><h3>Object entry row</h3>${badge(state.status)}</div>
+				<div class="sub">The single mutable row · <code>ObjectEntry.status</code></div>
+				<div class="row"><span class="k">Values in the row</span><span class="v mono">${state.exists ? 'content v' + state.content : '—'}</span></div>
+				${sched}
+				${task}
+			</div></section>
+			<section class="card"><div class="body" id="versions-card">
+				<div class="title-row"><h3>Version history</h3><span class="hint">ObjectEntryVersion</span></div>
+				<div class="sub">JSON snapshots of the row, newest first</div>
+				${versions}
+			</div></section>`;
+	},
+	renderUI() {
+		const el = document.getElementById('ui');
+		if (!state.exists) {
+			el.innerHTML = '<div class="hint">Add an entry to start.</div>';
+			return;
+		}
+		const visible = state.status === S.APPROVED;
+		let approvedNote;
+		if (state.lastApprovedContent === null) approvedNote = 'Never approved yet.';
+		else if (state.lastApprovedContent === state.content) approvedNote = `Content v${state.content}, the same as the row.`;
+		else if (options.versioning) approvedNote = `Content v${state.lastApprovedContent}. It is no longer in the row, only in the version history.`;
+		else approvedNote = `Content v${state.lastApprovedContent} was overwritten and is gone (no versioning).`;
+		const draftBlock = OBJ.draftAllowed();
+		el.innerHTML = `
+			<div class="ui-tile">
+				<div class="t">Status in the entries list</div>
+				<div>${badge(state.status)}</div>
+				<div class="why">Read straight from <code>ObjectEntry.status</code>.</div>
+			</div>
+			<div class="ui-tile">
+				<div class="t">Asset entry visible</div>
+				<div><strong>${visible ? 'Yes' : 'No'}</strong></div>
+				<div class="why"><code>updateEntry(..., objectEntry.isApproved())</code> in updateStatus. Last approved content: ${approvedNote}</div>
+			</div>
+			<div class="ui-tile">
+				<div class="t">Entry form buttons</div>
+				<div><span class="fake-btn">${mode === 'wf' ? 'Submit for Workflow' : 'Publish'}</span> <span class="fake-btn ${draftBlock ? 'off' : ''}">Save as Draft</span></div>
+				<div class="why">${draftBlock || 'Save as Draft allowed.'}</div>
+			</div>`;
+	},
+	renderDiagrams() {
+		const box = document.getElementById('diagrams');
+		box.className = 'diagrams single';
+		const P = {
+			2: [110, 90], 1: [350, 90], 4: [590, 90],
+			3: [110, 250], 0: [350, 250], 7: [590, 250]
+		};
+		const shown = [2, 0];
+		if (mode === 'wf') shown.push(1, 4);
+		if (options.schedule) shown.push(3, 7);
+
+		const E = [];
+		const add = (a, b) => { if (shown.includes(a) && shown.includes(b)) E.push([a, b]); };
+		if (mode === 'wf') {
+			add(2, 1); add(0, 1); add(1, 0); add(1, 4); add(4, 1); add(1, 7); add(3, 1); add(7, 1);
+		}
+		else {
+			add(2, 0); add(2, 7); add(3, 0); add(3, 7);
+		}
+		add(0, 7); add(7, 0); add(0, 3); add(7, 3);
+		if (options.draft && options.versioning) { add(0, 2); add(7, 2); add(3, 2); }
+
+		const recent = state.transitions.slice(-2).filter(([a]) => a !== null);
+		const isHot = (a, b) => recent.some(([x, y]) => x === a && y === b);
+
+		function arrow(a, b, hot) {
+			const [x1, y1] = P[a];
+			const [x2, y2] = P[b];
+			const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy);
+			const ux = dx / len, uy = dy / len;
+			const ox = -uy * 9, oy = ux * 9;
+			const t = (ux2, uy2) => Math.min(64 / Math.max(Math.abs(ux2), 1e-6), 26 / Math.max(Math.abs(uy2), 1e-6));
+			const s = t(ux, uy);
+			const sx = x1 + ux * s + ox, sy = y1 + uy * s + oy;
+			const ex = x2 - ux * s + ox, ey = y2 - uy * s + oy;
+			return `<g class="edge ${hot ? 'hot' : ''}"><path d="M${sx.toFixed(1)},${sy.toFixed(1)} L${ex.toFixed(1)},${ey.toFixed(1)}" marker-end="url(#${hot ? 'arrow-hot' : 'arrow'})"></path></g>`;
+		}
+
+		const cold = E.filter(([a, b]) => !isHot(a, b)).map(([a, b]) => arrow(a, b, false)).join('');
+		const hot = recent.filter(([a, b]) => shown.includes(a) && shown.includes(b)).map(([a, b]) => arrow(a, b, true)).join('');
+		const nodes = shown.map((s) => node(s, P[s][0], P[s][1], s, state.status === s)).join('');
+		const last = state.transitions.length
+			? state.transitions.slice(-2).map(([a, b]) => `${a === null ? 'new' : NAMES[a]} → ${NAMES[b]}`).join(', then ')
+			: 'No transitions yet.';
+		const notes = [];
+		if (mode === 'wf') notes.push('Denied only lasts an instant: the update task sets Pending right after.');
+		if (!options.schedule) notes.push('Schedule is off, so Scheduled/Expired are hidden.');
+		if (!(options.draft && options.versioning)) notes.push('Going back to Draft from a non-draft status needs drafts + versioning.');
+
+		box.innerHTML = `<div class="card"><h2>Object entry status</h2><div class="body">
+			<svg viewBox="0 0 700 330" role="img" aria-label="Object entry status transitions">${DEFS}
+				${cold}${hot}${nodes}
+				<text class="caption" x="350" y="300">Last change: ${last}</text>
+				<text class="caption" x="350" y="320">${notes.join(' ')}</text>
+			</svg>
+		</div></div>`;
+	},
+	afterRender() {
+		state.changed.forEach(flash);
+		state.changed = [];
+		state.newVersion = null;
+		const cb = document.getElementById('future-next');
+		if (cb) cb.addEventListener('change', () => { state.futureNext = cb.checked; });
+	}
+};
+
+/* ------------------------------------------------------------------ */
+/* Shell                                                               */
+/* ------------------------------------------------------------------ */
+
+const MODELS = {page: PAGE, object: OBJ};
+
+function model() {
+	return MODELS[entity];
+}
+
+function reset() {
+	state = model().init();
+}
+
+function renderActions(actions) {
+	let html = '';
+	let group = null;
+	for (const a of actions) {
+		if (a.group !== group) {
+			group = a.group;
+			html += `<div class="group-title">${group}</div>`;
+		}
+		html += `<button type="button" class="action" data-action="${a.id}" ${a.enabled ? '' : 'disabled'}>
+			<strong>${a.title}</strong><span>${a.desc}</span></button>`;
+	}
+	if (model().extraControls) html += model().extraControls();
+	document.getElementById('actions').innerHTML = html;
+}
+
+function renderLog() {
+	const el = document.getElementById('log');
+	if (!state.log.length) {
+		el.innerHTML = '<li class="empty-log">No events yet.</li>';
+		return;
+	}
+	el.innerHTML = state.log.map((e, i) => `
+		<li>
+			<div class="step"><span class="num">${i + 1}.</span><span class="what">${e.what}</span></div>
+			<div class="detail">${e.detail}</div>
+			<div class="ref"><code>${e.ref}</code></div>
+		</li>`).join('');
+	el.scrollTop = el.scrollHeight;
+}
+
+let currentActions = [];
+
+function render() {
+	document.querySelectorAll('[data-entity]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.entity === entity)));
+	document.querySelectorAll('[data-mode]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === mode)));
+	document.getElementById('object-options').hidden = entity !== 'object';
+	document.getElementById('mode-hint').textContent = model().hint();
+	currentActions = model().actions();
+	renderActions(currentActions);
+	model().renderCards();
+	model().renderUI();
+	model().renderDiagrams();
+	renderLog();
+	model().afterRender();
+}
+
+document.getElementById('actions').addEventListener('click', (event) => {
+	const button = event.target.closest('[data-action]');
+	if (!button || button.disabled) return;
+	const action = currentActions.find((a) => a.id === button.dataset.action);
+	action.run();
+	render();
+});
+
+document.querySelectorAll('[data-entity]').forEach((b) => {
+	b.addEventListener('click', () => { entity = b.dataset.entity; reset(); render(); });
+});
+
+document.querySelectorAll('[data-mode]').forEach((b) => {
+	b.addEventListener('click', () => { mode = b.dataset.mode; reset(); render(); });
+});
+
+document.querySelectorAll('[data-opt]').forEach((cb) => {
+	cb.addEventListener('change', () => { options[cb.dataset.opt] = cb.checked; reset(); render(); });
+});
+
+document.getElementById('reset').addEventListener('click', () => { reset(); render(); });
+
+reset();
+render();
+</script>
+</body>
+</html>
