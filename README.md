@@ -7,3 +7,5 @@ Launches prototypes (epics under [LPD-50024](https://liferay.atlassian.net/brows
 - `page-editor-launch-selector.html`: Page Editor with Live/Launch context selector
 - `page-status-flow.html`: Launch and Page draft status flow
 - `content-page-status.html`: Content Page and Object Entry status simulator
+
+Browse online: https://beni-the-po.github.io/launches-mockups/

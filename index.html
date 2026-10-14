@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Launches Mockups</title>
+<style>
+:root{--bg:#f7f8f9;--card:#fff;--text:#272833;--muted:#6b6c7e;--border:#e7e7ed;--accent:#0b5fff;--accent-soft:#f0f5ff}
+@media (prefers-color-scheme:dark){:root{--bg:#1c1c24;--card:#272833;--text:#f1f2f5;--muted:#a7a9bc;--border:#393a4a;--accent:#6e9cff;--accent-soft:#2b3550}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:960px;margin:0 auto;padding:48px 16px}
+h1{margin:0 0 8px;font-size:2rem}
+.lead{margin:0 0 32px;color:var(--muted)}
+.lead a{color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.card{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;color:inherit;text-decoration:none;transition:border-color .15s,box-shadow .15s}
+.card:hover,.card:focus-visible{border-color:var(--accent);box-shadow:0 2px 12px rgba(11,95,255,.12)}
+.thumb{aspect-ratio:16/9;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;color:var(--accent);font-weight:600;font-size:.9rem;border-bottom:1px solid var(--border)}
+.thumb img{width:100%;height:100%;object-fit:cover;object-position:top left}
+.body{padding:16px}
+.body h2{margin:0 0 4px;font-size:1.05rem}
+.body p{margin:0;color:var(--muted);font-size:.9rem}
+footer{margin-top:40px;color:var(--muted);font-size:.85rem}
+</style>
+</head>
+<body>
+<main>
+<h1>Launches Mockups</h1>
+<p class="lead">Interactive HTML prototypes for Liferay Launches (epics under <a href="https://liferay.atlassian.net/browse/LPD-50024">LPD-50024</a>). Every page is a clickable simulation; no data is saved.</p>
+<div class="grid">
+<a class="card" href="launches-mockup-clay.html">
+<div class="thumb"><img src="launches-mockup-clay.html.png" alt="" loading="lazy"></div>
+<div class="body"><h2>Launches (Clay)</h2><p>Launches list, Info/Elements form, publish, schedule, error details, Pages and CMS Content drafts.</p></div>
+</a>
+<a class="card" href="launches-mockup-custom.html">
+<div class="thumb"><img src="launches-mockup-custom.html.png" alt="" loading="lazy"></div>
+<div class="body"><h2>Launches (custom CSS)</h2><p>The same prototype with hand-rolled CSS instead of Clay.</p></div>
+</a>
+<a class="card" href="page-editor-launch-selector.html">
+<div class="thumb">Page Editor</div>
+<div class="body"><h2>Page Editor Launch Selector</h2><p>Switch between Live and the Launches a page is being worked on in.</p></div>
+</a>
+<a class="card" href="page-status-flow.html">
+<div class="thumb">Status flow</div>
+<div class="body"><h2>Page Status Flow</h2><p>Page draft statuses, transitions and actions inside a Launch.</p></div>
+</a>
+<a class="card" href="content-page-status.html">
+<div class="thumb">Simulator</div>
+<div class="body"><h2>Content Status Simulator</h2><p>How Content Page and Object Entry statuses change today, with and without workflow.</p></div>
+</a>
+</div>
+<footer>Prototypes only. They do not reflect shipped product behavior.</footer>
+</main>
+</body>
+</html>
