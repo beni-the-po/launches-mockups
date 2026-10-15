@@ -1509,6 +1509,8 @@
 						<label for="scheduleModalTime">Time</label>
 						<input type="time" class="form-control" id="scheduleModalTime">
 					</div>
+
+					<p class="text-danger" id="scheduleModalError" role="alert" style="margin: 12px 0 0" hidden>The date and time must be at least one minute in the future. Choose a later date or time.</p>
 				</div>
 				<div class="modal-footer">
 					<button class="btn btn-secondary" type="button" id="scheduleModalCancel">Cancel</button>
@@ -3786,11 +3788,24 @@
 			var scheduleModalConfirmBtn = document.getElementById('scheduleModalConfirm');
 			var scheduleModalCancelBtn = document.getElementById('scheduleModalCancel');
 			var scheduleModalCloseBtn = document.getElementById('scheduleModalClose');
+			var scheduleModalError = document.getElementById('scheduleModalError');
 			var scheduleModalLaunch = null;
 			var scheduleModalOnConfirmed = null;
 
 			function updateScheduleModalConfirmState() {
 				scheduleModalConfirmBtn.disabled = !scheduleModalDate.value || !scheduleModalTime.value;
+				scheduleModalError.hidden = true;
+			}
+
+			// The schedule must be at least one minute later than the moment it's saved: the current
+			// minute and anything before it are rejected (LPD-106030 AC20-AC21). Checked on confirm,
+			// so a time that was valid when picked but went stale while the modal was open is caught.
+			function isScheduleTimeValid() {
+				var scheduled = new Date(scheduleModalDate.value + 'T' + scheduleModalTime.value);
+				var startOfCurrentMinute = new Date();
+				startOfCurrentMinute.setSeconds(0, 0);
+
+				return !isNaN(scheduled.getTime()) && scheduled.getTime() >= startOfCurrentMinute.getTime() + 60000;
 			}
 
 			scheduleModalDate.addEventListener('input', updateScheduleModalConfirmState);
@@ -3814,6 +3829,11 @@
 
 			scheduleModalConfirmBtn.addEventListener('click', function () {
 				if (scheduleModalConfirmBtn.disabled || !scheduleModalLaunch) {
+					return;
+				}
+
+				if (!isScheduleTimeValid()) {
+					scheduleModalError.hidden = false;
 					return;
 				}
 
