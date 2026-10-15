@@ -342,6 +342,10 @@
 							<span class="inline-item inline-item-before"><svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#globe"></use></svg></span>
 							Preview
 						</button>
+						<button type="button" class="btn btn-secondary mr-2" id="launchFormUnscheduleBtn" hidden>
+							<span class="inline-item inline-item-before"><svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#calendar"></use></svg></span>
+							UnSchedule
+						</button>
 						<div class="dropdown mr-2" style="position: relative; display: inline-block" id="launchFormPublishGroup">
 							<button type="button" class="btn btn-secondary dropdown-toggle" id="launchFormPublishBtn">
 								Publish
@@ -1213,6 +1217,7 @@
 						return [
 							VIEW_ITEM,
 							PREVIEW_ITEM,
+							{icon: 'calendar', label: 'UnSchedule', perform: 'unschedule'},
 							{divider: true},
 							{icon: 'trash', label: 'Delete', danger: true, perform: 'delete'}
 						];
@@ -1302,6 +1307,9 @@
 						}
 						else if (perform === 'preview' && launch) {
 							openPreviewModal(launch);
+						}
+						else if (perform === 'unschedule' && launch) {
+							confirmUnscheduleLaunch(launch);
 						}
 						else if (perform === 'delete' && launch) {
 							confirmDeleteLaunch(launch);
@@ -2625,6 +2633,7 @@
 			// status shows up.
 
 			var launchFormPublishGroup = document.getElementById('launchFormPublishGroup');
+			var launchFormUnscheduleBtn = document.getElementById('launchFormUnscheduleBtn');
 			var launchFormPublishBtn = document.getElementById('launchFormPublishBtn');
 			var launchFormPublishMenu = document.getElementById('launchFormPublishMenu');
 
@@ -2638,6 +2647,9 @@
 
 				// Toggled through inline display (not [hidden]) because the group needs inline-block.
 				launchFormPublishGroup.style.display = visible ? 'inline-block' : 'none';
+
+				// UnSchedule only exists for a Scheduled Launch (the page is read-only then).
+				launchFormUnscheduleBtn.hidden = !(launch && launch.statusKey === 'scheduled');
 				launchFormPublishMenu.classList.remove('mockup-open');
 			}
 
@@ -3265,6 +3277,36 @@
 			}
 
 			// ---- Delete (confirm before removing) ----
+
+			// ---- UnSchedule (Scheduled only): removes the scheduled job, Launch goes back to Open ----
+
+			function confirmUnscheduleLaunch(launch, onConfirmed) {
+				openConfirmModal({
+					title: 'UnSchedule Launch',
+					message: 'UnSchedule the Launch will DELETE the scheduled job and the Launch will be moved to Open. Do you want to proceed?',
+					confirmLabel: 'Confirm',
+					onConfirm: function () {
+						// The mockup has no real cron job: the "reach scheduled time" simulation only
+						// fires Scheduled Launches, so going back to Open is what removes the job here.
+						launch.status = 'secondary';
+						launch.statusLabel = 'Open';
+						launch.statusKey = 'open';
+						renderLaunchRows(searchInput ? searchInput.value : '');
+
+						if (onConfirmed) {
+							onConfirmed();
+						}
+					}
+				});
+			}
+
+			launchFormUnscheduleBtn.addEventListener('click', function () {
+				var launch = getCurrentFormLaunch();
+
+				if (launch) {
+					confirmUnscheduleLaunch(launch, function () { show('landing'); });
+				}
+			});
 
 			function confirmDeleteLaunch(launch) {
 				openConfirmModal({
