@@ -1993,8 +1993,12 @@
 
 				addToLaunchVersionLabel.textContent = context.pageName + ' v' + context.version;
 
-				addToLaunchSelect.innerHTML = '<option value="">Select a Launch</option>' +
-					LAUNCHES.map(function (l) { return '<option value="' + l.id + '">' + l.name + '</option>'; }).join('');
+				// Only Open Launches can receive assets: Scheduled, Published and Failed
+				// Launches are locked, so they're never offered here.
+				var openLaunches = LAUNCHES.filter(function (l) { return l.statusKey === 'open'; });
+
+				addToLaunchSelect.innerHTML = '<option value="">' + (openLaunches.length ? 'Select a Launch' : 'No Open Launches available') + '</option>' +
+					openLaunches.map(function (l) { return '<option value="' + l.id + '">' + l.name + '</option>'; }).join('');
 
 				addToLaunchModalConfirmBtn.disabled = true;
 				showModal(addToLaunchModal);

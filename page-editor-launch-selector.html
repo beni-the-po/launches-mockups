@@ -813,8 +813,10 @@
 			var selectedLaunchToAdd = null;
 
 			function availableLaunchesToAdd() {
+				// Only Open Launches can receive a page: Scheduled, Published and Failed
+				// Launches are locked, so they're never offered here.
 				return Object.keys(LAUNCHES).filter(function (id) {
-					return pageDrafts.indexOf(id) === -1;
+					return pageDrafts.indexOf(id) === -1 && LAUNCHES[id].status === 'Open';
 				});
 			}
 
@@ -824,7 +826,7 @@
 
 				var available = availableLaunchesToAdd();
 				if (available.length === 0) {
-					addToLaunchOptions.innerHTML = '<p style="color:#6b6c7e;font-size:.8125rem;">This page already has a draft in every available Launch.</p>';
+					addToLaunchOptions.innerHTML = '<p style="color:#6b6c7e;font-size:.8125rem;">No Open Launches available. This page already has a draft in every Open Launch.</p>';
 				} else {
 					addToLaunchOptions.innerHTML = available.map(function (id) {
 						var launch = LAUNCHES[id];
