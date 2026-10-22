@@ -363,7 +363,7 @@
 							</div>
 						</div>
 						<button type="button" class="btn btn-secondary btn-borderless mr-2" data-goto="landing" id="launchFormCancelBtn">Cancel</button>
-						<button type="button" class="btn btn-primary" data-goto="landing" id="launchFormSaveBtn">Create</button>
+						<button type="button" class="btn btn-primary" id="launchFormSaveBtn">Create</button>
 					</div>
 				</div>
 			</div>
@@ -380,15 +380,19 @@
 
 				<div class="tab-content mt-4">
 					<div class="tab-pane fade show active" data-form-pane="info" role="tabpanel">
-						<div class="form-group" style="max-width: 640px">
-							<label for="launchFormName">Name</label>
+						<div class="form-group" style="max-width: 640px" id="launchFormNameGroup">
+							<label for="launchFormName">Name <span class="reference-mark text-warning" aria-hidden="true">*</span></label>
 							<input
 								type="text"
 								class="form-control"
 								placeholder="Untitled Launch"
 								aria-label="Launch name"
 								id="launchFormName"
+								required
 							>
+							<div class="form-feedback-group" id="launchFormNameFeedback" hidden>
+								<div class="form-feedback-item">The Name field is required.</div>
+							</div>
 						</div>
 
 						<div class="form-group mt-4" style="max-width: 640px">
@@ -814,6 +818,8 @@
 					</div>
 
 					<p class="text-secondary mb-0" id="addElementEmptyMessage" hidden>No assets found for this scope.</p>
+
+					<div class="alert alert-warning mb-0" role="alert" id="addElementStagingMessage" hidden></div>
 				</div>
 				<div class="modal-footer">
 					<button class="btn btn-secondary" type="button" id="addElementModalCancel">Cancel</button>
@@ -854,6 +860,8 @@
 				</div>
 				<div class="modal-body">
 					<p class="mb-3">Add <strong id="addToLaunchVersionLabel"></strong> to a Launch.</p>
+
+					<div class="alert alert-warning" role="alert" id="addToLaunchStagingMessage" hidden></div>
 
 					<div class="form-group">
 						<label for="addToLaunchSelect">Launch</label>
@@ -1087,10 +1095,10 @@
 			// ---- Launches list (frontend data set look) ----
 
 			var LAUNCHES = [
-				{id: 'myLaunche', name: 'MyLaunche', description: '', modified: '9/15/2026, 6:51:12 AM', status: 'secondary', statusLabel: 'Open', statusKey: 'open'},
-				{id: 'winterNewsletter', name: 'Winter Newsletter', description: 'Newsletter landing page and signup banner, ready to go live', modified: '9/16/2026, 10:05:44 AM', status: 'secondary', statusLabel: 'Open', statusKey: 'open'},
-				{id: 'blackFriday', name: 'Black Friday Deals', description: 'Deals landing page and countdown banner — passes validation, but one asset fails while publishing', modified: '9/16/2026, 11:20:03 AM', status: 'secondary', statusLabel: 'Open', statusKey: 'open'},
-				{id: 'fallCampaign', name: 'Fall Campaign Refresh', description: 'Homepage banner and landing page copy update', modified: '9/12/2026, 2:14:00 PM', status: 'secondary', statusLabel: 'Open', statusKey: 'open'},
+				{id: 'myLaunche', name: 'MyLaunche', description: '', modified: '9/15/2026, 6:51:12 AM', status: 'secondary', statusLabel: 'In Progress', statusKey: 'inProgress'},
+				{id: 'winterNewsletter', name: 'Winter Newsletter', description: 'Newsletter landing page and signup banner, ready to go live', modified: '9/16/2026, 10:05:44 AM', status: 'secondary', statusLabel: 'In Progress', statusKey: 'inProgress'},
+				{id: 'blackFriday', name: 'Black Friday Deals', description: 'Deals landing page and countdown banner — passes validation, but one asset fails while publishing', modified: '9/16/2026, 11:20:03 AM', status: 'secondary', statusLabel: 'In Progress', statusKey: 'inProgress'},
+				{id: 'fallCampaign', name: 'Fall Campaign Refresh', description: 'Homepage banner and landing page copy update', modified: '9/12/2026, 2:14:00 PM', status: 'secondary', statusLabel: 'In Progress', statusKey: 'inProgress'},
 				{id: 'q3Announcement', name: 'Q3 Product Announcement', description: 'Blog post and pricing page updates', modified: '9/9/2026, 9:02:31 AM', status: 'danger', statusLabel: 'Failed', statusKey: 'failed'},
 				{id: 'holidayStorefront', name: 'Holiday Storefront', description: '', modified: '8/30/2026, 4:47:09 PM', status: 'success', statusLabel: 'Published', statusKey: 'published'}
 			];
@@ -1106,7 +1114,7 @@
 			}
 
 			// While a publish is running the status column shows a progress bar instead of the status
-			// label. It's not a status of its own: the Launch stays Open until the publish resolves.
+			// label. It's not a status of its own: the Launch stays In Progress until the publish resolves.
 			function renderStatusCell(launch) {
 				if (typeof launch.publishProgress === 'number') {
 					var pct = Math.round(launch.publishProgress);
@@ -1131,6 +1139,12 @@
 				}
 			}
 
+			// Only an In Progress Launch with no publish running can be edited. Scheduled, Published
+			// and Failed Launches open read-only, wherever they're opened from.
+			function isLaunchEditable(launch) {
+				return launch.statusKey === 'inProgress' && typeof launch.publishProgress !== 'number';
+			}
+
 			function renderLaunchRows(filter) {
 				var q = (filter || '').trim().toLowerCase();
 				var list = LAUNCHES.filter(function (launch) {
@@ -1150,7 +1164,7 @@
 								'<div class="custom-checkbox custom-control"><label><input class="custom-control-input launch-row-checkbox" type="checkbox"><span class="custom-control-label"></span></label></div>' +
 							'</td>' +
 							'<td class="table-cell-expand-small table-cell-minw-200 table-title">' +
-								'<a class="d-inline-block" href="#" data-goto="form" data-form-mode="edit" data-launch-id="' + launch.id + '">' + launch.name + icon('shortcut', '; margin-left: 4px') + '</a>' +
+								'<a class="d-inline-block" href="#" data-goto="form" data-form-mode="' + (isLaunchEditable(launch) ? 'edit' : 'view') + '" data-launch-id="' + launch.id + '">' + launch.name + icon('shortcut', '; margin-left: 4px') + '</a>' +
 							'</td>' +
 							'<td class="table-cell-expand table-cell-minw-300">' + (launch.description || '—') + '</td>' +
 							'<td class="table-cell-expand-smallest table-cell-ws-nowrap">' + launch.modified + '</td>' +
@@ -1186,7 +1200,7 @@
 			}
 
 			// "View" (read-only) is always available, on every status, regardless of what else is.
-			// Beyond that: open -> everything; failed -> View + View Error Details + Delete; published -> View/Delete (no Edit, no Publish/Schedule);
+			// Beyond that: inProgress -> everything; failed -> View + View Error Details + Delete; published -> View/Delete (no Edit, no Publish/Schedule);
 			// scheduled -> View + Delete.
 			function getMenuItemsForStatus(statusKey) {
 				var VIEW_ITEM = {icon: 'view', label: 'View', action: 'form', formMode: 'view'};
@@ -1223,7 +1237,7 @@
 							{divider: true},
 							{icon: 'trash', label: 'Delete', danger: true, perform: 'delete'}
 						];
-					case 'open':
+					case 'inProgress':
 					default:
 						return [
 							VIEW_ITEM,
@@ -1256,7 +1270,7 @@
 				closeDropdown();
 
 				var launch = LAUNCHES.filter(function (l) { return l.id === kebabButton.dataset.kebab; })[0];
-				var items = getMenuItemsForStatus(launch ? (typeof launch.publishProgress === 'number' ? 'publishInProgress' : launch.statusKey) : 'open');
+				var items = getMenuItemsForStatus(launch ? (typeof launch.publishProgress === 'number' ? 'publishInProgress' : launch.statusKey) : 'inProgress');
 
 				if (!items.length) {
 					return;
@@ -1332,12 +1346,17 @@
 
 			// ---- Pages list ----
 
+			// Sites with Staging active: none of their Pages can be added to a Launch, neither from
+			// the Page itself (Add to a Launch) nor from the Launch's Assets tab (Add Asset).
+			var STAGED_SITES = {'Marketing Site': true};
+
 			var PAGES = [
 				{id: 'home', name: 'Home', site: 'Guest', version: '4.0', updated: '9/15/2026, 10:12:00 AM', status: 'success', statusLabel: 'Published'},
 				{id: 'about-us', name: 'About Us', site: 'Guest', version: '2.1', updated: '9/14/2026, 4:30:00 PM', status: 'secondary', statusLabel: 'Draft'},
 				{id: 'contact', name: 'Contact', site: 'Guest', version: '1.3', updated: '9/13/2026, 9:05:00 AM', status: 'success', statusLabel: 'Published'},
 				{id: 'products', name: 'Products', site: 'Guest', version: '3.2', updated: '9/12/2026, 3:47:00 PM', status: 'info', statusLabel: 'Pending'},
-				{id: 'careers', name: 'Careers', site: 'Guest', version: '1.0', updated: '9/11/2026, 1:22:00 PM', status: 'secondary', statusLabel: 'Draft'}
+				{id: 'careers', name: 'Careers', site: 'Guest', version: '1.0', updated: '9/11/2026, 1:22:00 PM', status: 'secondary', statusLabel: 'Draft'},
+				{id: 'events', name: 'Events', site: 'Marketing Site', version: '1.1', updated: '9/10/2026, 11:30:00 AM', status: 'success', statusLabel: 'Published'}
 			];
 
 			var pageRowsEl = document.getElementById('pageRows');
@@ -1355,7 +1374,9 @@
 				pageRowsEl.innerHTML = PAGES.map(function (page) {
 					return '' +
 						'<tr data-id="' + page.id + '">' +
-							'<td class="table-cell-expand-small table-cell-minw-200 table-title"><span class="text-truncate-inline">' + page.name + '</span></td>' +
+							'<td class="table-cell-expand-small table-cell-minw-200 table-title"><span class="text-truncate-inline">' + page.name + '</span>' +
+								(STAGED_SITES[page.site] ? ' <span class="label label-info ml-1" title="' + page.site + ' has Staging active"><span class="label-item label-item-expand">Staging</span></span>' : '') +
+							'</td>' +
 							'<td class="table-cell-expand-smallest table-cell-ws-nowrap">' +
 								(pageHasLaunchDraft(page.id) ?
 									'<span title="Has a draft tied to a Launch" aria-label="Has a draft tied to a Launch">' + icon('rocket') + '</span>' :
@@ -1482,7 +1503,8 @@
 				'about-us': [],
 				contact: [],
 				products: [],
-				careers: []
+				careers: [],
+				events: []
 			};
 
 			// Renders the Pages list for the first time here, now that PAGE_DRAFTS exists — the
@@ -1731,6 +1753,8 @@
 						openAddToLaunchModal({
 							pageName: editorPage.name,
 							version: editorPage.version,
+							site: editorPage.site,
+							type: 'Content Page',
 							onAdded: function (launchId, newElement) {
 								// Per user rule: associating a page with a Launch keeps its Main
 								// Draft intact — the page ends up with BOTH the Main Draft
@@ -1783,6 +1807,10 @@
 			// ---- Page version history ----
 
 			var PAGE_VERSIONS = {
+				events: [
+					{version: '1.1', updated: '9/10/2026, 11:30:00 AM', launchId: null, launchElementId: null},
+					{version: '1.0', updated: '8/5/2026, 10:00:00 AM', launchId: null, launchElementId: null}
+				],
 				home: [
 					{version: '4.0', updated: '9/15/2026, 10:12:00 AM', launchId: null, launchElementId: null},
 					{version: '3.0', updated: '8/20/2026, 2:00:00 PM', launchId: 'holidayStorefront', launchElementId: 10},
@@ -1946,6 +1974,8 @@
 							openAddToLaunchModal({
 								pageName: page ? page.name : 'Page',
 								version: versionRow.version,
+								site: page ? page.site : 'Guest',
+								type: 'Content Page',
 								onAdded: function (launchId, newElement) {
 									versionRow.launchId = launchId;
 									versionRow.launchElementId = newElement.id;
@@ -2003,12 +2033,19 @@
 
 				addToLaunchVersionLabel.textContent = context.pageName + ' v' + context.version;
 
-				// Only Open Launches can receive assets: Scheduled, Published and Failed
+				// Only In Progress Launches can receive assets: Scheduled, Published and Failed
 				// Launches are locked, so they're never offered here.
-				var openLaunches = LAUNCHES.filter(function (l) { return l.statusKey === 'open'; });
+				var inProgressLaunches = LAUNCHES.filter(function (l) { return l.statusKey === 'inProgress'; });
 
-				addToLaunchSelect.innerHTML = '<option value="">' + (openLaunches.length ? 'Select a Launch' : 'No Open Launches available') + '</option>' +
-					openLaunches.map(function (l) { return '<option value="' + l.id + '">' + l.name + '</option>'; }).join('');
+				addToLaunchSelect.innerHTML = '<option value="">' + (inProgressLaunches.length ? 'Select a Launch' : 'No In Progress Launches available') + '</option>' +
+					inProgressLaunches.map(function (l) { return '<option value="' + l.id + '">' + l.name + '</option>'; }).join('');
+
+				var stagingSite = context.site && STAGED_SITES[context.site] ? context.site : null;
+				var stagingMessage = document.getElementById('addToLaunchStagingMessage');
+
+				stagingMessage.hidden = !stagingSite;
+				stagingMessage.textContent = stagingSite ? 'This Page can\'t be added to a Launch because Staging is active on ' + stagingSite + '.' : '';
+				addToLaunchSelect.disabled = !!stagingSite;
 
 				addToLaunchModalConfirmBtn.disabled = true;
 				showModal(addToLaunchModal);
@@ -2055,9 +2092,9 @@
 						name: context.pageName,
 						version: context.version,
 						author: 'Test Test',
-						type: 'Web Content Article',
+						type: context.type || 'Web Content Article',
 						scope: 'Site',
-						scopeName: 'Guest',
+						scopeName: context.site || 'Guest',
 						modified: new Date().toLocaleString(),
 						status: 'info',
 						statusLabel: 'Pending'
@@ -2488,15 +2525,15 @@
 				holidayStorefront: [
 					{id: 8, name: 'Holiday Homepage Banner', version: '3.0', author: 'Carlos Vidal', type: 'Web Content Article', scope: 'Site', scopeName: 'Guest', modified: '8/30/2026, 4:40:07 PM', status: 'success', statusLabel: 'Published'},
 					{id: 9, name: 'Gift Guide Landing Page', version: '1.4', author: 'Maria Alonso', type: 'Web Content Article', scope: 'Site', scopeName: 'Guest', modified: '8/30/2026, 4:12:55 PM', status: 'success', statusLabel: 'Published'},
-					{id: 10, name: 'Home', version: '3.0', author: 'Test Test', type: 'Web Content Article', scope: 'Site', scopeName: 'Guest', modified: '8/20/2026, 2:00:00 PM', status: 'success', statusLabel: 'Published'}
+					{id: 10, name: 'Home', version: '3.0', author: 'Test Test', type: 'Content Page', scope: 'Site', scopeName: 'Guest', modified: '8/20/2026, 2:00:00 PM', status: 'success', statusLabel: 'Published'}
 				]
 			};
 
 			// Cross-links a Pages version history row to the LAUNCH_ELEMENTS entry it created, so
 			// "Remove from the Launch" can remove precisely that element (not just any element that
 			// happens to match name/version). Seeded here for the versions that start out attached.
-			LAUNCH_ELEMENTS.myLaunche.push({id: 11, name: 'About Us', version: '2.1', author: 'Test Test', type: 'Web Content Article', scope: 'Site', scopeName: 'Guest', modified: '9/14/2026, 4:30:00 PM', status: 'info', statusLabel: 'Pending'});
-			LAUNCH_ELEMENTS.fallCampaign.push({id: 12, name: 'Products', version: '3.2', author: 'Test Test', type: 'Web Content Article', scope: 'Site', scopeName: 'Guest', modified: '9/12/2026, 3:47:00 PM', status: 'info', statusLabel: 'Pending'});
+			LAUNCH_ELEMENTS.myLaunche.push({id: 11, name: 'About Us', version: '2.1', author: 'Test Test', type: 'Content Page', scope: 'Site', scopeName: 'Guest', modified: '9/14/2026, 4:30:00 PM', status: 'info', statusLabel: 'Pending'});
+			LAUNCH_ELEMENTS.fallCampaign.push({id: 12, name: 'Products', version: '3.2', author: 'Test Test', type: 'Content Page', scope: 'Site', scopeName: 'Guest', modified: '9/12/2026, 3:47:00 PM', status: 'info', statusLabel: 'Pending'});
 			LAUNCH_ELEMENTS.myLaunche.push({id: 13, name: 'Company Overview', version: '1.0', author: 'Test Test', type: 'Web Content Article', scope: 'Site', scopeName: 'Guest', modified: '7/2/2026, 11:00:00 AM', status: 'success', statusLabel: 'Published'});
 
 			var elements = [];
@@ -2515,10 +2552,13 @@
 			var elementsCapSummary = document.getElementById('elementsCapSummary');
 			var addElementBtn = document.getElementById('addElementBtn');
 			var isFormReadOnly = false;
+			var isFormNew = false;
+			var launchFormNameGroup = document.getElementById('launchFormNameGroup');
+			var launchFormNameFeedback = document.getElementById('launchFormNameFeedback');
 
 			function renderElementRows() {
 				if (!elements.length) {
-					elementRowsEl.innerHTML = '<tr><td colspan="9" class="text-center text-secondary" style="padding: 32px">No assets yet' + (isFormReadOnly ? '.' : '. Click Add Asset to add one.') + '</td></tr>';
+					elementRowsEl.innerHTML = '<tr><td colspan="9" class="text-center text-secondary" style="padding: 32px">No assets yet' + (isFormReadOnly ? '.' : isFormNew ? '. Create the Launch first, then add assets to it.' : '. Click Add Asset to add one.') + '</td></tr>';
 				}
 				else {
 					elementRowsEl.innerHTML = elements.map(function (el) {
@@ -2593,8 +2633,30 @@
 				});
 			});
 
+			function setNameError(hasError) {
+				launchFormNameGroup.classList.toggle('has-error', hasError);
+				launchFormNameFeedback.hidden = !hasError;
+			}
+
+			launchFormName.addEventListener('input', function () {
+				if (launchFormName.value.trim()) {
+					setNameError(false);
+				}
+			});
+
 			function openLaunchForm(mode, launchId) {
+				// Edit falls back to read-only for a Launch that can't be edited (AC9).
+				if (mode === 'edit') {
+					var launchToEdit = LAUNCHES.filter(function (l) { return l.id === launchId; })[0];
+
+					if (launchToEdit && !isLaunchEditable(launchToEdit)) {
+						mode = 'view';
+					}
+				}
+
 				isFormReadOnly = (mode === 'view');
+				isFormNew = (mode === 'new');
+				setNameError(false);
 
 				if (mode === 'new') {
 					currentLaunchId = null;
@@ -2618,7 +2680,8 @@
 				launchFormDescription.disabled = isFormReadOnly;
 				launchFormSaveBtn.hidden = isFormReadOnly;
 				launchFormCancelBtn.textContent = isFormReadOnly ? 'Close' : 'Cancel';
-				addElementBtn.hidden = isFormReadOnly;
+				// A new Launch starts In Progress with no assets: they're added once it exists.
+				addElementBtn.hidden = isFormReadOnly || isFormNew;
 
 				// No Launch exists yet to preview in "New Launch" mode.
 				launchFormPreviewBtn.hidden = (mode === 'new');
@@ -2629,8 +2692,51 @@
 				show('form');
 			}
 
+			// Create adds a new In Progress Launch with no assets to the top of the list; Save
+			// updates the Launch's Name, Description and assets. Both stamp the Modified date.
+			launchFormSaveBtn.addEventListener('click', function () {
+				var name = launchFormName.value.trim();
+
+				if (!name) {
+					setNameError(true);
+					switchFormTab('info');
+					launchFormName.focus();
+					return;
+				}
+
+				var description = launchFormDescription.value.trim();
+				var modified = new Date().toLocaleString();
+
+				if (currentLaunchId) {
+					var launch = getCurrentFormLaunch();
+					var keptIds = elements.map(function (el) { return el.id; });
+
+					(LAUNCH_ELEMENTS[launch.id] || []).forEach(function (el) {
+						if (keptIds.indexOf(el.id) === -1) {
+							clearPageVersionsByElementId(el.id);
+						}
+					});
+
+					launch.name = name;
+					launch.description = description;
+					launch.modified = modified;
+					LAUNCH_ELEMENTS[launch.id] = elements;
+				}
+				else {
+					nextLaunchId += 1;
+
+					var newLaunch = {id: 'newLaunch' + nextLaunchId, name: name, description: description, modified: modified, status: 'secondary', statusLabel: 'In Progress', statusKey: 'inProgress'};
+
+					LAUNCHES.unshift(newLaunch);
+					LAUNCH_ELEMENTS[newLaunch.id] = [];
+				}
+
+				renderLaunchRows(searchInput ? searchInput.value : '');
+				show('landing');
+			});
+
 			// ---- Publish / Schedule button on the Launch page (shown on both Info and Assets tabs) ----
-			// Same rule as the kebab menu: only for an existing Open Launch with no publish running.
+			// Same rule as the kebab menu: only for an existing In Progress Launch with no publish running.
 			// After confirming, the user goes back to the list, where the progress bar or the new
 			// status shows up.
 
@@ -2645,7 +2751,7 @@
 
 			function updateLaunchFormPublishGroup() {
 				var launch = currentLaunchId ? getCurrentFormLaunch() : null;
-				var visible = !!launch && launch.statusKey === 'open' && typeof launch.publishProgress !== 'number';
+				var visible = !!launch && launch.statusKey === 'inProgress' && typeof launch.publishProgress !== 'number';
 
 				// Toggled through inline display (not [hidden]) because the group needs inline-block.
 				launchFormPublishGroup.style.display = visible ? 'inline-block' : 'none';
@@ -2972,7 +3078,7 @@
 			}
 
 			// No intermediate "Publishing" status: the status column shows a progress bar while the
-			// publish runs, then the Launch goes straight from Open to Published or Failed. Publishing
+			// publish runs, then the Launch goes straight from In Progress to Published or Failed. Publishing
 			// is not transactional: elements that published stay published even if another one fails;
 			// the failed ones keep their previous state and get an entry in Error Details.
 			function runLaunchPublish(launch) {
@@ -3298,19 +3404,19 @@
 
 			// ---- Delete (confirm before removing) ----
 
-			// ---- UnSchedule (Scheduled only): removes the scheduled job, Launch goes back to Open ----
+			// ---- UnSchedule (Scheduled only): removes the scheduled job, Launch goes back to In Progress ----
 
 			function confirmUnscheduleLaunch(launch, onConfirmed) {
 				openConfirmModal({
 					title: 'UnSchedule Launch',
-					message: 'UnSchedule the Launch will DELETE the scheduled job and the Launch will be moved to Open. Do you want to proceed?',
+					message: 'UnSchedule the Launch will DELETE the scheduled job and the Launch will be moved to In Progress. Do you want to proceed?',
 					confirmLabel: 'Confirm',
 					onConfirm: function () {
 						// The mockup has no real cron job: the "reach scheduled time" simulation only
-						// fires Scheduled Launches, so going back to Open is what removes the job here.
+						// fires Scheduled Launches, so going back to In Progress is what removes the job here.
 						launch.status = 'secondary';
-						launch.statusLabel = 'Open';
-						launch.statusKey = 'open';
+						launch.statusLabel = 'In Progress';
+						launch.statusKey = 'inProgress';
 						renderLaunchRows(searchInput ? searchInput.value : '');
 
 						if (onConfirmed) {
@@ -3457,6 +3563,7 @@
 			// version model); Blog Posting and Document do not support versioning in this mockup
 			// (matches the real BlogsEntry finding from earlier research — no numbered versions).
 			var TYPE_SUPPORTS_VERSIONING = {
+				'Content Page': true,
 				'Web Content Article': true,
 				'Blog Posting': false,
 				'Document': false
@@ -3465,6 +3572,9 @@
 			var AVAILABLE_ELEMENTS = {
 				site: {
 					Guest: [
+						{name: 'Home', version: '4.0', type: 'Content Page', status: 'success', statusLabel: 'Ready to Publish'},
+						{name: 'Contact', version: '1.3', type: 'Content Page', status: 'info', statusLabel: 'Pending'},
+						{name: 'Careers', version: '1.0', type: 'Content Page', status: 'info', statusLabel: 'Pending'},
 						{name: 'Homepage Banner', version: '1.0', type: 'Web Content Article', status: 'success', statusLabel: 'Ready to Publish'},
 						{name: 'About Us Page', version: '2.3', type: 'Web Content Article', status: 'info', statusLabel: 'Pending'},
 						{name: 'Contact Form', version: '1.1', type: 'Document', status: 'danger', statusLabel: 'Rejected'}
@@ -3476,6 +3586,10 @@
 					Intranet: [
 						{name: 'Employee Handbook', version: '4.2', type: 'Document', status: 'info', statusLabel: 'Pending'},
 						{name: 'IT Support FAQ', version: '1.5', type: 'Web Content Article', status: 'success', statusLabel: 'Ready to Publish'}
+					],
+					'Marketing Site': [
+						{name: 'Events', version: '1.1', type: 'Content Page', status: 'success', statusLabel: 'Ready to Publish'},
+						{name: 'Spring Promo', version: '2.0', type: 'Content Page', status: 'info', statusLabel: 'Pending'}
 					],
 					'Partner Portal': [
 						{name: 'Partner Onboarding Guide', version: '1.0', type: 'Document', status: 'danger', statusLabel: 'Rejected'},
@@ -3506,6 +3620,7 @@
 			var addElementListGroup = document.getElementById('addElementListGroup');
 			var addElementListEl = document.getElementById('addElementList');
 			var addElementEmptyMessage = document.getElementById('addElementEmptyMessage');
+			var addElementStagingMessage = document.getElementById('addElementStagingMessage');
 			var addElementModalConfirmBtn = document.getElementById('addElementModalConfirm');
 			var addElementModalCancelBtn = document.getElementById('addElementModalCancel');
 			var addElementModalCloseBtn = document.getElementById('addElementModalClose');
@@ -3516,6 +3631,7 @@
 				addElementScopeValueGroup.hidden = true;
 				addElementListGroup.hidden = true;
 				addElementEmptyMessage.hidden = true;
+				addElementStagingMessage.hidden = true;
 				addElementListEl.innerHTML = '';
 				addElementModalConfirmBtn.disabled = true;
 			}
@@ -3546,7 +3662,7 @@
 
 				var names = Object.keys(AVAILABLE_ELEMENTS[scopeType]);
 				addElementScopeValue.innerHTML = '<option value="">Select...</option>' +
-					names.map(function (name) { return '<option value="' + name + '">' + name + '</option>'; }).join('');
+					names.map(function (name) { return '<option value="' + name + '">' + name + (scopeType === 'site' && STAGED_SITES[name] ? ' (Staging active)' : '') + '</option>'; }).join('');
 
 				addElementScopeValueGroup.hidden = false;
 			});
@@ -3556,10 +3672,19 @@
 				var scopeValue = addElementScopeValue.value;
 
 				addElementModalConfirmBtn.disabled = true;
+				addElementStagingMessage.hidden = true;
 
 				if (!scopeValue) {
 					addElementListGroup.hidden = true;
 					addElementEmptyMessage.hidden = true;
+					return;
+				}
+
+				if (scopeType === 'site' && STAGED_SITES[scopeValue]) {
+					addElementListGroup.hidden = true;
+					addElementEmptyMessage.hidden = true;
+					addElementStagingMessage.textContent = 'Pages from ' + scopeValue + ' can\'t be added to a Launch because Staging is active on this Site.';
+					addElementStagingMessage.hidden = false;
 					return;
 				}
 
