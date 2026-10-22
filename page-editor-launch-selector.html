@@ -563,10 +563,10 @@
 			// ---- Seed data ----------------------------------------------------
 
 			var LAUNCHES = {
-				fallCampaign: { id: 'fallCampaign', name: 'Fall Campaign Refresh', status: 'Open' },
+				fallCampaign: { id: 'fallCampaign', name: 'Fall Campaign Refresh', status: 'In Progress' },
 				holidayStorefront: { id: 'holidayStorefront', name: 'Holiday Storefront', status: 'Scheduled' },
-				q3Announcement: { id: 'q3Announcement', name: 'Q3 Product Announcement', status: 'Open' },
-				springRefresh: { id: 'springRefresh', name: 'Spring Refresh 2027', status: 'Open' }
+				q3Announcement: { id: 'q3Announcement', name: 'Q3 Product Announcement', status: 'In Progress' },
+				springRefresh: { id: 'springRefresh', name: 'Spring Refresh 2027', status: 'In Progress' }
 			};
 
 			// Page currently has a draft in fallCampaign + holidayStorefront.
@@ -645,7 +645,7 @@
 							'<span class="context-option-icon is-launch">' + icon('rocket') + '</span>' +
 							'<span class="context-option-body">' +
 								'<span class="co-title">' + launch.name + '</span>' +
-								'<span class="co-meta">' + launch.status + ' &middot; ' + (PAGE_CONTENT[launchId].readyToPublish ? 'Ready to publish' : 'In progress') + '</span>' +
+								'<span class="co-meta">' + launch.status + ' &middot; ' + (PAGE_CONTENT[launchId].readyToPublish ? 'Ready to Publish' : 'Pending') + '</span>' +
 							'</span>' +
 							(isActive ? '<span class="context-option-check">' + icon('check') + '</span>' : '') +
 						'</button>'
@@ -813,10 +813,10 @@
 			var selectedLaunchToAdd = null;
 
 			function availableLaunchesToAdd() {
-				// Only Open Launches can receive a page: Scheduled, Published and Failed
+				// Only In Progress Launches can receive a page: Scheduled, Published and Failed
 				// Launches are locked, so they're never offered here.
 				return Object.keys(LAUNCHES).filter(function (id) {
-					return pageDrafts.indexOf(id) === -1 && LAUNCHES[id].status === 'Open';
+					return pageDrafts.indexOf(id) === -1 && LAUNCHES[id].status === 'In Progress';
 				});
 			}
 
@@ -826,7 +826,7 @@
 
 				var available = availableLaunchesToAdd();
 				if (available.length === 0) {
-					addToLaunchOptions.innerHTML = '<p style="color:#6b6c7e;font-size:.8125rem;">No Open Launches available. This page already has a draft in every Open Launch.</p>';
+					addToLaunchOptions.innerHTML = '<p style="color:#6b6c7e;font-size:.8125rem;">No In Progress Launches available. This page already has a draft in every In Progress Launch.</p>';
 				} else {
 					addToLaunchOptions.innerHTML = available.map(function (id) {
 						var launch = LAUNCHES[id];

@@ -1825,10 +1825,10 @@
 			// ---- Launches list (frontend data set look) ----
 
 			var LAUNCHES = [
-				{id: 'myLaunche', name: 'MyLaunche', description: '', modified: '9/15/2026, 6:51:12 AM', status: 'secondary', statusLabel: 'Open', statusKey: 'open'},
-				{id: 'winterNewsletter', name: 'Winter Newsletter', description: 'Newsletter landing page and signup banner, ready to go live', modified: '9/16/2026, 10:05:44 AM', status: 'secondary', statusLabel: 'Open', statusKey: 'open'},
-				{id: 'blackFriday', name: 'Black Friday Deals', description: 'Deals landing page and countdown banner — passes validation, but one asset fails while publishing', modified: '9/16/2026, 11:20:03 AM', status: 'secondary', statusLabel: 'Open', statusKey: 'open'},
-				{id: 'fallCampaign', name: 'Fall Campaign Refresh', description: 'Homepage banner and landing page copy update', modified: '9/12/2026, 2:14:00 PM', status: 'secondary', statusLabel: 'Open', statusKey: 'open'},
+				{id: 'myLaunche', name: 'MyLaunche', description: '', modified: '9/15/2026, 6:51:12 AM', status: 'secondary', statusLabel: 'In Progress', statusKey: 'inProgress'},
+				{id: 'winterNewsletter', name: 'Winter Newsletter', description: 'Newsletter landing page and signup banner, ready to go live', modified: '9/16/2026, 10:05:44 AM', status: 'secondary', statusLabel: 'In Progress', statusKey: 'inProgress'},
+				{id: 'blackFriday', name: 'Black Friday Deals', description: 'Deals landing page and countdown banner — passes validation, but one asset fails while publishing', modified: '9/16/2026, 11:20:03 AM', status: 'secondary', statusLabel: 'In Progress', statusKey: 'inProgress'},
+				{id: 'fallCampaign', name: 'Fall Campaign Refresh', description: 'Homepage banner and landing page copy update', modified: '9/12/2026, 2:14:00 PM', status: 'secondary', statusLabel: 'In Progress', statusKey: 'inProgress'},
 				{id: 'q3Announcement', name: 'Q3 Product Announcement', description: 'Blog post and pricing page updates', modified: '9/9/2026, 9:02:31 AM', status: 'danger', statusLabel: 'Failed', statusKey: 'failed'},
 				{id: 'holidayStorefront', name: 'Holiday Storefront', description: '', modified: '8/30/2026, 4:47:09 PM', status: 'success', statusLabel: 'Published', statusKey: 'published'}
 			];
@@ -1844,7 +1844,7 @@
 			}
 
 			// While a publish is running the status column shows a progress bar instead of the status
-			// label. It's not a status of its own: the Launch stays Open until the publish resolves.
+			// label. It's not a status of its own: the Launch stays In Progress until the publish resolves.
 			function renderStatusCell(launch) {
 				if (typeof launch.publishProgress === 'number') {
 					var pct = Math.round(launch.publishProgress);
@@ -1924,7 +1924,7 @@
 			}
 
 			// "View" (read-only) is always available, on every status, regardless of what else is.
-			// Beyond that: open -> everything; failed -> View + View Error Details + Delete; published -> View/Delete (no Edit, no Publish/Schedule);
+			// Beyond that: inProgress -> everything; failed -> View + View Error Details + Delete; published -> View/Delete (no Edit, no Publish/Schedule);
 			// scheduled -> View + Delete.
 			function getMenuItemsForStatus(statusKey) {
 				var VIEW_ITEM = {icon: 'view', label: 'View', action: 'form', formMode: 'view'};
@@ -1961,7 +1961,7 @@
 							{divider: true},
 							{icon: 'trash', label: 'Delete', danger: true, perform: 'delete'}
 						];
-					case 'open':
+					case 'inProgress':
 					default:
 						return [
 							VIEW_ITEM,
@@ -1994,7 +1994,7 @@
 				closeDropdown();
 
 				var launch = LAUNCHES.filter(function (l) { return l.id === kebabButton.dataset.kebab; })[0];
-				var items = getMenuItemsForStatus(launch ? (typeof launch.publishProgress === 'number' ? 'publishInProgress' : launch.statusKey) : 'open');
+				var items = getMenuItemsForStatus(launch ? (typeof launch.publishProgress === 'number' ? 'publishInProgress' : launch.statusKey) : 'inProgress');
 
 				if (!items.length) {
 					return;
@@ -2750,12 +2750,12 @@
 
 				addToLaunchVersionLabel.textContent = context.pageName + ' v' + context.version;
 
-				// Only Open Launches can receive assets: Scheduled, Published and Failed
+				// Only In Progress Launches can receive assets: Scheduled, Published and Failed
 				// Launches are locked, so they're never offered here.
-				var openLaunches = LAUNCHES.filter(function (l) { return l.statusKey === 'open'; });
+				var inProgressLaunches = LAUNCHES.filter(function (l) { return l.statusKey === 'inProgress'; });
 
-				addToLaunchSelect.innerHTML = '<option value="">' + (openLaunches.length ? 'Select a Launch' : 'No Open Launches available') + '</option>' +
-					openLaunches.map(function (l) { return '<option value="' + l.id + '">' + l.name + '</option>'; }).join('');
+				addToLaunchSelect.innerHTML = '<option value="">' + (inProgressLaunches.length ? 'Select a Launch' : 'No In Progress Launches available') + '</option>' +
+					inProgressLaunches.map(function (l) { return '<option value="' + l.id + '">' + l.name + '</option>'; }).join('');
 
 				addToLaunchModalConfirmBtn.disabled = true;
 				showModal(addToLaunchModal);
@@ -3383,7 +3383,7 @@
 			}
 
 			// ---- Publish / Schedule button on the Launch page (shown on both Info and Assets tabs) ----
-			// Same rule as the kebab menu: only for an existing Open Launch with no publish running.
+			// Same rule as the kebab menu: only for an existing In Progress Launch with no publish running.
 			// After confirming, the user goes back to the list, where the progress bar or the new
 			// status shows up.
 
@@ -3398,7 +3398,7 @@
 
 			function updateLaunchFormPublishGroup() {
 				var launch = currentLaunchId ? getCurrentFormLaunch() : null;
-				var visible = !!launch && launch.statusKey === 'open' && typeof launch.publishProgress !== 'number';
+				var visible = !!launch && launch.statusKey === 'inProgress' && typeof launch.publishProgress !== 'number';
 
 				// Toggled through inline display (not [hidden]) because the group needs inline-block.
 				launchFormPublishGroup.style.display = visible ? 'inline-block' : 'none';
@@ -3725,7 +3725,7 @@
 			}
 
 			// No intermediate "Publishing" status: the status column shows a progress bar while the
-			// publish runs, then the Launch goes straight from Open to Published or Failed. Publishing
+			// publish runs, then the Launch goes straight from In Progress to Published or Failed. Publishing
 			// is not transactional: elements that published stay published even if another one fails;
 			// the failed ones keep their previous state and get an entry in Error Details.
 			function runLaunchPublish(launch) {
@@ -4051,19 +4051,19 @@
 
 			// ---- Delete (confirm before removing) ----
 
-			// ---- UnSchedule (Scheduled only): removes the scheduled job, Launch goes back to Open ----
+			// ---- UnSchedule (Scheduled only): removes the scheduled job, Launch goes back to In Progress ----
 
 			function confirmUnscheduleLaunch(launch, onConfirmed) {
 				openConfirmModal({
 					title: 'UnSchedule Launch',
-					message: 'UnSchedule the Launch will DELETE the scheduled job and the Launch will be moved to Open. Do you want to proceed?',
+					message: 'UnSchedule the Launch will DELETE the scheduled job and the Launch will be moved to In Progress. Do you want to proceed?',
 					confirmLabel: 'Confirm',
 					onConfirm: function () {
 						// The mockup has no real cron job: the "reach scheduled time" simulation only
-						// fires Scheduled Launches, so going back to Open is what removes the job here.
+						// fires Scheduled Launches, so going back to In Progress is what removes the job here.
 						launch.status = 'secondary';
-						launch.statusLabel = 'Open';
-						launch.statusKey = 'open';
+						launch.statusLabel = 'In Progress';
+						launch.statusKey = 'inProgress';
 						renderLaunchRows(searchInput ? searchInput.value : '');
 
 						if (onConfirmed) {
