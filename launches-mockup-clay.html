@@ -2613,10 +2613,20 @@
 				}
 
 				var removeId = removeBtn.getAttribute('data-remove');
-				clearPageVersionsByElementId(Number(removeId));
-				elements = elements.filter(function (el) { return String(el.id) !== removeId; });
-				commitElements();
-				renderElementRows();
+				var element = elements.filter(function (el) { return String(el.id) === removeId; })[0];
+
+				// The asset is never deleted: only its relationship with the Launch is removed (LPD-109389 AC15-AC16).
+				openConfirmModal({
+					title: 'Remove Asset from Launch',
+					message: '"' + (element ? element.name : 'This asset') + '" will be removed from this Launch only. The asset will not be deleted and stays available, with all its versions, outside the Launch.',
+					confirmLabel: 'Remove',
+					onConfirm: function () {
+						clearPageVersionsByElementId(Number(removeId));
+						elements = elements.filter(function (el) { return String(el.id) !== removeId; });
+						commitElements();
+						renderElementRows();
+					}
+				});
 			});
 
 			// There's no Save on the Launch page: adding or removing an asset is stored right away
