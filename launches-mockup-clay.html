@@ -327,7 +327,7 @@
 			</div>
 		</div>
 
-		<!-- ================= LAUNCH FORM (Info / Assets) ================= -->
+		<!-- ================= LAUNCH DETAIL (assets list) ================= -->
 		<div data-view="form" class="launch-form">
 			<div class="management-bar management-bar-light navbar">
 				<div class="align-items-center container-fluid d-flex">
@@ -362,78 +362,58 @@
 								</button>
 							</div>
 						</div>
-						<button type="button" class="btn btn-secondary btn-borderless mr-2" data-goto="landing" id="launchFormCancelBtn">Cancel</button>
-						<button type="button" class="btn btn-primary" id="launchFormSaveBtn">Create</button>
+						<div class="dropdown" style="position: relative; display: inline-block">
+							<button type="button" class="component-action btn btn-monospaced btn-unstyled" aria-label="Launch actions" id="launchDetailKebabBtn">
+								<svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#ellipsis-v"></use></svg>
+							</button>
+							<div class="dropdown-menu dropdown-menu-right" id="launchDetailKebabMenu" role="menu">
+								<button type="button" role="menuitem" class="dropdown-item" data-launch-detail-action="rename">
+									<span class="inline-item inline-item-before"><svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#pencil"></use></svg></span>
+									Rename
+								</button>
+								<button type="button" role="menuitem" class="dropdown-item text-danger" data-launch-detail-action="delete">
+									<span class="inline-item inline-item-before"><svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#trash"></use></svg></span>
+									Delete
+								</button>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
 
 			<div class="container-fluid p-4">
-				<ul class="nav nav-underline" role="tablist">
-					<li class="nav-item" role="presentation">
-						<a class="nav-link active" href="#" role="tab" data-form-tab="info" aria-selected="true">Info</a>
-					</li>
-					<li class="nav-item" role="presentation">
-						<a class="nav-link" href="#" role="tab" data-form-tab="elements" aria-selected="false">Assets</a>
-					</li>
-				</ul>
+				<p class="text-secondary mb-4" id="launchDetailDescription" hidden></p>
 
-				<div class="tab-content mt-4">
-					<div class="tab-pane fade show active" data-form-pane="info" role="tabpanel">
-						<div class="form-group" style="max-width: 640px" id="launchFormNameGroup">
-							<label for="launchFormName">Name <span class="reference-mark text-warning" aria-hidden="true">*</span></label>
-							<input
-								type="text"
-								class="form-control"
-								placeholder="Untitled Launch"
-								aria-label="Launch name"
-								id="launchFormName"
-								required
-							>
-							<div class="form-feedback-group" id="launchFormNameFeedback" hidden>
-								<div class="form-feedback-item">The Name field is required.</div>
-							</div>
-						</div>
+				<div class="d-flex align-items-center justify-content-between mb-3">
+					<span class="text-secondary" id="elementsCapSummary">0 of 1,000 assets</span>
 
-						<div class="form-group mt-4" style="max-width: 640px">
-							<label for="launchFormDescription">Description</label>
-							<textarea class="form-control" id="launchFormDescription" placeholder="Enter description"></textarea>
-						</div>
-					</div>
+					<button type="button" class="btn btn-primary" id="addElementBtn">
+						<span class="inline-item inline-item-before"><svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#plus"></use></svg></span>
+						Add Asset
+					</button>
+				</div>
 
-					<div class="tab-pane fade" data-form-pane="elements" role="tabpanel">
-						<div class="d-flex align-items-center justify-content-between mb-3">
-							<span class="text-secondary" id="elementsCapSummary">0 of 1,000 assets</span>
+				<div class="table-responsive">
+					<table class="show-quick-actions-on-hover table table-autofit table-head-bordered table-heading-nowrap table-hover table-list table-striped">
+						<thead>
+							<tr>
+								<th class="table-cell-expand-small table-cell-minw-200 table-title">Name</th>
+								<th class="table-cell-expand-smallest table-cell-ws-nowrap">Version</th>
+								<th class="table-cell-expand-smallest table-cell-ws-nowrap">Author</th>
+								<th class="table-cell-expand-smallest table-cell-ws-nowrap">Type</th>
+								<th class="table-cell-expand-smallest table-cell-ws-nowrap">Scope</th>
+								<th class="table-cell-expand-smallest table-cell-ws-nowrap">Scope name</th>
+								<th class="table-cell-expand-smallest table-cell-ws-nowrap">Modified</th>
+								<th class="table-cell-expand-smallest table-cell-ws-nowrap">Status</th>
+								<th class="lfr-entry-action-column"><span class="sr-only">Item Actions</span></th>
+							</tr>
+						</thead>
+						<tbody id="elementRows"></tbody>
+					</table>
+				</div>
 
-							<button type="button" class="btn btn-primary" id="addElementBtn">
-								<span class="inline-item inline-item-before"><svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#plus"></use></svg></span>
-								Add Asset
-							</button>
-						</div>
-
-						<div class="table-responsive">
-							<table class="show-quick-actions-on-hover table table-autofit table-head-bordered table-heading-nowrap table-hover table-list table-striped">
-								<thead>
-									<tr>
-										<th class="table-cell-expand-small table-cell-minw-200 table-title">Name</th>
-										<th class="table-cell-expand-smallest table-cell-ws-nowrap">Version</th>
-										<th class="table-cell-expand-smallest table-cell-ws-nowrap">Author</th>
-										<th class="table-cell-expand-smallest table-cell-ws-nowrap">Type</th>
-										<th class="table-cell-expand-smallest table-cell-ws-nowrap">Scope</th>
-										<th class="table-cell-expand-smallest table-cell-ws-nowrap">Scope name</th>
-										<th class="table-cell-expand-smallest table-cell-ws-nowrap">Modified</th>
-										<th class="table-cell-expand-smallest table-cell-ws-nowrap">Status</th>
-										<th class="lfr-entry-action-column"><span class="sr-only">Item Actions</span></th>
-									</tr>
-								</thead>
-								<tbody id="elementRows"></tbody>
-							</table>
-						</div>
-
-						<div class="pagination-bar mt-3">
-							<span class="text-secondary" id="elementsPaginationSummary">1 to 3 of 3 assets</span>
-						</div>
-					</div>
+				<div class="pagination-bar mt-3">
+					<span class="text-secondary" id="elementsPaginationSummary">1 to 3 of 3 assets</span>
 				</div>
 			</div>
 		</div>
@@ -754,6 +734,37 @@
 			</div>
 		</div>
 	</div>
+	<div class="modal" id="launchModal" tabindex="-1" role="dialog" aria-modal="true" hidden>
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h2 class="modal-title" id="launchModalTitle">New Launch</h2>
+					<button aria-label="Close" class="close" type="button" id="launchModalClose">
+						<svg class="lexicon-icon" style="width:16px;height:16px" viewBox="0 0 512 512"><use xlink:href="#times"></use></svg>
+					</button>
+				</div>
+				<div class="modal-body">
+					<div class="form-group" id="launchFormNameGroup">
+						<label for="launchFormName">Name <span class="reference-mark text-warning" aria-hidden="true">*</span></label>
+						<input type="text" class="form-control" placeholder="Untitled Launch" id="launchFormName" required>
+						<div class="form-feedback-group" id="launchFormNameFeedback" hidden>
+							<div class="form-feedback-item">The Name field is required.</div>
+						</div>
+					</div>
+
+					<div class="form-group mb-0">
+						<label for="launchFormDescription">Description</label>
+						<textarea class="form-control" id="launchFormDescription" placeholder="Enter description"></textarea>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-secondary" type="button" id="launchModalCancel">Cancel</button>
+					<button class="btn btn-primary" type="button" id="launchModalSubmit">Add</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
 	<div class="modal" id="scheduleModal" tabindex="-1" role="dialog" aria-modal="true" hidden>
 		<div class="modal-dialog modal-dialog-centered" role="document">
 			<div class="modal-content">
@@ -1243,6 +1254,7 @@
 							VIEW_ITEM,
 							PREVIEW_ITEM,
 							{icon: 'pencil', label: 'Edit', action: 'form', formMode: 'edit'},
+							{icon: 'pencil', label: 'Rename', perform: 'rename'},
 							{icon: 'upload', label: 'Publish', perform: 'publish'},
 							{icon: 'calendar', label: 'Schedule', perform: 'schedule'},
 							{divider: true},
@@ -1326,6 +1338,9 @@
 						}
 						else if (perform === 'unschedule' && launch) {
 							confirmUnscheduleLaunch(launch);
+						}
+						else if (perform === 'rename' && launch) {
+							openLaunchModal(launch);
 						}
 						else if (perform === 'delete' && launch) {
 							confirmDeleteLaunch(launch);
@@ -2542,8 +2557,7 @@
 			var nextLaunchId = 0;
 
 			var launchFormTitle = document.getElementById('launchFormTitle');
-			var launchFormSaveBtn = document.getElementById('launchFormSaveBtn');
-			var launchFormCancelBtn = document.getElementById('launchFormCancelBtn');
+			var launchDetailDescription = document.getElementById('launchDetailDescription');
 			var launchFormPreviewBtn = document.getElementById('launchFormPreviewBtn');
 			var launchFormName = document.getElementById('launchFormName');
 			var launchFormDescription = document.getElementById('launchFormDescription');
@@ -2552,13 +2566,12 @@
 			var elementsCapSummary = document.getElementById('elementsCapSummary');
 			var addElementBtn = document.getElementById('addElementBtn');
 			var isFormReadOnly = false;
-			var isFormNew = false;
 			var launchFormNameGroup = document.getElementById('launchFormNameGroup');
 			var launchFormNameFeedback = document.getElementById('launchFormNameFeedback');
 
 			function renderElementRows() {
 				if (!elements.length) {
-					elementRowsEl.innerHTML = '<tr><td colspan="9" class="text-center text-secondary" style="padding: 32px">No assets yet' + (isFormReadOnly ? '.' : isFormNew ? '. Create the Launch first, then add assets to it.' : '. Click Add Asset to add one.') + '</td></tr>';
+					elementRowsEl.innerHTML = '<tr><td colspan="9" class="text-center text-secondary" style="padding: 32px">No assets yet' + (isFormReadOnly ? '.' : '. Click Add Asset to add one.') + '</td></tr>';
 				}
 				else {
 					elementRowsEl.innerHTML = elements.map(function (el) {
@@ -2600,9 +2613,25 @@
 				}
 
 				var removeId = removeBtn.getAttribute('data-remove');
+				clearPageVersionsByElementId(Number(removeId));
 				elements = elements.filter(function (el) { return String(el.id) !== removeId; });
+				commitElements();
 				renderElementRows();
 			});
+
+			// There's no Save on the Launch page: adding or removing an asset is stored right away
+			// and stamps the Launch's Modified date.
+			function commitElements() {
+				var launch = getCurrentFormLaunch();
+
+				if (!launch) {
+					return;
+				}
+
+				LAUNCH_ELEMENTS[launch.id] = elements;
+				launch.modified = new Date().toLocaleString();
+				renderLaunchRows(searchInput ? searchInput.value : '');
+			}
 
 			addElementBtn.addEventListener('click', function () {
 				if (elements.length >= MAX_ELEMENTS) {
@@ -2612,26 +2641,14 @@
 				openAddElementModal();
 			});
 
-			function switchFormTab(tabName) {
-				document.querySelectorAll('[data-form-tab]').forEach(function (tab) {
-					var active = tab.getAttribute('data-form-tab') === tabName;
-					tab.classList.toggle('active', active);
-					tab.setAttribute('aria-selected', active ? 'true' : 'false');
-				});
+			// ---- New Launch / Edit Launch modal ----
+			// One modal for both: "New Launch" creates an In Progress Launch with no assets and opens
+			// its page; "Edit Launch" (Rename) changes the Name and/or Description of an existing one.
 
-				document.querySelectorAll('[data-form-pane]').forEach(function (pane) {
-					var active = pane.getAttribute('data-form-pane') === tabName;
-					pane.classList.toggle('show', active);
-					pane.classList.toggle('active', active);
-				});
-			}
-
-			document.querySelectorAll('[data-form-tab]').forEach(function (tab) {
-				tab.addEventListener('click', function (event) {
-					event.preventDefault();
-					switchFormTab(tab.getAttribute('data-form-tab'));
-				});
-			});
+			var launchModal = document.getElementById('launchModal');
+			var launchModalTitle = document.getElementById('launchModalTitle');
+			var launchModalSubmit = document.getElementById('launchModalSubmit');
+			var launchModalLaunch = null;
 
 			function setNameError(hasError) {
 				launchFormNameGroup.classList.toggle('has-error', hasError);
@@ -2644,98 +2661,133 @@
 				}
 			});
 
-			function openLaunchForm(mode, launchId) {
-				// Edit falls back to read-only for a Launch that can't be edited (AC9).
-				if (mode === 'edit') {
-					var launchToEdit = LAUNCHES.filter(function (l) { return l.id === launchId; })[0];
-
-					if (launchToEdit && !isLaunchEditable(launchToEdit)) {
-						mode = 'view';
-					}
-				}
-
-				isFormReadOnly = (mode === 'view');
-				isFormNew = (mode === 'new');
+			function openLaunchModal(launch) {
+				launchModalLaunch = launch || null;
+				launchModalTitle.textContent = launch ? 'Edit Launch' : 'New Launch';
+				launchModalSubmit.textContent = launch ? 'Save' : 'Add';
+				launchFormName.value = launch ? launch.name : '';
+				launchFormDescription.value = launch ? (launch.description || '') : '';
 				setNameError(false);
-
-				if (mode === 'new') {
-					currentLaunchId = null;
-					launchFormTitle.textContent = 'New Launch';
-					launchFormSaveBtn.textContent = 'Create';
-					launchFormName.value = '';
-					launchFormDescription.value = '';
-					elements = [];
-				}
-				else {
-					var launch = LAUNCHES.filter(function (l) { return l.id === launchId; })[0] || LAUNCHES[0];
-					currentLaunchId = launch.id;
-					launchFormTitle.textContent = launch.name;
-					launchFormSaveBtn.textContent = 'Save';
-					launchFormName.value = launch.name;
-					launchFormDescription.value = launch.description || '';
-					elements = (LAUNCH_ELEMENTS[launch.id] || []).map(function (el) { return Object.assign({}, el); });
-				}
-
-				launchFormName.disabled = isFormReadOnly;
-				launchFormDescription.disabled = isFormReadOnly;
-				launchFormSaveBtn.hidden = isFormReadOnly;
-				launchFormCancelBtn.textContent = isFormReadOnly ? 'Close' : 'Cancel';
-				// A new Launch starts In Progress with no assets: they're added once it exists.
-				addElementBtn.hidden = isFormReadOnly || isFormNew;
-
-				// No Launch exists yet to preview in "New Launch" mode.
-				launchFormPreviewBtn.hidden = (mode === 'new');
-				updateLaunchFormPublishGroup();
-
-				renderElementRows();
-				switchFormTab('info');
-				show('form');
+				showModal(launchModal);
+				launchFormName.focus();
 			}
 
-			// Create adds a new In Progress Launch with no assets to the top of the list; Save
-			// updates the Launch's Name, Description and assets. Both stamp the Modified date.
-			launchFormSaveBtn.addEventListener('click', function () {
+			function closeLaunchModal() {
+				hideModal(launchModal);
+				launchModalLaunch = null;
+			}
+
+			launchModalSubmit.addEventListener('click', function () {
 				var name = launchFormName.value.trim();
 
 				if (!name) {
 					setNameError(true);
-					switchFormTab('info');
 					launchFormName.focus();
 					return;
 				}
 
 				var description = launchFormDescription.value.trim();
 				var modified = new Date().toLocaleString();
+				var launch = launchModalLaunch;
 
-				if (currentLaunchId) {
-					var launch = getCurrentFormLaunch();
-					var keptIds = elements.map(function (el) { return el.id; });
+				closeLaunchModal();
 
-					(LAUNCH_ELEMENTS[launch.id] || []).forEach(function (el) {
-						if (keptIds.indexOf(el.id) === -1) {
-							clearPageVersionsByElementId(el.id);
-						}
-					});
-
+				if (launch) {
 					launch.name = name;
 					launch.description = description;
 					launch.modified = modified;
-					LAUNCH_ELEMENTS[launch.id] = elements;
-				}
-				else {
-					nextLaunchId += 1;
+					renderLaunchRows(searchInput ? searchInput.value : '');
 
-					var newLaunch = {id: 'newLaunch' + nextLaunchId, name: name, description: description, modified: modified, status: 'secondary', statusLabel: 'In Progress', statusKey: 'inProgress'};
+					if (currentLaunchId === launch.id) {
+						renderLaunchDetailHeader(launch);
+					}
 
-					LAUNCHES.unshift(newLaunch);
-					LAUNCH_ELEMENTS[newLaunch.id] = [];
+					return;
 				}
 
+				nextLaunchId += 1;
+
+				var newLaunch = {id: 'newLaunch' + nextLaunchId, name: name, description: description, modified: modified, status: 'secondary', statusLabel: 'In Progress', statusKey: 'inProgress'};
+
+				LAUNCHES.unshift(newLaunch);
+				LAUNCH_ELEMENTS[newLaunch.id] = [];
 				renderLaunchRows(searchInput ? searchInput.value : '');
-				show('landing');
+				openLaunchForm('edit', newLaunch.id);
 			});
 
-			// ---- Publish / Schedule button on the Launch page (shown on both Info and Assets tabs) ----
+			document.getElementById('launchModalCancel').addEventListener('click', closeLaunchModal);
+			document.getElementById('launchModalClose').addEventListener('click', closeLaunchModal);
+
+			// ---- Launch page: just the assets list, with a header kebab for Rename and Delete ----
+
+			var launchDetailKebabBtn = document.getElementById('launchDetailKebabBtn');
+			var launchDetailKebabMenu = document.getElementById('launchDetailKebabMenu');
+			var launchDetailRenameItem = launchDetailKebabMenu.querySelector('[data-launch-detail-action="rename"]');
+
+			function renderLaunchDetailHeader(launch) {
+				launchFormTitle.textContent = launch.name;
+				launchDetailDescription.textContent = launch.description || '';
+				launchDetailDescription.hidden = !launch.description;
+			}
+
+			function openLaunchForm(mode, launchId) {
+				if (mode === 'new') {
+					openLaunchModal(null);
+					return;
+				}
+
+				var launch = LAUNCHES.filter(function (l) { return l.id === launchId; })[0] || LAUNCHES[0];
+
+				// Edit falls back to read-only for a Launch that can't be edited (AC9).
+				isFormReadOnly = (mode === 'view') || !isLaunchEditable(launch);
+				currentLaunchId = launch.id;
+				elements = LAUNCH_ELEMENTS[launch.id] || (LAUNCH_ELEMENTS[launch.id] = []);
+
+				renderLaunchDetailHeader(launch);
+				addElementBtn.hidden = isFormReadOnly;
+
+				// Rename follows the same rule as Edit; Delete is there in every status except
+				// while a publish is running (same as the Launches list kebab).
+				launchDetailRenameItem.hidden = isFormReadOnly;
+				launchDetailKebabBtn.parentElement.hidden = typeof launch.publishProgress === 'number';
+				launchDetailKebabMenu.classList.remove('mockup-open');
+
+				updateLaunchFormPublishGroup();
+				renderElementRows();
+				show('form');
+			}
+
+			launchDetailKebabBtn.addEventListener('click', function (event) {
+				event.stopPropagation();
+				launchDetailKebabMenu.classList.toggle('mockup-open');
+			});
+
+			document.addEventListener('click', function (event) {
+				if (launchDetailKebabMenu.classList.contains('mockup-open') && !launchDetailKebabMenu.contains(event.target)) {
+					launchDetailKebabMenu.classList.remove('mockup-open');
+				}
+			});
+
+			launchDetailKebabMenu.querySelectorAll('[data-launch-detail-action]').forEach(function (item) {
+				item.addEventListener('click', function () {
+					launchDetailKebabMenu.classList.remove('mockup-open');
+
+					var launch = getCurrentFormLaunch();
+
+					if (!launch) {
+						return;
+					}
+
+					if (item.getAttribute('data-launch-detail-action') === 'rename') {
+						openLaunchModal(launch);
+					}
+					else {
+						confirmDeleteLaunch(launch, function () { show('landing'); });
+					}
+				});
+			});
+
+			// ---- Publish / Schedule button on the Launch page ----
 			// Same rule as the kebab menu: only for an existing In Progress Launch with no publish running.
 			// After confirming, the user goes back to the list, where the progress bar or the new
 			// status shows up.
@@ -3434,7 +3486,7 @@
 				}
 			});
 
-			function confirmDeleteLaunch(launch) {
+			function confirmDeleteLaunch(launch, onDeleted) {
 				openConfirmModal({
 					title: 'Delete Launch',
 					message: 'Are you sure you want to delete the Launch "' + launch.name + '"?',
@@ -3444,6 +3496,10 @@
 						LAUNCHES = LAUNCHES.filter(function (l) { return l.id !== launch.id; });
 						delete LAUNCH_ELEMENTS[launch.id];
 						renderLaunchRows(searchInput ? searchInput.value : '');
+
+						if (onDeleted) {
+							onDeleted();
+						}
 					}
 				});
 			}
@@ -3787,6 +3843,7 @@
 							statusLabel: candidate.statusLabel
 						});
 
+						commitElements();
 						renderElementRows();
 						processNextCandidate();
 					}, processNextCandidate);
