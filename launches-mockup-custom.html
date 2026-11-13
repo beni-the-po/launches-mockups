@@ -3227,7 +3227,7 @@
 					{id: 15, name: 'Newsletter Signup Banner', version: '1.1', author: 'Carlos Vidal', type: 'Web Content Article', scope: 'Site', scopeName: 'Guest', modified: '9/16/2026, 9:41:07 AM', status: 'success', statusLabel: 'Ready to Publish'}
 				],
 				// Also every element Ready to Publish, but "Deals Countdown Banner" is flagged to fail
-				// during the publish, to demo the Failed outcome (and the no-rollback rule).
+				// during the publish, to demo the Failed outcome (the whole publish is rolled back) and publishing it again.
 				blackFriday: [
 					{id: 16, name: 'Black Friday Landing Page', version: '1.0', author: 'Test Test', type: 'Web Content Article', scope: 'Site', scopeName: 'Guest', modified: '9/16/2026, 11:12:40 AM', status: 'success', statusLabel: 'Ready to Publish'},
 					{id: 17, name: 'Deals Countdown Banner', version: '2.0', author: 'Maria Alonso', type: 'Web Content Article', scope: 'Site', scopeName: 'Guest', modified: '9/16/2026, 11:05:18 AM', status: 'success', statusLabel: 'Ready to Publish', failOnPublish: true}
@@ -3727,9 +3727,10 @@
 			}
 
 			// No intermediate "Publishing" status: the status column shows a progress bar while the
-			// publish runs, then the Launch goes straight from In Progress to Published or Failed. Publishing
-			// is not transactional: elements that published stay published even if another one fails;
-			// the failed ones keep their previous state and get an entry in Error Details.
+			// publish runs, then the Launch goes straight from In Progress (or Failed) to Published or Failed.
+			// Publishing is all or nothing: if any element fails, the whole publish is rolled back, so no
+			// element is published, and every failing element gets an entry in Error Details. A Failed
+			// Launch can be published again; Error Details only keeps the errors of the latest attempt.
 			function runLaunchPublish(launch) {
 				launch.publishProgress = 0;
 				updateStatusCell(launch);
@@ -3748,17 +3749,28 @@
 						var failed = [];
 						var now = new Date().toLocaleString('en-US');
 
-						(LAUNCH_ELEMENTS[launch.id] || []).forEach(function (el) {
-							if (el.failOnPublish) {
-								failed.push(el);
-								return;
-							}
+						var elements = LAUNCH_ELEMENTS[launch.id] || [];
 
-							el.status = 'success';
-							el.statusLabel = 'Published';
-						});
+						failed = elements.filter(function (el) { return el.failOnPublish; });
+
+						// Rollback: only mark the elements Published when every one of them succeeded.
+						if (!failed.length) {
+							elements.forEach(function (el) {
+								el.status = 'success';
+								el.statusLabel = 'Published';
+							});
+						}
+
+						for (var i = ERRORS.length - 1; i >= 0; i--) {
+							if (ERRORS[i].launchId === launch.id) {
+								ERRORS.splice(i, 1);
+							}
+						}
 
 						failed.forEach(function (el) {
+							// One-shot failure, so publishing the Failed Launch again (after "fixing" it) succeeds.
+							delete el.failOnPublish;
+
 							ERRORS.push({id: ERRORS.length + 1, launchId: launch.id, message: 'Failed to publish "' + el.name + '" — the scheduled display date is later than the expiration date.', element: el.name, date: now, severity: 'danger', severityLabel: 'Critical'});
 						});
 
