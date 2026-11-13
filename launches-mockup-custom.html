@@ -1924,7 +1924,7 @@
 			}
 
 			// "View" (read-only) is always available, on every status, regardless of what else is.
-			// Beyond that: inProgress -> everything; failed -> View + View Error Details + Delete; published -> View/Delete (no Edit, no Publish/Schedule);
+			// Beyond that: inProgress -> everything; failed -> View + Publish + Schedule + View Error Details + Delete (a Failed Launch can be published or scheduled again); published -> View/Delete (no Edit, no Publish/Schedule);
 			// scheduled -> View + Delete.
 			function getMenuItemsForStatus(statusKey) {
 				var VIEW_ITEM = {icon: 'view', label: 'View', action: 'form', formMode: 'view'};
@@ -1938,6 +1938,8 @@
 						return [
 							VIEW_ITEM,
 							PREVIEW_ITEM,
+							{icon: 'upload', label: 'Publish', perform: 'publish'},
+							{icon: 'calendar', label: 'Schedule', perform: 'schedule'},
 							{icon: 'info-circle', label: 'View Error Details', action: 'errors'},
 							{divider: true},
 							{icon: 'trash', label: 'Delete', danger: true, perform: 'delete'}
@@ -3398,7 +3400,7 @@
 
 			function updateLaunchFormPublishGroup() {
 				var launch = currentLaunchId ? getCurrentFormLaunch() : null;
-				var visible = !!launch && launch.statusKey === 'inProgress' && typeof launch.publishProgress !== 'number';
+				var visible = !!launch && (launch.statusKey === 'inProgress' || launch.statusKey === 'failed') && typeof launch.publishProgress !== 'number';
 
 				// Toggled through inline display (not [hidden]) because the group needs inline-block.
 				launchFormPublishGroup.style.display = visible ? 'inline-block' : 'none';
