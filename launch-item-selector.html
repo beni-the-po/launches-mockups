@@ -964,7 +964,7 @@
 						return false;
 					}
 
-					return !query || launch.name.toLowerCase().indexOf(query) !== -1;
+					return !query || (launch.name + ' ' + (launch.description || '')).toLowerCase().indexOf(query) !== -1;
 				});
 
 				var dir = state.sortDir === 'asc' ? 1 : -1;
