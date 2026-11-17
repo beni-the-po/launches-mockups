@@ -23,7 +23,7 @@
 		.review-toolbar {
 			position: sticky;
 			top: 0;
-			z-index: 1020;
+			z-index: 1100;
 			display: flex;
 			flex-wrap: wrap;
 			align-items: center;
@@ -217,6 +217,12 @@
 
 		#selectorModal .modal-dialog {
 			max-width: 1140px;
+			margin-top: 3.5rem;
+			min-height: calc(100% - 5.25rem);
+		}
+
+		#selectorModal .modal-content {
+			height: calc(100vh - 5.25rem) !important;
 		}
 
 		#selectorModal .modal-content {
@@ -427,6 +433,16 @@
 			flex: 1 1 auto;
 		}
 
+		#addError {
+			display: flex;
+			align-items: flex-start;
+			gap: .5rem;
+		}
+
+		#addError[hidden] {
+			display: none;
+		}
+
 		#listView[hidden] {
 			display: none;
 		}
@@ -567,6 +583,12 @@
 			<button type="button" data-create-mode="inline" aria-pressed="false" title="Alternative explored: an editable row appears at the top of the list">Inline row</button>
 			<button type="button" data-create-mode="view" aria-pressed="false" title="Alternative explored: the selector itself switches to a creation form">Same modal</button>
 		</div>
+		<div class="seg">
+			<span>Add to Launch:</span>
+			<button type="button" data-outcome="success" aria-pressed="true">Succeeds</button>
+			<button type="button" data-outcome="published" aria-pressed="false" title="Someone published the selected Launch while the modal was open">Fails: Launch published</button>
+			<button type="button" data-outcome="permission" aria-pressed="false" title="The user cannot add assets to the selected Launch">Fails: no permission</button>
+		</div>
 		<div class="spacer"></div>
 		<span style="opacity:.6">LPD-115340 · Item Selector for Launches</span>
 	</div>
@@ -679,6 +701,14 @@
 							</div>
 						</div>
 						<button type="button" class="btn btn-primary" id="newLaunchButton">New</button>
+					</div>
+
+					<div class="alert alert-danger" id="addError" role="alert" hidden>
+						<svg class="lexicon-icon" style="flex:0 0 auto;margin-top:3px" viewBox="0 0 512 512"><use xlink:href="#exclamation-full"></use></svg>
+						<div id="addErrorText" style="flex:1 1 auto"></div>
+						<button type="button" class="close" aria-label="Dismiss" id="addErrorClose" style="position:static;padding:0;width:auto;height:auto">
+							<svg class="lexicon-icon" style="width:12px;height:12px" viewBox="0 0 512 512"><use xlink:href="#times"></use></svg>
+						</button>
 					</div>
 
 					<div class="active-filters" id="activeFilters" hidden></div>
@@ -804,6 +834,7 @@
 <symbol id="check" viewBox="0 0 512 512">
 			<path class="lexicon-icon-outline" d="M502.091 60.993c-9.909-9.91-25.962-9.91-35.843 0l-336.988 336.988-83.508-83.451c-9.881-9.909-25.962-9.909-35.843 0-9.909 9.909-9.909 25.962 0 35.843l98.257 98.257c2.608 2.608 5.679 4.433 8.924 5.679 4.028 2.464 8.403 4.115 12.952 4.115 6.49 0 12.981-2.464 17.936-7.418l354.112-354.141c9.909-9.909 9.909-25.962 0-35.871l0-0.001z"/>
 		</symbol>
+<symbol id="exclamation-full" viewBox="0 0 512 512"><path class="lexicon-icon-outline" d="M256,0C114.6,0,0,114.6,0,256s114.6,256,256,256s256-114.6,256-256S397.4,0,256,0z M256,384c-17.7,0-32-14.3-32-32s14.3-32,32-32s32,14.3,32,32S273.7,384,256,384z M272,288h-32l-16-160h64L272,288z"></path></symbol>
 <symbol id="times" viewBox="0 0 512 512">
 			<path class="lexicon-icon-outline" d="M301.1,256.1L502.3,54.9c30.1-30.1-16.8-73.6-45.2-45.2L255.9,210.8L54.6,9.7C24.6-20.4-19,26.5,9.4,54.9l201.2,201.2L9.3,457.3c-28.9,28.9,15.8,74.6,45.2,45.2l201.3-201.2l201.3,201.2c28.9,28.9,74.2-16.3,45.2-45.2L301.1,256.1z"/>
 		</symbol>
@@ -896,6 +927,7 @@
 				selectedId: null,
 				nextId: 200,
 				createMode: 'modal',
+				outcome: 'success',
 				creating: null
 			};
 
@@ -1140,6 +1172,7 @@
 				state.selectedId = null;
 				state.creating = null;
 				state.justCreatedId = null;
+				$('addError').hidden = true;
 				state.onSelect = options.onSelect;
 				state.asset = options.asset;
 
@@ -1233,6 +1266,20 @@
 				});
 			});
 
+			document.querySelectorAll('[data-outcome]').forEach(function (button) {
+				button.addEventListener('click', function () {
+					state.outcome = button.getAttribute('data-outcome');
+
+					document.querySelectorAll('[data-outcome]').forEach(function (b) {
+						b.setAttribute('aria-pressed', String(b === button));
+					});
+				});
+			});
+
+			$('addErrorClose').addEventListener('click', function () {
+				$('addError').hidden = true;
+			});
+
 			// ---- Selector wiring ---------------------------------------------
 
 			document.querySelectorAll('[data-close-selector]').forEach(function (button) {
@@ -1246,6 +1293,29 @@
 					return;
 				}
 
+				// AC20: simulated failures keep the modal open, explain why and
+				// refresh the list.
+
+				if (state.outcome !== 'success') {
+					var assetLabel = '<strong>' + escapeHtml(state.asset.name) + '</strong>';
+					var launchLabel = '<strong>' + escapeHtml(launch.name) + '</strong>';
+
+					if (state.outcome === 'published') {
+						launch.status = 'Published';
+						state.selectedId = null;
+						$('addErrorText').innerHTML = assetLabel + ' could not be added to ' + launchLabel + ' because the Launch was published in the meantime. The list has been refreshed. Select another Launch.';
+					}
+					else {
+						$('addErrorText').innerHTML = assetLabel + ' could not be added to ' + launchLabel + ' because you do not have permission to add assets to this Launch.';
+					}
+
+					$('addError').hidden = false;
+					render();
+
+					return;
+				}
+
+				$('addError').hidden = true;
 				closeSelector();
 
 				// AC5: the selector adds the draft it received to the Launch.
