@@ -368,6 +368,67 @@
 			accent-color: #0b5fff;
 		}
 
+		.selector-table tr.inline-create {
+			cursor: default;
+			background: #f0f5ff;
+		}
+
+		.selector-table tr.inline-create:hover {
+			background: #f0f5ff;
+		}
+
+		.selector-table tr.inline-create .form-control {
+			height: 2rem;
+			min-height: 2rem;
+			padding: .25rem .5rem;
+			font-size: .875rem;
+		}
+
+		.selector-table tr.inline-create .has-error .form-control {
+			border-color: #da1414;
+		}
+
+		.inline-actions {
+			display: flex;
+			gap: .25rem;
+		}
+
+		.inline-actions .btn {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			width: 2rem;
+			height: 2rem;
+			padding: 0;
+		}
+
+		#listView {
+			display: flex;
+			flex-direction: column;
+			flex: 1 1 auto;
+		}
+
+		#listView[hidden] {
+			display: none;
+		}
+
+		.create-view {
+			max-width: 560px;
+		}
+
+		.create-view .back-link {
+			display: inline-flex;
+			align-items: center;
+			gap: .375rem;
+			margin-bottom: 1.25rem;
+			padding: 0;
+			border: 0;
+			background: transparent;
+			color: #0b5fff;
+			font-weight: 600;
+			cursor: pointer;
+		}
+
 		.selector-empty {
 			flex: 1 1 auto;
 			display: flex;
@@ -481,6 +542,12 @@
 			<button type="button" data-data="seed" aria-pressed="true">Yes</button>
 			<button type="button" data-data="empty" aria-pressed="false" title="Only Published Launches exist, so none can be selected">None</button>
 		</div>
+		<div class="seg">
+			<span>New Launch:</span>
+			<button type="button" data-create-mode="inline" aria-pressed="true" title="An editable row appears at the top of the list">Inline row</button>
+			<button type="button" data-create-mode="view" aria-pressed="false" title="The selector itself switches to a creation form">Same modal</button>
+			<button type="button" data-create-mode="modal" aria-pressed="false" title="A second modal opens on top of the selector">Stacked modal</button>
+		</div>
 		<div class="spacer"></div>
 		<span style="opacity:.6">LPD-115340 · Item Selector for Launches</span>
 	</div>
@@ -567,6 +634,7 @@
 					</button>
 				</div>
 				<div class="modal-body">
+					<div id="listView">
 					<div class="selector-toolbar">
 						<div class="dropdown">
 							<button type="button" class="btn btn-unstyled nav-link d-inline-flex align-items-center" id="filterToggle" aria-haspopup="true" aria-expanded="false" style="gap:.375rem;color:#6b6c7e;font-weight:600">
@@ -632,15 +700,37 @@
 
 					<div class="selector-empty" id="emptyState" hidden>
 						<img src="empty_state.svg" alt="">
-						<h3 id="emptyTitle">No Launches yet</h3>
+						<h3 id="emptyTitle">No Launches available</h3>
 						<p id="emptyText">Click New to create your first Launch.</p>
+						<button type="button" class="btn btn-secondary" id="quickCreateButton" hidden></button>
+					</div>
+					</div>
+
+					<div class="create-view" id="createView" hidden>
+						<button type="button" class="back-link" data-create-cancel>
+							<svg class="lexicon-icon" style="width:12px;height:12px" viewBox="0 0 512 512"><use xlink:href="#angle-left"></use></svg>Back to Launches
+						</button>
+						<div class="form-group" id="viewNameGroup">
+							<label for="viewLaunchName">Name <svg class="lexicon-icon" style="width:8px;height:8px;color:#da1414" viewBox="0 0 512 512"><use xlink:href="#asterisk"></use></svg></label>
+							<input class="form-control" id="viewLaunchName" autocomplete="off">
+							<div class="form-feedback-group" id="viewNameError" hidden>
+								<div class="form-feedback-item">This field is required.</div>
+							</div>
+						</div>
+						<div class="form-group mb-0">
+							<label for="viewLaunchDescription">Description</label>
+							<textarea class="form-control" id="viewLaunchDescription" rows="3"></textarea>
+						</div>
+						<p class="text-secondary small mt-3 mb-0">The new Launch is created In Progress. You go back to the list with it selected.</p>
 					</div>
 				</div>
 				<div class="modal-footer">
 					<span class="selection-summary is-empty" id="selectionSummary">No launch selected</span>
 					<div class="d-flex" style="gap:.5rem">
-						<button type="button" class="btn btn-secondary" data-close-selector>Cancel</button>
-						<button type="button" class="btn btn-primary" id="addToLaunchButton" disabled>Add to Launch</button>
+						<button type="button" class="btn btn-secondary" data-close-selector data-list-footer>Cancel</button>
+						<button type="button" class="btn btn-primary" id="addToLaunchButton" data-list-footer disabled>Add to Launch</button>
+						<button type="button" class="btn btn-secondary" data-create-cancel data-view-footer hidden>Cancel</button>
+						<button type="button" class="btn btn-primary" id="viewCreateButton" data-view-footer hidden>Create</button>
 					</div>
 				</div>
 			</div>
@@ -692,6 +782,9 @@
 	<div class="toast-wrap" id="toastWrap" hidden></div>
 
 	<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+<symbol id="check" viewBox="0 0 512 512">
+			<path class="lexicon-icon-outline" d="M502.091 60.993c-9.909-9.91-25.962-9.91-35.843 0l-336.988 336.988-83.508-83.451c-9.881-9.909-25.962-9.909-35.843 0-9.909 9.909-9.909 25.962 0 35.843l98.257 98.257c2.608 2.608 5.679 4.433 8.924 5.679 4.028 2.464 8.403 4.115 12.952 4.115 6.49 0 12.981-2.464 17.936-7.418l354.112-354.141c9.909-9.909 9.909-25.962 0-35.871l0-0.001z"/>
+		</symbol>
 <symbol id="times" viewBox="0 0 512 512">
 			<path class="lexicon-icon-outline" d="M301.1,256.1L502.3,54.9c30.1-30.1-16.8-73.6-45.2-45.2L255.9,210.8L54.6,9.7C24.6-20.4-19,26.5,9.4,54.9l201.2,201.2L9.3,457.3c-28.9,28.9,15.8,74.6,45.2,45.2l201.3-201.2l201.3,201.2c28.9,28.9,74.2-16.3,45.2-45.2L301.1,256.1z"/>
 		</symbol>
@@ -753,7 +846,7 @@
 			// joining an existing list.
 
 			var LAUNCH_ASSETS = {
-				101: [{ name: 'Barcelona Meetup Announcement', type: 'Blog Post', draft: 'Draft 1' }],
+				101: [{ name: 'Barcelona Meetup Announcement', type: 'Blog Post', draft: 'Draft 1' }, { name: 'Madrid Meetup Recap', type: 'Content Page', draft: 'Draft 1' }],
 				102: [{ name: 'Holiday Landing Page', type: 'Content Page', draft: 'Draft 3' }, { name: 'Holiday Hero Banner', type: 'Image', draft: 'Draft 1' }],
 				103: [{ name: 'DEVCON Keynote Recap', type: 'Blog Post', draft: 'Draft 2' }],
 				104: [{ name: 'Brand Guidelines', type: 'Content Page', draft: 'Draft 1' }, { name: 'Voice and Tone', type: 'Content Page', draft: 'Draft 1' }],
@@ -782,7 +875,9 @@
 				perPage: 20,
 				page: 1,
 				selectedId: null,
-				nextId: 200
+				nextId: 200,
+				createMode: 'inline',
+				creating: null
 			};
 
 			// ---- Helpers ------------------------------------------------------
@@ -829,8 +924,16 @@
 			// ---- Data pipeline -----------------------------------------------
 
 			function availableLaunches() {
+				var assetName = state.asset && state.asset.name;
+
 				return state.launches.filter(function (launch) {
-					return launch.status !== 'Published';
+
+					// AC2: never Published. AC17: never a Launch that already
+					// has a draft of this asset.
+
+					return launch.status !== 'Published' && !(LAUNCH_ASSETS[launch.id] || []).some(function (item) {
+						return item.name === assetName;
+					});
 				});
 			}
 
@@ -888,12 +991,21 @@
 				var hasLaunches = all.length > 0;
 				var hasResults = rows.length > 0;
 
-				$('tableArea').hidden = !hasResults;
-				$('emptyState').hidden = hasResults;
+				var inlineRow = state.creating && state.createMode === 'inline';
+
+				$('tableArea').hidden = !hasResults && !inlineRow;
+				$('emptyState').hidden = hasResults || inlineRow;
+				$('newLaunchButton').disabled = Boolean(inlineRow);
+
+				var query = state.search.trim();
+				var quick = $('quickCreateButton');
+
+				quick.hidden = !(hasLaunches && !hasResults && query);
+				quick.textContent = 'Create Launch "' + query + '"';
 
 				if (!hasLaunches) {
-					$('emptyTitle').textContent = 'No Launches yet';
-					$('emptyText').textContent = 'Click New to create your first Launch.';
+					$('emptyTitle').textContent = 'No Launches available';
+					$('emptyText').textContent = 'Click New to create a Launch.';
 				}
 				else if (!hasResults) {
 					$('emptyTitle').textContent = 'No results found';
@@ -911,6 +1023,22 @@
 						'<td class="col-date">' + formatDate(launch.scheduledDate) + '</td>' +
 						'</tr>';
 				}).join('');
+
+				if (inlineRow) {
+					$('launchRows').insertAdjacentHTML('afterbegin',
+						'<tr class="inline-create">' +
+						'<td class="col-radio"><input type="radio" disabled aria-label="New Launch"></td>' +
+						'<td class="col-name"><div id="inlineNameGroup"><input class="form-control" id="inlineName" placeholder="Name (required)" aria-label="Name" autocomplete="off"></div></td>' +
+						'<td class="col-desc"><input class="form-control" id="inlineDescription" placeholder="Description" aria-label="Description" autocomplete="off"></td>' +
+						'<td class="col-status"><span class="label label-secondary"><span class="label-item label-item-expand">In Progress</span></span></td>' +
+						'<td class="col-date"><div class="inline-actions">' +
+						'<button type="button" class="btn btn-primary btn-sm" id="inlineSave" aria-label="Create" title="Create (Enter)">' + icon('check', 14) + '</button>' +
+						'<button type="button" class="btn btn-secondary btn-sm" id="inlineCancel" aria-label="Cancel" title="Cancel (Esc)">' + icon('times', 12) + '</button>' +
+						'</div></td></tr>');
+
+					$('inlineName').value = state.creating.name;
+					$('inlineDescription').value = state.creating.description;
+				}
 
 				['name', 'status', 'scheduledDate'].forEach(function (key) {
 					var holder = document.querySelector('[data-sort-icon="' + key + '"]');
@@ -989,10 +1117,12 @@
 				state.sortDir = 'asc';
 				state.page = 1;
 				state.selectedId = null;
+				state.creating = null;
 				state.onSelect = options.onSelect;
 				state.asset = options.asset;
 
 				$('searchInput').value = '';
+				showView('list');
 				$('selectorTitle').textContent = 'Select Launch to Add ' + options.assetName;
 
 				closeMenus();
@@ -1241,27 +1371,198 @@
 				else if (!$('newLaunchModal').hidden) {
 					closeModal($('newLaunchModal'), $('newLaunchBackdrop'));
 				}
+				else if (state.creating) {
+					cancelCreate();
+				}
 				else if (!$('selectorModal').hidden) {
 					closeSelector();
 				}
 			});
 
-			// ---- New Launch (stacked modal) ----------------------------------
+			// ---- New Launch: three variants ---------------------------------
+			// inline: editable row at the top of the list (no new modal)
+			// view:   the selector body switches to a form (no new modal)
+			// modal:  a second modal stacked on top (original version)
+
+			var assetTitle = '';
+
+			function showView(view) {
+				$('listView').hidden = view !== 'list';
+				$('createView').hidden = view !== 'create';
+
+				document.querySelectorAll('[data-list-footer]').forEach(function (el) {
+					el.hidden = view !== 'list';
+				});
+				document.querySelectorAll('[data-view-footer]').forEach(function (el) {
+					el.hidden = view !== 'create';
+				});
+
+				$('selectionSummary').style.visibility = view === 'list' ? '' : 'hidden';
+
+				if (view === 'create') {
+					assetTitle = $('selectorTitle').textContent;
+					$('selectorTitle').textContent = 'New Launch';
+				}
+				else if (assetTitle) {
+					$('selectorTitle').textContent = assetTitle;
+					assetTitle = '';
+				}
+			}
+
+			function startCreate(name) {
+				closeMenus();
+				state.creating = { name: name || '', description: '' };
+
+				if (state.createMode === 'inline') {
+					state.search = '';
+					state.statuses = [];
+					state.page = 1;
+					$('searchInput').value = '';
+					render();
+					$('inlineName').focus();
+				}
+				else if (state.createMode === 'view') {
+					$('viewLaunchName').value = state.creating.name;
+					$('viewLaunchDescription').value = '';
+					$('viewNameGroup').classList.remove('has-error');
+					$('viewNameError').hidden = true;
+					showView('create');
+					$('viewLaunchName').focus();
+				}
+				else {
+					$('newLaunchName').value = state.creating.name;
+					$('newLaunchDescription').value = '';
+					$('newNameGroup').classList.remove('has-error');
+					$('newNameError').hidden = true;
+					openModal($('newLaunchModal'), $('newLaunchBackdrop'));
+					$('newLaunchName').focus();
+				}
+			}
+
+			function cancelCreate() {
+				var mode = state.createMode;
+
+				state.creating = null;
+
+				if (mode === 'view') {
+					showView('list');
+				}
+				else if (mode === 'modal') {
+					closeModal($('newLaunchModal'), $('newLaunchBackdrop'));
+				}
+
+				render();
+			}
+
+			function createLaunch(name, description) {
+				var launch = {
+					id: state.nextId++,
+					externalReferenceCode: uuid(),
+					name: name,
+					description: description,
+					status: 'In Progress',
+					scheduledDate: null
+				};
+
+				state.launches.push(launch);
+				state.selectedId = launch.id;
+				state.creating = null;
+				state.search = '';
+				state.statuses = [];
+				$('searchInput').value = '';
+
+				var index = visibleLaunches().indexOf(launch);
+
+				state.page = Math.floor(index / state.perPage) + 1;
+
+				render();
+				toast('<strong>' + escapeHtml(name) + '</strong> was created and selected.');
+			}
 
 			$('newLaunchButton').addEventListener('click', function () {
-				$('newLaunchName').value = '';
-				$('newLaunchDescription').value = '';
-				$('newNameGroup').classList.remove('has-error');
-				$('newNameError').hidden = true;
-				closeMenus();
-				openModal($('newLaunchModal'), $('newLaunchBackdrop'));
-				$('newLaunchName').focus();
+				startCreate('');
 			});
 
-			document.querySelectorAll('[data-close-new]').forEach(function (button) {
+			$('quickCreateButton').addEventListener('click', function () {
+				startCreate(state.search.trim());
+			});
+
+			document.querySelectorAll('[data-create-mode]').forEach(function (button) {
 				button.addEventListener('click', function () {
-					closeModal($('newLaunchModal'), $('newLaunchBackdrop'));
+					state.createMode = button.getAttribute('data-create-mode');
+
+					document.querySelectorAll('[data-create-mode]').forEach(function (b) {
+						b.setAttribute('aria-pressed', String(b === button));
+					});
 				});
+			});
+
+			// Inline row
+
+			$('launchRows').addEventListener('input', function (event) {
+				if (state.creating && event.target.id === 'inlineName') {
+					state.creating.name = event.target.value;
+					$('inlineNameGroup').classList.remove('has-error');
+				}
+				else if (state.creating && event.target.id === 'inlineDescription') {
+					state.creating.description = event.target.value;
+				}
+			});
+
+			function saveInline() {
+				var name = state.creating.name.trim();
+
+				if (!name) {
+					$('inlineNameGroup').classList.add('has-error');
+					$('inlineName').focus();
+
+					return;
+				}
+
+				createLaunch(name, state.creating.description.trim());
+			}
+
+			$('launchRows').addEventListener('click', function (event) {
+				if (event.target.closest('#inlineSave')) {
+					saveInline();
+				}
+				else if (event.target.closest('#inlineCancel')) {
+					cancelCreate();
+				}
+			});
+
+			$('launchRows').addEventListener('keydown', function (event) {
+				if (event.key === 'Enter' && event.target.closest('.inline-create')) {
+					event.preventDefault();
+					saveInline();
+				}
+			});
+
+			// Same modal
+
+			document.querySelectorAll('[data-create-cancel]').forEach(function (button) {
+				button.addEventListener('click', cancelCreate);
+			});
+
+			$('viewCreateButton').addEventListener('click', function () {
+				var name = $('viewLaunchName').value.trim();
+
+				if (!name) {
+					$('viewNameGroup').classList.add('has-error');
+					$('viewNameError').hidden = false;
+					$('viewLaunchName').focus();
+
+					return;
+				}
+
+				showView('list');
+				createLaunch(name, $('viewLaunchDescription').value.trim());
+			});
+
+			// Stacked modal
+
+			document.querySelectorAll('[data-close-new]').forEach(function (button) {
+				button.addEventListener('click', cancelCreate);
 			});
 
 			$('createLaunchButton').addEventListener('click', function () {
@@ -1275,28 +1576,8 @@
 					return;
 				}
 
-				var launch = {
-					id: state.nextId++,
-					externalReferenceCode: uuid(),
-					name: name,
-					description: $('newLaunchDescription').value.trim(),
-					status: 'In Progress',
-					scheduledDate: null
-				};
-
-				state.launches.push(launch);
-				state.selectedId = launch.id;
-				state.search = '';
-				state.statuses = [];
-				$('searchInput').value = '';
-
-				var index = visibleLaunches().indexOf(launch);
-
-				state.page = Math.floor(index / state.perPage) + 1;
-
 				closeModal($('newLaunchModal'), $('newLaunchBackdrop'));
-				render();
-				toast('<strong>' + escapeHtml(name) + '</strong> was created.');
+				createLaunch(name, $('newLaunchDescription').value.trim());
 			});
 		})();
 	</script>
