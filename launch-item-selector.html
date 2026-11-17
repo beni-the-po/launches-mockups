@@ -70,6 +70,17 @@
 			color: #272833;
 		}
 
+		.review-toolbar button.is-chosen {
+			border-color: #ffd76e;
+			color: #ffd76e;
+			font-weight: 600;
+		}
+
+		.review-toolbar button.is-chosen[aria-pressed="true"] {
+			background: #ffd76e;
+			color: #272833;
+		}
+
 		.review-toolbar .spacer {
 			flex: 1 1 auto;
 		}
@@ -346,6 +357,14 @@
 			background: #f0f5ff;
 		}
 
+		.selector-table tbody tr.is-new:not(.is-selected) td {
+			background: #edf9f0;
+		}
+
+		.selector-table tbody tr.is-selected td {
+			background: #f0f5ff;
+		}
+
 		.selector-table .col-radio {
 			width: 48px;
 			padding-right: 0;
@@ -544,9 +563,9 @@
 		</div>
 		<div class="seg">
 			<span>New Launch:</span>
-			<button type="button" data-create-mode="inline" aria-pressed="true" title="An editable row appears at the top of the list">Inline row</button>
-			<button type="button" data-create-mode="view" aria-pressed="false" title="The selector itself switches to a creation form">Same modal</button>
-			<button type="button" data-create-mode="modal" aria-pressed="false" title="A second modal opens on top of the selector">Stacked modal</button>
+			<button type="button" data-create-mode="modal" aria-pressed="true" class="is-chosen" title="Chosen option (AC8): a second modal opens on top of the selector">&#9733; Stacked modal</button>
+			<button type="button" data-create-mode="inline" aria-pressed="false" title="Alternative explored: an editable row appears at the top of the list">Inline row</button>
+			<button type="button" data-create-mode="view" aria-pressed="false" title="Alternative explored: the selector itself switches to a creation form">Same modal</button>
 		</div>
 		<div class="spacer"></div>
 		<span style="opacity:.6">LPD-115340 · Item Selector for Launches</span>
@@ -721,7 +740,7 @@
 							<label for="viewLaunchDescription">Description</label>
 							<textarea class="form-control" id="viewLaunchDescription" rows="3"></textarea>
 						</div>
-						<p class="text-secondary small mt-3 mb-0">The new Launch is created In Progress. You go back to the list with it selected.</p>
+						<p class="text-secondary small mt-3 mb-0">The new Launch is created In Progress and added to the list. It is not selected automatically.</p>
 					</div>
 				</div>
 				<div class="modal-footer">
@@ -760,7 +779,7 @@
 						<label for="newLaunchDescription">Description</label>
 						<textarea class="form-control" id="newLaunchDescription" rows="3"></textarea>
 					</div>
-					<p class="text-secondary small mt-3 mb-0">The new Launch is created In Progress and selected in the list (TBD).</p>
+					<p class="text-secondary small mt-3 mb-0">The new Launch is created In Progress and added to the list. It is not selected automatically.</p>
 				</div>
 				<div class="modal-footer">
 					<div class="modal-item-last">
@@ -876,7 +895,7 @@
 				page: 1,
 				selectedId: null,
 				nextId: 200,
-				createMode: 'inline',
+				createMode: 'modal',
 				creating: null
 			};
 
@@ -1015,7 +1034,9 @@
 				$('launchRows').innerHTML = pageRows.map(function (launch) {
 					var selected = launch.id === state.selectedId;
 
-					return '<tr data-id="' + launch.id + '"' + (selected ? ' class="is-selected"' : '') + '>' +
+					var classes = (selected ? 'is-selected ' : '') + (launch.id === state.justCreatedId ? 'is-new' : '');
+
+					return '<tr data-id="' + launch.id + '"' + (classes.trim() ? ' class="' + classes.trim() + '"' : '') + '>' +
 						'<td class="col-radio"><input type="radio" name="launch" aria-label="Select ' + escapeHtml(launch.name) + '"' + (selected ? ' checked' : '') + '></td>' +
 						'<td class="col-name">' + escapeHtml(launch.name) + '</td>' +
 						'<td class="col-desc">' + escapeHtml(launch.description || '') + '</td>' +
@@ -1118,6 +1139,7 @@
 				state.page = 1;
 				state.selectedId = null;
 				state.creating = null;
+				state.justCreatedId = null;
 				state.onSelect = options.onSelect;
 				state.asset = options.asset;
 
@@ -1465,8 +1487,8 @@
 				};
 
 				state.launches.push(launch);
-				state.selectedId = launch.id;
 				state.creating = null;
+				state.justCreatedId = launch.id;
 				state.search = '';
 				state.statuses = [];
 				$('searchInput').value = '';
@@ -1476,7 +1498,7 @@
 				state.page = Math.floor(index / state.perPage) + 1;
 
 				render();
-				toast('<strong>' + escapeHtml(name) + '</strong> was created and selected.');
+				toast('<strong>' + escapeHtml(name) + '</strong> was created. Select it in the list to add the draft.');
 			}
 
 			$('newLaunchButton').addEventListener('click', function () {
