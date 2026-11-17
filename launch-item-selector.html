@@ -143,6 +143,49 @@
 			letter-spacing: .02em;
 		}
 
+		.result-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+			gap: 1rem;
+			margin-top: 1.5rem;
+		}
+
+		.result-grid[hidden] {
+			display: none;
+		}
+
+		.result-grid .returned-panel {
+			margin-top: 0;
+		}
+
+		.returned-panel table {
+			width: 100%;
+			margin: 0;
+			font-size: .8125rem;
+		}
+
+		.returned-panel td,
+		.returned-panel th {
+			padding: .5rem .75rem;
+			border-top: 1px solid #e7e7ed;
+			vertical-align: middle;
+		}
+
+		.returned-panel thead th {
+			border-top: 0;
+			font-weight: 600;
+			color: #6b6c7e;
+		}
+
+		.returned-panel tr.is-new {
+			background: #edf9f0;
+		}
+
+		.returned-panel .label {
+			text-transform: none;
+			font-weight: 400;
+		}
+
 		.returned-panel pre {
 			margin: 0;
 			padding: .75rem;
@@ -459,9 +502,18 @@
 			<div class="host-block">Hero Banner · "Madrid Meetup: thanks for coming!"</div>
 			<div class="host-block">Rich Text · Recap of the talks and speakers</div>
 			<div class="host-block">Photo Gallery · 24 images</div>
-			<div class="returned-panel" data-returned hidden>
-				<header>Value returned by the selector to the Page Editor</header>
-				<pre data-returned-json></pre>
+			<div class="result-grid" data-returned hidden>
+				<div class="returned-panel">
+					<header>Value returned by the selector to the Page Editor</header>
+					<pre data-returned-json></pre>
+				</div>
+				<div class="returned-panel">
+					<header data-assets-title>Assets in the Launch</header>
+					<table class="table">
+						<thead><tr><th>Asset</th><th>Type</th><th>Draft</th></tr></thead>
+						<tbody data-assets-rows></tbody>
+					</table>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -488,9 +540,18 @@
 				<label>Content</label>
 				<textarea class="form-control" rows="6">A first look at what is coming in the 2027.Q1 release…</textarea>
 			</div>
-			<div class="returned-panel" data-returned hidden>
-				<header>Value returned by the selector to CMS Content</header>
-				<pre data-returned-json></pre>
+			<div class="result-grid" data-returned hidden>
+				<div class="returned-panel">
+					<header>Value returned by the selector to CMS Content</header>
+					<pre data-returned-json></pre>
+				</div>
+				<div class="returned-panel">
+					<header data-assets-title>Assets in the Launch</header>
+					<table class="table">
+						<thead><tr><th>Asset</th><th>Type</th><th>Draft</th></tr></thead>
+						<tbody data-assets-rows></tbody>
+					</table>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -684,8 +745,22 @@
 			];
 
 			var HOSTS = {
-				pageEditor: { assetName: 'Madrid Meetup Recap', assetType: 'Content Page' },
-				cms: { assetName: 'Spring Product Teaser', assetType: 'Blog Post' }
+				pageEditor: { assetName: 'Madrid Meetup Recap', assetType: 'Content Page', draft: { externalReferenceCode: 'a3f1c9e2-5b7d-4e8a-9c21-7d64b0e1f352', name: 'Draft 2' } },
+				cms: { assetName: 'Spring Product Teaser', assetType: 'Blog Post', draft: { externalReferenceCode: 'c81e4b70-2d9f-4a63-8f15-3e9a6c07d4b8', name: 'Draft 1' } }
+			};
+
+			// Assets already in each Launch, so the result panel shows the draft
+			// joining an existing list.
+
+			var LAUNCH_ASSETS = {
+				101: [{ name: 'Barcelona Meetup Announcement', type: 'Blog Post', draft: 'Draft 1' }],
+				102: [{ name: 'Holiday Landing Page', type: 'Content Page', draft: 'Draft 3' }, { name: 'Holiday Hero Banner', type: 'Image', draft: 'Draft 1' }],
+				103: [{ name: 'DEVCON Keynote Recap', type: 'Blog Post', draft: 'Draft 2' }],
+				104: [{ name: 'Brand Guidelines', type: 'Content Page', draft: 'Draft 1' }, { name: 'Voice and Tone', type: 'Content Page', draft: 'Draft 1' }],
+				105: [{ name: 'What\u2019s New in 2027.Q1', type: 'Content Page', draft: 'Draft 1' }],
+				106: [{ name: 'Partner Onboarding', type: 'Content Page', draft: 'Draft 2' }],
+				107: [],
+				108: [{ name: 'Pricing', type: 'Content Page', draft: 'Draft 4' }]
 			};
 
 			var STATUS_LABEL = {
@@ -915,6 +990,7 @@
 				state.page = 1;
 				state.selectedId = null;
 				state.onSelect = options.onSelect;
+				state.asset = options.asset;
 
 				$('searchInput').value = '';
 				$('selectorTitle').textContent = 'Select Launch to Add ' + options.assetName;
@@ -950,6 +1026,7 @@
 					var view = document.querySelector('[data-host-view="' + state.host + '"]');
 
 					openLaunchSelector({
+						asset: { name: host.assetName, type: host.assetType, draft: host.draft },
 						assetName: host.assetName,
 						onSelect: function (launch) {
 							var chip = view.querySelector('[data-launch-chip]');
@@ -959,6 +1036,13 @@
 
 							view.querySelector('[data-returned]').hidden = false;
 							view.querySelector('[data-returned-json]').textContent = JSON.stringify(launch, null, 2);
+
+							view.querySelector('[data-assets-title]').textContent = 'Assets in ' + launch.name;
+							view.querySelector('[data-assets-rows]').innerHTML = (LAUNCH_ASSETS[launch.id] || []).map(function (item) {
+								return '<tr' + (item.isNew ? ' class="is-new"' : '') + '><td>' + escapeHtml(item.name) +
+									(item.isNew ? ' <span class="label label-success ml-1"><span class="label-item label-item-expand">Just added</span></span>' : '') +
+									'</td><td>' + escapeHtml(item.type) + '</td><td>' + escapeHtml(item.draft) + '</td></tr>';
+							}).join('');
 
 							toast('<strong>' + escapeHtml(host.assetName) + '</strong> was added to <strong>' + escapeHtml(launch.name) + '</strong>.');
 						}
@@ -1011,6 +1095,20 @@
 				}
 
 				closeSelector();
+
+				// AC5: the selector adds the draft it received to the Launch.
+
+				var assets = LAUNCH_ASSETS[launch.id] = LAUNCH_ASSETS[launch.id] || [];
+				var asset = state.asset;
+				var added = { name: asset.name, type: asset.type, draft: asset.draft.name, isNew: true };
+
+				assets.forEach(function (item) {
+					item.isNew = false;
+				});
+
+				if (!assets.some(function (item) { return item.name === asset.name; })) {
+					assets.push(added);
+				}
 
 				state.onSelect({
 					externalReferenceCode: launch.externalReferenceCode,
