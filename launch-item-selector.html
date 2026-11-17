@@ -434,9 +434,9 @@
 			<button type="button" data-host="cms" aria-pressed="false">CMS Content</button>
 		</div>
 		<div class="seg">
-			<span>Data:</span>
-			<button type="button" data-data="seed" aria-pressed="true">Launches exist</button>
-			<button type="button" data-data="empty" aria-pressed="false">No Launches</button>
+			<span>Launches available:</span>
+			<button type="button" data-data="seed" aria-pressed="true">Yes</button>
+			<button type="button" data-data="empty" aria-pressed="false" title="Only Published Launches exist, so none can be selected">None</button>
 		</div>
 		<div class="spacer"></div>
 		<span style="opacity:.6">LPD-115340 · Item Selector for Launches</span>
@@ -671,16 +671,16 @@
 			// never list them (AC2).
 
 			var SEED = [
-				{ id: 101, name: 'Spain Meetups Series', description: 'Announcements and recap articles for the Madrid and Barcelona community meetups.', status: 'Scheduled', scheduledDate: '2026-11-27T18:00' },
-				{ id: 102, name: 'Holiday Campaign 2026', description: 'Seasonal landing contents, banners and blog posts for the December campaign.', status: 'Scheduled', scheduledDate: '2026-12-01T09:00' },
-				{ id: 103, name: 'DEVCON 2026 Event Coverage', description: 'Session recaps, speaker pages and videos to go live right after the event closes.', status: 'In Progress', scheduledDate: null },
-				{ id: 104, name: 'Brand Refresh', description: 'Updated brand guidelines, voice and tone pages, and the new hero imagery across all spaces.', status: 'In Progress', scheduledDate: null },
-				{ id: 105, name: '2027.Q1 Product Release', description: 'Release notes, user guides and What’s New articles for the 2027.Q1 release.', status: 'In Progress', scheduledDate: null },
-				{ id: 106, name: 'Partner Portal Update', description: 'New partner onboarding pages and the updated partner program terms.', status: 'Failed', scheduledDate: null },
-				{ id: 107, name: 'Year in Review 2026', description: 'Highlights article, customer stories and the annual infographic.', status: 'Scheduled', scheduledDate: '2026-12-15T10:00' },
-				{ id: 108, name: 'Pricing Page Redesign', description: 'New pricing tiers, comparison table and FAQ.', status: 'In Progress', scheduledDate: null },
-				{ id: 109, name: 'Black Friday 2026', description: 'Deals landing page and promotional banners.', status: 'Published', scheduledDate: '2026-11-13T00:00' },
-				{ id: 110, name: 'Fall Campaign Refresh', description: 'Autumn imagery and seasonal copy across the home page.', status: 'Published', scheduledDate: null }
+				{ id: 101, externalReferenceCode: '7956f758-d2fd-471d-84d9-09ee805b6bfe', name: 'Spain Meetups Series', description: 'Announcements and recap articles for the Madrid and Barcelona community meetups.', status: 'Scheduled', scheduledDate: '2026-11-27T18:00' },
+				{ id: 102, externalReferenceCode: 'f0a283bc-d6da-4c7d-b536-e49339417e4e', name: 'Holiday Campaign 2026', description: 'Seasonal landing contents, banners and blog posts for the December campaign.', status: 'Scheduled', scheduledDate: '2026-12-01T09:00' },
+				{ id: 103, externalReferenceCode: '6f650ceb-120b-479c-95b9-3fbc8e60b47c', name: 'DEVCON 2026 Event Coverage', description: 'Session recaps, speaker pages and videos to go live right after the event closes.', status: 'In Progress', scheduledDate: null },
+				{ id: 104, externalReferenceCode: '7a0e5b31-1ba0-413c-9df8-26be3c03d26d', name: 'Brand Refresh', description: 'Updated brand guidelines, voice and tone pages, and the new hero imagery across all spaces.', status: 'In Progress', scheduledDate: null },
+				{ id: 105, externalReferenceCode: '3f64109e-d06e-457a-8f1b-28e897a2e3aa', name: '2027.Q1 Product Release', description: 'Release notes, user guides and What’s New articles for the 2027.Q1 release.', status: 'In Progress', scheduledDate: null },
+				{ id: 106, externalReferenceCode: 'e4ad20f5-c559-498f-9952-ef0be219ec35', name: 'Partner Portal Update', description: 'New partner onboarding pages and the updated partner program terms.', status: 'Failed', scheduledDate: null },
+				{ id: 107, externalReferenceCode: '44465459-0c5c-4f84-bebe-8bf6d658405f', name: 'Year in Review 2026', description: 'Highlights article, customer stories and the annual infographic.', status: 'Scheduled', scheduledDate: '2026-12-15T10:00' },
+				{ id: 108, externalReferenceCode: '1ec132a7-ccd4-4603-81ea-47f49d0a683a', name: 'Pricing Page Redesign', description: 'New pricing tiers, comparison table and FAQ.', status: 'In Progress', scheduledDate: null },
+				{ id: 109, externalReferenceCode: '549081cc-8a23-4502-a87e-a2e116fdd07c', name: 'Black Friday 2026', description: 'Deals landing page and promotional banners.', status: 'Published', scheduledDate: '2026-11-13T00:00' },
+				{ id: 110, externalReferenceCode: '561c7a63-eca3-41d8-84bf-df973cb65f94', name: 'Fall Campaign Refresh', description: 'Autumn imagery and seasonal copy across the home page.', status: 'Published', scheduledDate: null }
 			];
 
 			var HOSTS = {
@@ -716,7 +716,15 @@
 				return document.getElementById(id);
 			}
 
-			function clone(value) {
+			function uuid() {
+				return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+					var r = Math.random() * 16 | 0;
+
+					return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+				});
+			}
+
+						function clone(value) {
 				return JSON.parse(JSON.stringify(value));
 			}
 
@@ -984,7 +992,7 @@
 					});
 
 					toast(button.getAttribute('data-data') === 'empty' ?
-						'Only Published Launches exist now. Open the selector to see the empty state.' :
+						'No Launches available: only Published Launches exist now. Click Add to Launch to see the empty state.' :
 						'Sample Launches restored.');
 				});
 			});
@@ -1005,6 +1013,7 @@
 				closeSelector();
 
 				state.onSelect({
+					externalReferenceCode: launch.externalReferenceCode,
 					id: launch.id,
 					name: launch.name,
 					description: launch.description,
@@ -1170,6 +1179,7 @@
 
 				var launch = {
 					id: state.nextId++,
+					externalReferenceCode: uuid(),
 					name: name,
 					description: $('newLaunchDescription').value.trim(),
 					status: 'In Progress',
