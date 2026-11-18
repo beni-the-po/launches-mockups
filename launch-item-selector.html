@@ -579,7 +579,7 @@
 		</div>
 		<div class="seg">
 			<span>New Launch:</span>
-			<button type="button" data-create-mode="modal" aria-pressed="true" class="is-chosen" title="Chosen option (AC8): a second modal opens on top of the selector">&#9733; Stacked modal</button>
+			<button type="button" data-create-mode="modal" aria-pressed="true" class="is-chosen" title="Chosen option (AC7): a second modal opens on top of the selector">&#9733; Stacked modal</button>
 			<button type="button" data-create-mode="inline" aria-pressed="false" title="Alternative explored: an editable row appears at the top of the list">Inline row</button>
 			<button type="button" data-create-mode="view" aria-pressed="false" title="Alternative explored: the selector itself switches to a creation form">Same modal</button>
 		</div>
@@ -979,7 +979,7 @@
 
 				return state.launches.filter(function (launch) {
 
-					// AC2: never Published. AC17: never a Launch that already
+					// AC2: never Published. AC16: never a Launch that already
 					// has a draft of this asset.
 
 					return launch.status !== 'Published' && !(LAUNCH_ASSETS[launch.id] || []).some(function (item) {
@@ -1161,7 +1161,7 @@
 				$('filterToggle').setAttribute('aria-expanded', 'false');
 			}
 
-			// The selector API: one call, returns the selected Launch (AC6).
+			// The selector API: one call, returns the selected Launch (AC5).
 
 			function openLaunchSelector(options) {
 				state.search = '';
@@ -1293,7 +1293,7 @@
 					return;
 				}
 
-				// AC20: simulated failures keep the modal open, explain why and
+				// AC19: simulated failures keep the modal open, explain why and
 				// refresh the list.
 
 				if (state.outcome !== 'success') {
@@ -1318,7 +1318,7 @@
 				$('addError').hidden = true;
 				closeSelector();
 
-				// AC5: the selector adds the draft it received to the Launch.
+				// AC4: the selector adds the draft it received to the Launch.
 
 				var assets = LAUNCH_ASSETS[launch.id] = LAUNCH_ASSETS[launch.id] || [];
 				var asset = state.asset;
